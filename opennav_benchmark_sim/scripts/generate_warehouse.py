@@ -348,43 +348,6 @@ def write_ground_plane(s: SDFWriter):
     s.w('')
 
 
-def _compute_corridor_edges() -> tuple[float, float]:
-    """Find the tightest shelf edges bordering the corridor."""
-    west_edge = -WAREHOUSE_X / 2.0
-    east_edge = WAREHOUSE_X / 2.0
-    for zone in ALL_ZONES:
-        half = zone.shelf_length_x / 2.0
-        for x in zone.x_positions():
-            right = x + half
-            left = x - half
-            if right < CORRIDOR_X_MIN and right > west_edge:
-                west_edge = right
-            if left > CORRIDOR_X_MAX and left < east_edge:
-                east_edge = left
-    return west_edge, east_edge
-
-
-def write_corridor_lines(s: SDFWriter):
-    """Green safety lines along both edges of the main N-S corridor."""
-    wy = WAREHOUSE_Y
-    west_x, east_x = _compute_corridor_edges()
-    for side, x in [('west', west_x), ('east', east_x)]:
-        s.w(f'    <!-- Corridor safety line ({side}) -->')
-        s.w(f'    <model name="corridor_line_{side}">')
-        s.w('      <static>true</static>')
-        s.w(f'      <pose>{x} 0 0.005 0 0 0</pose>')
-        s.w('      <link name="link">')
-        s.w('        <visual name="visual">')
-        s.w(f'          <geometry><box><size>0.15 {wy} 0.01</size></box></geometry>')
-        s.w('          <material>')
-        s.w('            <ambient>0.0 0.6 0.0 1</ambient>')
-        s.w('            <diffuse>0.0 0.7 0.0 1</diffuse>')
-        s.w('            <specular>0.1 0.1 0.1 1</specular>')
-        s.w('          </material>')
-        s.w('        </visual>')
-        s.w('      </link>')
-        s.w('    </model>')
-    s.w('')
 
 
 def write_macros(s: SDFWriter):
@@ -764,7 +727,6 @@ def main():
 
     write_header(s)
     write_ground_plane(s)
-    write_corridor_lines(s)
     write_macros(s)
     write_perimeter_walls(s)
     write_columns(s)

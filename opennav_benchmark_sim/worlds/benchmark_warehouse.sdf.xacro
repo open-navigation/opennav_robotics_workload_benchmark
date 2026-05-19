@@ -25,6 +25,7 @@
     <!-- Scene -->
     <scene>
       <ambient>0.8 0.8 0.8 1</ambient>
+      
       <background>0.3 0.7 0.9 1</background>
       <shadows>0</shadows>
       <grid>false</grid>
