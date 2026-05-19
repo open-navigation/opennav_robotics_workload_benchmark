@@ -175,8 +175,8 @@ ZONE_A = ShelfZone(
     shelf_depth_y=1.2,
     row_y_positions=_za_y_south + _za_y_north,
     ctc_x=8.0,
-    x_min=-54,
-    x_max=54,
+    x_min=-56,
+    x_max=56,
     paired=True,
 )
 
@@ -192,7 +192,7 @@ ZONE_B_WEST = ShelfZone(
     shelf_depth_y=1.2,
     row_y_positions=_zbw_y,
     ctc_x=8.0,
-    x_min=-54,
+    x_min=-56,
     x_max=-6,
     paired=True,
 )

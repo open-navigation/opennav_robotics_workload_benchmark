@@ -29,14 +29,10 @@
       </inertial>
       <visual name="chassis_visual">
         <visibility_flags>${robot_visibility_flags}</visibility_flags>
+        <pose>0 0 -0.25 1.5708 0 -1.5708</pose>
         <geometry>
-          <mesh><uri>package://opennav_benchmark_robot/meshes/chassis_body.stl</uri></mesh>
+          <mesh><uri>package://opennav_benchmark_robot/meshes/Forklift_agv_01.obj</uri></mesh>
         </geometry>
-        <material>
-          <ambient>0.28 0.66 0.85 1.0</ambient>
-          <diffuse>0.28 0.66 0.85 1.0</diffuse>
-          <specular>0.1 0.1 0.1 1.0</specular>
-        </material>
       </visual>
       <collision name="chassis_collision">
         <geometry>
@@ -48,35 +44,6 @@
     <joint name="base_joint" type="fixed">
       <parent>base_footprint</parent>
       <child>base_link</child>
-    </joint>
-
-    <!-- ============ SENSOR TOWER (front arc panel, Nav2 blue) ============ -->
-    <link name="sensor_tower_link">
-      <pose relative_to="base_link">0.52 0 0.318 0 0 0</pose>
-      <inertial>
-        <mass>3.0</mass>
-        <inertia>
-          <ixx>0.03</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>0.03</iyy><iyz>0</iyz>
-          <izz>0.01</izz>
-        </inertia>
-      </inertial>
-      <visual name="tower_visual">
-        <visibility_flags>${robot_visibility_flags}</visibility_flags>
-        <geometry>
-          <mesh><uri>package://opennav_benchmark_robot/meshes/sensor_tower.stl</uri></mesh>
-        </geometry>
-        <material>
-          <ambient>0.28 0.66 0.85 1.0</ambient>
-          <diffuse>0.28 0.66 0.85 1.0</diffuse>
-          <specular>0.1 0.1 0.1 1.0</specular>
-        </material>
-      </visual>
-    </link>
-
-    <joint name="sensor_tower_joint" type="fixed">
-      <parent>base_link</parent>
-      <child>sensor_tower_link</child>
     </joint>
 
     <!-- ============ DRIVE WHEELS ============ -->
@@ -215,7 +182,7 @@
       </inertial>
       <sensor name="imu_sensor" type="imu">
         <always_on>true</always_on>
-        <update_rate>200</update_rate>
+        <update_rate>100</update_rate>
         <imu>
           <angular_velocity>
             <x><noise type="gaussian"><mean>0</mean><stddev>0.0002</stddev></noise></x>
@@ -260,11 +227,6 @@
           <diffuse>0.75 0.75 0.78 1.0</diffuse>
         </material>
       </visual>
-      <collision name="collision">
-        <geometry>
-          <cylinder><radius>0.0425</radius><length>0.085</length></cylinder>
-        </geometry>
-      </collision>
       <sensor name="lidar_3d_center_sensor" type="gpu_lidar">
         <always_on>true</always_on>
         <update_rate>10</update_rate>
@@ -285,7 +247,7 @@
           </scan>
           <range>
             <min>0.3</min>
-            <max>75.0</max>
+            <max>50.0</max>
             <resolution>0.01</resolution>
           </range>
           <noise>
@@ -326,11 +288,6 @@
           <diffuse>0.75 0.75 0.78 1.0</diffuse>
         </material>
       </visual>
-      <collision name="collision">
-        <geometry>
-          <cylinder><radius>0.0425</radius><length>0.085</length></cylinder>
-        </geometry>
-      </collision>
       <sensor name="lidar_3d_front_left_sensor" type="gpu_lidar">
         <always_on>true</always_on>
         <update_rate>10</update_rate>
@@ -392,11 +349,6 @@
           <diffuse>0.75 0.75 0.78 1.0</diffuse>
         </material>
       </visual>
-      <collision name="collision">
-        <geometry>
-          <cylinder><radius>0.0425</radius><length>0.085</length></cylinder>
-        </geometry>
-      </collision>
       <sensor name="lidar_3d_front_right_sensor" type="gpu_lidar">
         <always_on>true</always_on>
         <update_rate>10</update_rate>
@@ -458,14 +410,9 @@
           <diffuse>0.1 0.1 0.1 1.0</diffuse>
         </material>
       </visual>
-      <collision name="collision">
-        <geometry>
-          <cylinder><radius>0.03</radius><length>0.095</length></cylinder>
-        </geometry>
-      </collision>
       <sensor name="lidar_2d_front_sensor" type="gpu_lidar">
         <always_on>true</always_on>
-        <update_rate>10</update_rate>
+        <update_rate>30</update_rate>
         <lidar>
           <scan>
             <horizontal>
@@ -523,14 +470,9 @@
           <diffuse>0.1 0.1 0.1 1.0</diffuse>
         </material>
       </visual>
-      <collision name="collision">
-        <geometry>
-          <cylinder><radius>0.03</radius><length>0.095</length></cylinder>
-        </geometry>
-      </collision>
       <sensor name="lidar_2d_rear_sensor" type="gpu_lidar">
         <always_on>true</always_on>
-        <update_rate>10</update_rate>
+        <update_rate>30</update_rate>
         <lidar>
           <scan>
             <horizontal>
@@ -590,11 +532,6 @@
             <diffuse>0.1 0.1 0.1 1.0</diffuse>
           </material>
         </visual>
-        <collision name="collision">
-          <geometry>
-            <box><size>0.025 0.09 0.025</size></box>
-          </geometry>
-        </collision>
         <sensor name="${name}_rgbd" type="rgbd_camera">
           <always_on>true</always_on>
           <update_rate>10</update_rate>
@@ -606,7 +543,7 @@
             </image>
             <clip>
               <near>0.1</near>
-              <far>10.0</far>
+              <far>7.0</far>
             </clip>
           </camera>
           <topic>${ns}/${name}</topic>

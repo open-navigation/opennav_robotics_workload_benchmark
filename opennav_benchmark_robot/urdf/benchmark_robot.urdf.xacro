@@ -70,10 +70,10 @@
 
   <link name="base_link">
     <visual>
+      <origin xyz="0 0 -0.25" rpy="1.5708 0 -1.5708"/>
       <geometry>
-        <mesh filename="package://opennav_benchmark_robot/meshes/chassis_body.stl"/>
+        <mesh filename="package://opennav_benchmark_robot/meshes/Forklift_agv_01.obj"/>
       </geometry>
-      <material name="nav2_blue"/>
     </visual>
     <collision>
       <geometry>
@@ -91,12 +91,7 @@
 
   <!-- ============ SENSOR TOWER ============ -->
   <link name="sensor_tower_link">
-    <visual>
-      <geometry>
-        <mesh filename="package://opennav_benchmark_robot/meshes/sensor_tower.stl"/>
-      </geometry>
-      <material name="nav2_blue"/>
-    </visual>
+    <!-- sensor_tower visual removed (forklift mesh replaces it) -->
     <inertial>
       <mass value="3.0"/>
       <inertia ixx="0.03" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.01"/>
