@@ -50,9 +50,9 @@
       <child>base_link</child>
     </joint>
 
-    <!-- ============ SENSOR TOWER (front, Nav2 grey) ============ -->
+    <!-- ============ SENSOR TOWER (front arc panel, Nav2 blue) ============ -->
     <link name="sensor_tower_link">
-      <pose relative_to="base_link">0.15 0 0.31 0 0 0</pose>
+      <pose relative_to="base_link">0.52 0 0.318 0 0 0</pose>
       <inertial>
         <mass>3.0</mass>
         <inertia>
@@ -67,9 +67,9 @@
           <mesh><uri>package://opennav_benchmark_robot/meshes/sensor_tower.stl</uri></mesh>
         </geometry>
         <material>
-          <ambient>0.6 0.62 0.65 1.0</ambient>
-          <diffuse>0.6 0.62 0.65 1.0</diffuse>
-          <specular>0.05 0.05 0.05 1.0</specular>
+          <ambient>0.28 0.66 0.85 1.0</ambient>
+          <diffuse>0.28 0.66 0.85 1.0</diffuse>
+          <specular>0.1 0.1 0.1 1.0</specular>
         </material>
       </visual>
     </link>
@@ -241,7 +241,7 @@
     <!-- ============ 3D LIDARS (mounted on sensor tower) ============ -->
     <!-- Center: top of tower, 360deg, 32ch, 75m -->
     <link name="lidar_3d_center_link">
-      <pose relative_to="sensor_tower_link">0 0 0.17 0 0 0</pose>
+      <pose relative_to="sensor_tower_link">0 0 0.167 0 0 0</pose>
       <inertial>
         <mass>0.5</mass>
         <inertia>
@@ -307,7 +307,7 @@
 
     <!-- Front-left: on left arm, 120deg, 16ch, 30m, tilted down 15deg -->
     <link name="lidar_3d_front_left_link">
-      <pose relative_to="sensor_tower_link">0 0.24 0.17 -0.2618 0 0</pose>
+      <pose relative_to="sensor_tower_link">0 0.24 0.148 -0.2618 0 0</pose>
       <inertial>
         <mass>0.5</mass>
         <inertia>
@@ -373,7 +373,7 @@
 
     <!-- Front-right: on right arm, 120deg, 16ch, 30m, tilted down 15deg -->
     <link name="lidar_3d_front_right_link">
-      <pose relative_to="sensor_tower_link">0 -0.24 0.17 0.2618 0 0</pose>
+      <pose relative_to="sensor_tower_link">0 -0.24 0.148 0.2618 0 0</pose>
       <inertial>
         <mass>0.5</mass>
         <inertia>

@@ -16,9 +16,9 @@
   <xacro:property name="caster_radius" value="0.05"/>
   <xacro:property name="caster_mass" value="0.5"/>
 
-  <!-- Tower: sits on chassis top at front area -->
-  <xacro:property name="tower_x" value="0.15"/>
-  <xacro:property name="tower_half_h" value="0.15"/>
+  <!-- Tower: arc panel at front, bottom aligns with chassis top -->
+  <xacro:property name="tower_x" value="0.52"/>
+  <xacro:property name="tower_z_offset" value="0.318"/>
 
   <!-- Colors -->
   <material name="nav2_blue">
@@ -95,7 +95,7 @@
       <geometry>
         <mesh filename="package://opennav_benchmark_robot/meshes/sensor_tower.stl"/>
       </geometry>
-      <material name="nav2_grey"/>
+      <material name="nav2_blue"/>
     </visual>
     <inertial>
       <mass value="3.0"/>
@@ -106,7 +106,7 @@
   <joint name="sensor_tower_joint" type="fixed">
     <parent link="base_link"/>
     <child link="sensor_tower_link"/>
-    <origin xyz="${tower_x} 0 ${chassis_height/2 + tower_half_h}" rpy="0 0 0"/>
+    <origin xyz="${tower_x} 0 ${tower_z_offset}" rpy="0 0 0"/>
   </joint>
 
   <!-- ============ DRIVE WHEELS ============ -->
@@ -199,7 +199,7 @@
   <joint name="lidar_3d_center_joint" type="fixed">
     <parent link="sensor_tower_link"/>
     <child link="lidar_3d_center_link"/>
-    <origin xyz="0 0 ${tower_half_h + 0.01}" rpy="0 0 0"/>
+    <origin xyz="0 0 0.167" rpy="0 0 0"/>
   </joint>
 
   <!-- Front-left: on left arm of tower crossbar -->
@@ -221,7 +221,7 @@
   <joint name="lidar_3d_front_left_joint" type="fixed">
     <parent link="sensor_tower_link"/>
     <child link="lidar_3d_front_left_link"/>
-    <origin xyz="0 0.22 ${tower_half_h + 0.02}" rpy="${-pi/12} 0 0"/>
+    <origin xyz="0 0.24 0.148" rpy="${-pi/12} 0 0"/>
   </joint>
 
   <!-- Front-right: on right arm of tower crossbar -->
@@ -243,7 +243,7 @@
   <joint name="lidar_3d_front_right_joint" type="fixed">
     <parent link="sensor_tower_link"/>
     <child link="lidar_3d_front_right_link"/>
-    <origin xyz="0 -0.22 ${tower_half_h + 0.02}" rpy="${pi/12} 0 0"/>
+    <origin xyz="0 -0.24 0.148" rpy="${pi/12} 0 0"/>
   </joint>
 
   <!-- ============ 2D LIDARS (SICK TiM781 on chassis corners) ============ -->

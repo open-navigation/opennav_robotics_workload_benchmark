@@ -103,7 +103,7 @@ def generate_launch_description():
         description='Run Gazebo without GUI client')
     declare_world = DeclareLaunchArgument(
         'world',
-        default_value=os.path.join(sim_pkg, 'worlds', 'benchmark_warehouse.sdf.xacro'),
+        default_value=os.path.join(sim_pkg, 'worlds', 'benchmark_warehouse_2.sdf.xacro'),
         description='Path to world SDF xacro file')
     declare_robot_name = DeclareLaunchArgument(
         'robot_name', default_value='benchmark_robot',
