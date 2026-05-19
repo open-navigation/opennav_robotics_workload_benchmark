@@ -29,7 +29,7 @@ from dataclasses import dataclass, field
 
 RANDOM_SEED = 42
 MAX_PALLET_YAW_DEG = 10      # +/- degrees for pallet orientation jitter
-MAX_PALLET_XY_OFFSET = 0.15  # +/- metres for pallet position jitter
+MAX_PALLET_XY_OFFSET = 0.25  # +/- metres for pallet position jitter
 
 _rng = random.Random(RANDOM_SEED)
 
@@ -69,7 +69,7 @@ DOCK_DOOR_CENTERS = [-50, -38, -26, -14, -2, 10, 22, 34]
 
 # Inbound staging pallet clusters — moved close to dock doors
 INBOUND_STAGING = {
-    'cluster_centers_x': [-48, -25, -2, 22, 47],
+    'cluster_centers_x': [-60, -43, -27, -10, 7],
     'cols_per_cluster': 3,        # pallets wide (E-W)
     'rows_per_cluster': 7,        # pallets deep (N-S)
     'col_spacing': 1.5,           # E-W spacing between pallets
@@ -95,6 +95,8 @@ PALLET_STACKS = [
     ('ps_b', 37, 42, 5, 7, 1.3),
     ('ps_c', 48, 33, 5, 7, 1.3),
     ('ps_d', 48, 42, 5, 7, 1.3),
+    # Loading dock area along right (east) wall, below shelves
+    ('ps_dock', 48, -60, 14, 10, 1.3),
 ]
 
 
