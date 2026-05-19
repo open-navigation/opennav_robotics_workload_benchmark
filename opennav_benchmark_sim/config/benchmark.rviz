@@ -44,11 +44,11 @@ Visualization Manager:
 
     # 2D Lidars
     - Class: rviz_default_plugins/LaserScan
-      Name: Front Lidar
+      Name: Front Left Lidar
       Enabled: true
       Value: true
       Topic:
-        Value: /scan_front
+        Value: /scan_front_left
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
@@ -62,11 +62,11 @@ Visualization Manager:
       Decay Time: 0
 
     - Class: rviz_default_plugins/LaserScan
-      Name: Rear Lidar
+      Name: Front Right Lidar
       Enabled: true
       Value: true
       Topic:
-        Value: /scan_rear
+        Value: /scan_front_right
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
@@ -98,11 +98,11 @@ Visualization Manager:
       Max Intensity: 4096
 
     - Class: rviz_default_plugins/PointCloud2
-      Name: 3D Lidar Front Left
+      Name: 3D Lidar Top
       Enabled: true
       Value: true
       Topic:
-        Value: /lidar_3d_front_left/points
+        Value: /lidar_3d_top/points
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
@@ -115,11 +115,11 @@ Visualization Manager:
       Max Intensity: 4096
 
     - Class: rviz_default_plugins/PointCloud2
-      Name: 3D Lidar Front Right
+      Name: 3D Lidar Tilted
       Enabled: true
       Value: true
       Topic:
-        Value: /lidar_3d_front_right/points
+        Value: /lidar_3d_tilted/points
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last

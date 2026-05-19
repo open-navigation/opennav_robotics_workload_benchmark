@@ -41,14 +41,14 @@
   direction: GZ_TO_ROS
 
 # 2D Lidars (LaserScan)
-- ros_topic_name: "scan_front"
-  gz_topic_name: "/scan_front"
+- ros_topic_name: "scan_front_left"
+  gz_topic_name: "/scan_front_left"
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
 
-- ros_topic_name: "scan_rear"
-  gz_topic_name: "/scan_rear"
+- ros_topic_name: "scan_front_right"
+  gz_topic_name: "/scan_front_right"
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
@@ -61,14 +61,14 @@
   gz_type_name: "gz.msgs.PointCloudPacked"
   direction: GZ_TO_ROS
 
-- ros_topic_name: "lidar_3d_front_left/points"
-  gz_topic_name: "/lidar_3d_front_left/points/points"
+- ros_topic_name: "lidar_3d_top/points"
+  gz_topic_name: "/lidar_3d_top/points/points"
   ros_type_name: "sensor_msgs/msg/PointCloud2"
   gz_type_name: "gz.msgs.PointCloudPacked"
   direction: GZ_TO_ROS
 
-- ros_topic_name: "lidar_3d_front_right/points"
-  gz_topic_name: "/lidar_3d_front_right/points/points"
+- ros_topic_name: "lidar_3d_tilted/points"
+  gz_topic_name: "/lidar_3d_tilted/points/points"
   ros_type_name: "sensor_msgs/msg/PointCloud2"
   gz_type_name: "gz.msgs.PointCloudPacked"
   direction: GZ_TO_ROS

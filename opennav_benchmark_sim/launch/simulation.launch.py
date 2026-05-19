@@ -139,6 +139,9 @@ def generate_launch_description():
     set_gz_resource_path_robot = AppendEnvironmentVariable(
         'GZ_SIM_RESOURCE_PATH',
         os.path.dirname(robot_pkg))
+    set_gz_resource_path_robot2 = AppendEnvironmentVariable(
+        'GZ_SIM_RESOURCE_PATH',
+        robot_pkg)
 
     return LaunchDescription([
         declare_headless,
@@ -153,5 +156,6 @@ def generate_launch_description():
         set_gz_resource_path,
         set_gz_resource_path_models,
         set_gz_resource_path_robot,
+        set_gz_resource_path_robot2,
         OpaqueFunction(function=launch_setup),
     ])

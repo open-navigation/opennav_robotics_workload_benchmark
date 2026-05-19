@@ -1,6 +1,6 @@
 # Blender 3.3.1
 # www.blender.org
-mtllib Forklift agv 01.mtl
+mtllib Forklift_agv_01.mtl
 o Circle
 v 0.469081 1.027308 -0.361877
 v 0.466029 1.029032 -0.364403

@@ -164,10 +164,10 @@
       </joint>
     </xacro:macro>
 
-    <xacro:caster_sdf name="front_left" x="0.45" y="0.30"/>
-    <xacro:caster_sdf name="front_right" x="0.45" y="-0.30"/>
-    <xacro:caster_sdf name="rear_left" x="-0.45" y="0.30"/>
-    <xacro:caster_sdf name="rear_right" x="-0.45" y="-0.30"/>
+    <xacro:caster_sdf name="rear_left" x="0.45" y="0.30"/>
+    <xacro:caster_sdf name="rear_right" x="0.45" y="-0.30"/>
+    <xacro:caster_sdf name="front_left" x="-0.45" y="0.30"/>
+    <xacro:caster_sdf name="front_right" x="-0.45" y="-0.30"/>
 
     <!-- ============ IMU ============ -->
     <link name="imu_link">
@@ -205,10 +205,10 @@
       <child>imu_link</child>
     </joint>
 
-    <!-- ============ 3D LIDARS (mounted on sensor tower) ============ -->
-    <!-- Center: top of tower, 360deg, 32ch, 75m -->
+    <!-- ============ 3D LIDARS ============ -->
+    <!-- Center: 360deg, 32ch -->
     <link name="lidar_3d_center_link">
-      <pose relative_to="sensor_tower_link">0 0 0.167 0 0 0</pose>
+      <pose relative_to="base_link">0.10 0 0.825 0 0 0</pose>
       <inertial>
         <mass>0.5</mass>
         <inertia>
@@ -263,13 +263,13 @@
     </link>
 
     <joint name="lidar_3d_center_joint" type="fixed">
-      <parent>sensor_tower_link</parent>
+      <parent>base_link</parent>
       <child>lidar_3d_center_link</child>
     </joint>
 
-    <!-- Front-left: on left arm, 120deg, 16ch, 30m, tilted down 15deg -->
-    <link name="lidar_3d_front_left_link">
-      <pose relative_to="sensor_tower_link">0 0.24 0.148 -0.2618 0 0</pose>
+    <!-- Top: on tower surface, in front of center lidar -->
+    <link name="lidar_3d_top_link">
+      <pose relative_to="base_link">0.35 0 2.195 0 0 0</pose>
       <inertial>
         <mass>0.5</mass>
         <inertia>
@@ -288,7 +288,7 @@
           <diffuse>0.75 0.75 0.78 1.0</diffuse>
         </material>
       </visual>
-      <sensor name="lidar_3d_front_left_sensor" type="gpu_lidar">
+      <sensor name="lidar_3d_top_sensor" type="gpu_lidar">
         <always_on>true</always_on>
         <update_rate>10</update_rate>
         <lidar>
@@ -317,20 +317,20 @@
             <stddev>0.008</stddev>
           </noise>
         </lidar>
-        <topic>${ns}/lidar_3d_front_left/points</topic>
-        <gz_frame_id>lidar_3d_front_left_link</gz_frame_id>
+        <topic>${ns}/lidar_3d_top/points</topic>
+        <gz_frame_id>lidar_3d_top_link</gz_frame_id>
         <visibility_mask>${lidar_visibility_mask}</visibility_mask>
       </sensor>
     </link>
 
-    <joint name="lidar_3d_front_left_joint" type="fixed">
-      <parent>sensor_tower_link</parent>
-      <child>lidar_3d_front_left_link</child>
+    <joint name="lidar_3d_top_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>lidar_3d_top_link</child>
     </joint>
 
-    <!-- Front-right: on right arm, 120deg, 16ch, 30m, tilted down 15deg -->
-    <link name="lidar_3d_front_right_link">
-      <pose relative_to="sensor_tower_link">0 -0.24 0.148 0.2618 0 0</pose>
+    <!-- Front-right: 16ch, tilted down 15deg -->
+    <link name="lidar_3d_tilted_link">
+      <pose relative_to="base_link">0.10 0 1.845 0.7854 0 1.5708</pose>
       <inertial>
         <mass>0.5</mass>
         <inertia>
@@ -349,7 +349,7 @@
           <diffuse>0.75 0.75 0.78 1.0</diffuse>
         </material>
       </visual>
-      <sensor name="lidar_3d_front_right_sensor" type="gpu_lidar">
+      <sensor name="lidar_3d_tilted_sensor" type="gpu_lidar">
         <always_on>true</always_on>
         <update_rate>10</update_rate>
         <lidar>
@@ -378,20 +378,20 @@
             <stddev>0.008</stddev>
           </noise>
         </lidar>
-        <topic>${ns}/lidar_3d_front_right/points</topic>
-        <gz_frame_id>lidar_3d_front_right_link</gz_frame_id>
+        <topic>${ns}/lidar_3d_tilted/points</topic>
+        <gz_frame_id>lidar_3d_tilted_link</gz_frame_id>
         <visibility_mask>${lidar_visibility_mask}</visibility_mask>
       </sensor>
     </link>
 
-    <joint name="lidar_3d_front_right_joint" type="fixed">
-      <parent>sensor_tower_link</parent>
-      <child>lidar_3d_front_right_link</child>
+    <joint name="lidar_3d_tilted_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>lidar_3d_tilted_link</child>
     </joint>
 
     <!-- ============ 2D LIDARS (SICK TiM781 on chassis corners) ============ -->
-    <link name="lidar_2d_front_link">
-      <pose relative_to="base_link">0.50 0.30 0.13 0 0 0.7854</pose>
+    <link name="lidar_2d_front_left_link">
+      <pose relative_to="base_link">-0.50 0.40 0.60 0 0 2.356</pose>
       <inertial>
         <mass>0.4</mass>
         <inertia>
@@ -410,7 +410,7 @@
           <diffuse>0.1 0.1 0.1 1.0</diffuse>
         </material>
       </visual>
-      <sensor name="lidar_2d_front_sensor" type="gpu_lidar">
+      <sensor name="lidar_2d_front_left_sensor" type="gpu_lidar">
         <always_on>true</always_on>
         <update_rate>30</update_rate>
         <lidar>
@@ -439,19 +439,19 @@
             <stddev>0.01</stddev>
           </noise>
         </lidar>
-        <topic>${ns}/scan_front</topic>
-        <gz_frame_id>lidar_2d_front_link</gz_frame_id>
+        <topic>${ns}/scan_front_left</topic>
+        <gz_frame_id>lidar_2d_front_left_link</gz_frame_id>
         <visibility_mask>${lidar_visibility_mask}</visibility_mask>
       </sensor>
     </link>
 
-    <joint name="lidar_2d_front_joint" type="fixed">
+    <joint name="lidar_2d_front_left_joint" type="fixed">
       <parent>base_link</parent>
-      <child>lidar_2d_front_link</child>
+      <child>lidar_2d_front_left_link</child>
     </joint>
 
-    <link name="lidar_2d_rear_link">
-      <pose relative_to="base_link">-0.50 -0.30 0.13 0 0 -2.356</pose>
+    <link name="lidar_2d_front_right_link">
+      <pose relative_to="base_link">-0.50 -0.40 0.60 0 0 -2.356</pose>
       <inertial>
         <mass>0.4</mass>
         <inertia>
@@ -470,7 +470,7 @@
           <diffuse>0.1 0.1 0.1 1.0</diffuse>
         </material>
       </visual>
-      <sensor name="lidar_2d_rear_sensor" type="gpu_lidar">
+      <sensor name="lidar_2d_front_right_sensor" type="gpu_lidar">
         <always_on>true</always_on>
         <update_rate>30</update_rate>
         <lidar>
@@ -499,15 +499,15 @@
             <stddev>0.01</stddev>
           </noise>
         </lidar>
-        <topic>${ns}/scan_rear</topic>
-        <gz_frame_id>lidar_2d_rear_link</gz_frame_id>
+        <topic>${ns}/scan_front_right</topic>
+        <gz_frame_id>lidar_2d_front_right_link</gz_frame_id>
         <visibility_mask>${lidar_visibility_mask}</visibility_mask>
       </sensor>
     </link>
 
-    <joint name="lidar_2d_rear_joint" type="fixed">
+    <joint name="lidar_2d_front_right_joint" type="fixed">
       <parent>base_link</parent>
-      <child>lidar_2d_rear_link</child>
+      <child>lidar_2d_front_right_link</child>
     </joint>
 
     <!-- ============ DEPTH CAMERAS (Orbbec Gemini 335 on chassis faces) ============ -->
@@ -556,9 +556,9 @@
       </joint>
     </xacro:macro>
 
-    <xacro:camera_sdf name="camera_front_left" x="0.60" y="0.20" z="0.05" pitch="0.2618" yaw="-0.5245"/>
-    <xacro:camera_sdf name="camera_front_right" x="0.60" y="-0.20" z="0.05" pitch="0.2618" yaw="0.5245"/>
-    <xacro:camera_sdf name="camera_rear" x="-0.60" y="0" z="0.05" pitch="0" yaw="3.14159"/>
+    <xacro:camera_sdf name="camera_rear" x="0.235" y="0" z="0.175" pitch="0" yaw="0"/>
+    <xacro:camera_sdf name="camera_front_left" x="-0.63" y="0.20" z="0.10" pitch="0.2618" yaw="${3.14159 + 0.5245}"/>
+    <xacro:camera_sdf name="camera_front_right" x="-0.63" y="-0.20" z="0.10" pitch="0.2618" yaw="${3.14159 - 0.5245}"/>
 
     <!-- ============ PLUGINS ============ -->
     <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
