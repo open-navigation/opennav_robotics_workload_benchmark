@@ -29,6 +29,7 @@ from dataclasses import dataclass, field
 
 RANDOM_SEED = 42
 MAX_PALLET_YAW_DEG = 10      # +/- degrees for pallet orientation jitter
+MAX_PALLET_XY_OFFSET = 0.15  # +/- metres for pallet position jitter
 
 _rng = random.Random(RANDOM_SEED)
 
@@ -39,17 +40,28 @@ def random_yaw() -> float:
     return round(_rng.uniform(-max_rad, max_rad), 4)
 
 
+def random_xy_offset() -> tuple[float, float]:
+    """Return a random (dx, dy) offset within +/- MAX_PALLET_XY_OFFSET."""
+    dx = round(_rng.uniform(-MAX_PALLET_XY_OFFSET, MAX_PALLET_XY_OFFSET), 4)
+    dy = round(_rng.uniform(-MAX_PALLET_XY_OFFSET, MAX_PALLET_XY_OFFSET), 4)
+    return dx, dy
+
+
 # ──────────────────────────────────────────────────────────────────────
 # WAREHOUSE-LEVEL PARAMETERS
 # ──────────────────────────────────────────────────────────────────────
 
-WAREHOUSE_X = 120          # metres, total E-W
+WAREHOUSE_X = 128          # metres, total E-W (extra 1m for west-wall clearance)
 WAREHOUSE_Y = 140          # metres, total N-S
 WALL_HEIGHT = 10.0         # metres
 
+# Offset applied to all non-wall / non-ground assets to create room along
+# the west wall
+ASSET_X_OFFSET = 2.0
+
 # N-S travel corridor / main alleyway (no shelves placed inside)
-CORRIDOR_X_MIN = -3.0
-CORRIDOR_X_MAX =  3.0
+CORRIDOR_X_MIN = -3.0 + ASSET_X_OFFSET
+CORRIDOR_X_MAX =  3.0 + ASSET_X_OFFSET
 
 # Dock doors on the south wall
 DOCK_DOOR_WIDTH = 4.0
@@ -59,7 +71,7 @@ DOCK_DOOR_CENTERS = [-50, -38, -26, -14, -2, 10, 22, 34]
 INBOUND_STAGING = {
     'cluster_centers_x': [-48, -25, -2, 22, 47],
     'cols_per_cluster': 3,        # pallets wide (E-W)
-    'rows_per_cluster': 8,        # pallets deep (N-S)
+    'rows_per_cluster': 7,        # pallets deep (N-S)
     'col_spacing': 1.5,           # E-W spacing between pallets
     'row_spacing': 1.2,           # N-S spacing between pallets
     'y_start': -56.0,             # first row Y (close to dock doors at y=-70)
@@ -152,8 +164,8 @@ class ShelfZone:
     def x_positions(self) -> list[float]:
         """All shelf-center X positions, respecting N-S corridor gap."""
         positions = []
-        x = self.x_min
-        while x <= self.x_max + 0.01:
+        x = self.x_min + ASSET_X_OFFSET
+        while x <= self.x_max + ASSET_X_OFFSET + 0.01:
             half = self.shelf_length_x / 2.0
             if (x + half) < CORRIDOR_X_MIN or (x - half) > CORRIDOR_X_MAX:
                 positions.append(round(x, 2))
@@ -553,7 +565,7 @@ def write_columns(s: SDFWriter):
         s.w(f'    <xacro:support_column name="w{idx}" x="-{hx}" y="{y}"/>')
         idx += 1
     for (x, y) in INTERIOR_COLUMNS:
-        s.w(f'    <xacro:support_column name="int_{idx}" x="{x}" y="{y}"/>')
+        s.w(f'    <xacro:support_column name="int_{idx}" x="{x + ASSET_X_OFFSET}" y="{y}"/>')
         idx += 1
     s.w('')
 
@@ -597,10 +609,12 @@ def write_zone_d(s: SDFWriter):
     cross_aisle_breaks = [(-34, -22), (-12, 8), (22, 34)]
 
     # Generate X positions for back-to-back pairs, respecting N-S corridor
-    # and cross-aisle breaks
+    # and cross-aisle breaks.  Apply ASSET_X_OFFSET to shift away from west wall.
+    cross_aisle_breaks = [(lo + ASSET_X_OFFSET, hi + ASSET_X_OFFSET)
+                          for lo, hi in cross_aisle_breaks]
     x_positions = []
-    x = d['x_min']
-    while x <= d['x_max'] + 0.01:
+    x = d['x_min'] + ASSET_X_OFFSET
+    while x <= d['x_max'] + ASSET_X_OFFSET + 0.01:
         x2 = x + pair_gap  # second shelf in pair
         half = depth / 2.0
         mid = (x + x2) / 2.0
@@ -659,8 +673,11 @@ def write_inbound_staging(s: SDFWriter):
             ry = y_start - ri * row_sp
             for pi, xo in enumerate(col_offsets, 1):
                 yaw = random_yaw()
+                dx, dy = random_xy_offset()
+                px = round(cx + xo + ASSET_X_OFFSET + dx, 2)
+                py = round(ry + dy, 2)
                 s.w(f'    <xacro:pallet name="pin_c{ci}_r{ri+1}_{pi}" '
-                    f'x="{cx + xo}" y="{ry}" z="0.01" yaw="{yaw}"/>')
+                    f'x="{px}" y="{py}" z="0.01" yaw="{yaw}"/>')
                 total += 1
         s.w('')
 
@@ -697,8 +714,9 @@ def write_pallet_stacks(s: SDFWriter):
         s.w(f'    <!-- Stack {prefix} at ({cx}, {cy}), {nx}x{ny} -->')
         for xi in range(nx):
             for yi in range(ny):
-                px = round(cx + (xi - (nx - 1) / 2.0) * sp, 2)
-                py = round(cy + (yi - (ny - 1) / 2.0) * sp, 2)
+                dx, dy = random_xy_offset()
+                px = round(cx + (xi - (nx - 1) / 2.0) * sp + ASSET_X_OFFSET + dx, 2)
+                py = round(cy + (yi - (ny - 1) / 2.0) * sp + dy, 2)
                 n_levels = _stack_height(xi, yi, nx, ny)
                 yaw = random_yaw()
                 for lv in range(n_levels):
