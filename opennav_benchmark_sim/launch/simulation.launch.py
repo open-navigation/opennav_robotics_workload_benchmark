@@ -103,7 +103,7 @@ def generate_launch_description():
         description='Run Gazebo without GUI client')
     declare_world = DeclareLaunchArgument(
         'world',
-        default_value=os.path.join(sim_pkg, 'worlds', 'benchmark_warehouse_2.sdf.xacro'),
+        default_value=os.path.join(sim_pkg, 'worlds', 'benchmark_warehouse.sdf.xacro'),
         description='Path to world SDF xacro file')
     declare_robot_name = DeclareLaunchArgument(
         'robot_name', default_value='benchmark_robot',
@@ -133,6 +133,9 @@ def generate_launch_description():
     set_gz_resource_path = AppendEnvironmentVariable(
         'GZ_SIM_RESOURCE_PATH',
         os.path.join(sim_pkg, 'worlds'))
+    set_gz_resource_path_models = AppendEnvironmentVariable(
+        'GZ_SIM_RESOURCE_PATH',
+        os.path.join(sim_pkg, 'models'))
     set_gz_resource_path_robot = AppendEnvironmentVariable(
         'GZ_SIM_RESOURCE_PATH',
         os.path.dirname(robot_pkg))
@@ -148,6 +151,7 @@ def generate_launch_description():
         declare_yaw,
         declare_use_rviz,
         set_gz_resource_path,
+        set_gz_resource_path_models,
         set_gz_resource_path_robot,
         OpaqueFunction(function=launch_setup),
     ])

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Generate benchmark_warehouse_2.sdf.xacro procedurally.
+Generate benchmark_warehouse.sdf.xacro procedurally.
 
 Each zone is defined by a config dict with parametric values (shelf type,
 spacing, start position, bounds, etc.).  Edit the ZONE / WAREHOUSE configs
 at the top, then run:
 
-    python3 generate_warehouse.py > ../worlds/benchmark_warehouse_2.sdf.xacro
+    python3 generate_warehouse.py > ../worlds/benchmark_warehouse.sdf.xacro
 
 Orientation convention (all shelves run E-W, long axis in X):
   - shelf      model default: ~3.5 m X, ~1.0 m Y  -> yaw = 0 keeps E-W
@@ -79,10 +79,10 @@ INTERIOR_COLUMNS = [
 PALLET_STACK_HEIGHT = 1.2     # metres per pallet level
 PALLET_STACKS = [
     # East of Zone C (open floor where office used to be)
-    ('ps_a', 37, 33, 3, 6, 1.3),
-    ('ps_b', 37, 42, 3, 5, 1.3),
-    ('ps_c', 48, 33, 3, 6, 1.3),
-    ('ps_d', 48, 42, 3, 5, 1.3),
+    ('ps_a', 37, 33, 5, 7, 1.3),
+    ('ps_b', 37, 42, 5, 7, 1.3),
+    ('ps_c', 48, 33, 5, 7, 1.3),
+    ('ps_d', 48, 42, 5, 7, 1.3),
 ]
 
 
@@ -165,7 +165,7 @@ class ShelfZone:
 # Pair gap = 1.2 m (shelf depth, back-to-back touching).
 # Aisle between pairs = 2.0 m (30% reduction from original 2.8 m).
 _za_y_south = make_paired_rows(y_start=-37.2, n_pairs=3, pair_gap=1.2, aisle=2.0)
-_za_y_north = make_paired_rows(y_start=-22, n_pairs=3, pair_gap=1.2, aisle=2.0)
+_za_y_north = make_paired_rows(y_start=-22, n_pairs=4, pair_gap=1.2, aisle=2.0)
 
 ZONE_A = ShelfZone(
     name='zone_a',
@@ -182,7 +182,7 @@ ZONE_A = ShelfZone(
 
 # --- Zone B-West: Standard (big shelves, back-to-back pairs) ---
 # Aisle between pairs = 1.6 m (30% reduction from original 2.3 m).
-_zbw_y = make_paired_rows(y_start=8, n_pairs=3, pair_gap=1.2, aisle=1.6)
+_zbw_y = make_paired_rows(y_start=4, n_pairs=4, pair_gap=1.2, aisle=1.6)
 
 ZONE_B_WEST = ShelfZone(
     name='zone_bw',
@@ -222,6 +222,23 @@ ZONE_C = ShelfZone(
     x_min=-55,
     x_max=29,
 )
+
+# --- Zone D: Back Storage (big shelves rotated N-S, back-to-back pairs in X) ---
+# Perpendicular to current big shelves, parallel to small shelves.
+# Rotated shelf_big: 1.2m X (depth) x 7.5m Y (length).
+# Back-to-back pairs arranged in X, shelves spaced in Y.
+ZONE_D = {
+    'name': 'zone_d',
+    'label': 'ZONE D: BACK STORAGE (big shelves N-S, back-to-back pairs, 2.0 m aisles)',
+    'shelf_depth_x': 1.2,       # shelf width in X after rotation
+    'shelf_length_y': 7.5,      # shelf length in Y after rotation
+    'pair_gap': 1.2,            # center-to-center within a pair (X direction)
+    'aisle': 2.0,               # clear aisle between pairs (X direction)
+    'x_min': -46,
+    'x_max': 46,
+    'y_positions': [51, 62],    # shelf centers in Y (~4m clear E-W break between rows)
+    'ctc_y': 11.0,              # center-to-center in Y
+}
 
 ALL_ZONES = [ZONE_A, ZONE_B_WEST, ZONE_B_EAST, ZONE_C]
 
@@ -266,9 +283,9 @@ def write_header(s: SDFWriter):
     s.w('  <world name="benchmark_warehouse">')
     s.w('')
     s.w('    <!-- Physics -->')
-    s.w('    <physics name="3ms" type="ode">')
-    s.w('      <max_step_size>0.003</max_step_size>')
-    s.w('      <real_time_update_rate>1000.0</real_time_update_rate>')
+    s.w('    <physics name="5ms" type="bullet">')
+    s.w('      <max_step_size>0.005</max_step_size>')
+    s.w('      <real_time_update_rate>500.0</real_time_update_rate>')
     s.w('      <real_time_factor>1.0</real_time_factor>')
     s.w('    </physics>')
     s.w('')
@@ -328,6 +345,45 @@ def write_ground_plane(s: SDFWriter):
     s.w('      </link>')
     s.w('      <pose>0 0 0 0 0 0</pose>')
     s.w('    </model>')
+    s.w('')
+
+
+def _compute_corridor_edges() -> tuple[float, float]:
+    """Find the tightest shelf edges bordering the corridor."""
+    west_edge = -WAREHOUSE_X / 2.0
+    east_edge = WAREHOUSE_X / 2.0
+    for zone in ALL_ZONES:
+        half = zone.shelf_length_x / 2.0
+        for x in zone.x_positions():
+            right = x + half
+            left = x - half
+            if right < CORRIDOR_X_MIN and right > west_edge:
+                west_edge = right
+            if left > CORRIDOR_X_MAX and left < east_edge:
+                east_edge = left
+    return west_edge, east_edge
+
+
+def write_corridor_lines(s: SDFWriter):
+    """Green safety lines along both edges of the main N-S corridor."""
+    wy = WAREHOUSE_Y
+    west_x, east_x = _compute_corridor_edges()
+    for side, x in [('west', west_x), ('east', east_x)]:
+        s.w(f'    <!-- Corridor safety line ({side}) -->')
+        s.w(f'    <model name="corridor_line_{side}">')
+        s.w('      <static>true</static>')
+        s.w(f'      <pose>{x} 0 0.005 0 0 0</pose>')
+        s.w('      <link name="link">')
+        s.w('        <visual name="visual">')
+        s.w(f'          <geometry><box><size>0.15 {wy} 0.01</size></box></geometry>')
+        s.w('          <material>')
+        s.w('            <ambient>0.0 0.6 0.0 1</ambient>')
+        s.w('            <diffuse>0.0 0.7 0.0 1</diffuse>')
+        s.w('            <specular>0.1 0.1 0.1 1</specular>')
+        s.w('          </material>')
+        s.w('        </visual>')
+        s.w('      </link>')
+        s.w('    </model>')
     s.w('')
 
 
@@ -437,7 +493,7 @@ def write_macros(s: SDFWriter):
     s.w('    <!-- shelf default: 3.5m X x 1m Y -->')
     s.w('    <xacro:macro name="small_shelf" params="name x y">')
     s.w('      <include>')
-    s.w('        <uri>https://fuel.gazebosim.org/1.0/MovAi/models/shelf</uri>')
+    s.w('        <uri>shelf</uri>')
     s.w('        <name>${name}</name>')
     s.w('        <pose>${x} ${y} 0 0 0 0</pose>')
     s.w('        <static>true</static>')
@@ -447,9 +503,19 @@ def write_macros(s: SDFWriter):
     s.w('    <!-- shelf_big default: 7.5m X x 1.2m Y -->')
     s.w('    <xacro:macro name="big_shelf" params="name x y">')
     s.w('      <include>')
-    s.w('        <uri>https://fuel.gazebosim.org/1.0/MovAi/models/shelf_big</uri>')
+    s.w('        <uri>shelf_big</uri>')
     s.w('        <name>${name}</name>')
     s.w('        <pose>${x} ${y} 0 0 0 0</pose>')
+    s.w('        <static>true</static>')
+    s.w('      </include>')
+    s.w('    </xacro:macro>')
+    s.w('')
+    s.w('    <!-- shelf_big rotated N-S: 1.2m X x 7.5m Y -->')
+    s.w('    <xacro:macro name="big_shelf_ns" params="name x y">')
+    s.w('      <include>')
+    s.w('        <uri>shelf_big</uri>')
+    s.w('        <name>${name}</name>')
+    s.w('        <pose>${x} ${y} 0 0 0 1.5708</pose>')
     s.w('        <static>true</static>')
     s.w('      </include>')
     s.w('    </xacro:macro>')
@@ -459,7 +525,7 @@ def write_macros(s: SDFWriter):
     s.w('    <!-- Pallet macro -->')
     s.w('    <xacro:macro name="pallet" params="name x y z yaw">')
     s.w('      <include>')
-    s.w('        <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>')
+    s.w('        <uri>pallet_box_mobile</uri>')
     s.w('        <name>${name}</name>')
     s.w('        <pose>${x} ${y} ${z} 0 0 ${yaw}</pose>')
     s.w('        <static>true</static>')
@@ -549,6 +615,59 @@ def write_shelf_zone(s: SDFWriter, zone: ShelfZone):
             count += 1
 
     label = f'{zone.name} shelves ({zone.shelf_type})'
+    s.w(f'    <!-- {label}: {count} -->')
+    s.w('')
+    s.stat(label, count)
+
+
+def write_zone_d(s: SDFWriter):
+    """Generate Zone D: rotated big shelves (N-S) in back-to-back pairs along X."""
+    d = ZONE_D
+    pair_gap = d['pair_gap']
+    aisle = d['aisle']
+    depth = d['shelf_depth_x']
+    step = 2 * pair_gap + aisle  # center-to-center between pairs
+
+    # E-W cross-aisle breaks: skip pairs whose center falls in these X bands
+    # Gaps in X where pairs are skipped: center (wide entrance from N-S corridor)
+    # and two lateral breaks for E-W access
+    cross_aisle_breaks = [(-34, -22), (-12, 8), (22, 34)]
+
+    # Generate X positions for back-to-back pairs, respecting N-S corridor
+    # and cross-aisle breaks
+    x_positions = []
+    x = d['x_min']
+    while x <= d['x_max'] + 0.01:
+        x2 = x + pair_gap  # second shelf in pair
+        half = depth / 2.0
+        mid = (x + x2) / 2.0
+        # Check neither shelf in the pair overlaps the corridor
+        s1_ok = (x + half) < CORRIDOR_X_MIN or (x - half) > CORRIDOR_X_MAX
+        s2_ok = (x2 + half) < CORRIDOR_X_MIN or (x2 - half) > CORRIDOR_X_MAX
+        # Check pair doesn't fall in a cross-aisle break
+        in_break = any(lo <= mid <= hi for lo, hi in cross_aisle_breaks)
+        if s1_ok and s2_ok and not in_break:
+            x_positions.append((round(x, 2), round(x2, 2)))
+        x += step
+
+    y_positions = d['y_positions']
+    n_pairs = len(x_positions)
+    n_y = len(y_positions)
+
+    s.w('    <!-- ============================================================ -->')
+    s.w(f'    <!-- {d["label"]} -->')
+    s.w(f'    <!-- {n_pairs} back-to-back pairs x {n_y} deep, aisle {aisle}m -->')
+    s.w('    <!-- ============================================================ -->')
+    s.w('')
+
+    count = 0
+    for pi, (x1, x2) in enumerate(x_positions, 1):
+        for yi, yc in enumerate(y_positions, 1):
+            s.w(f'    <xacro:big_shelf_ns name="{d["name"]}_p{pi}a_{yi}" x="{x1}" y="{yc}"/>')
+            s.w(f'    <xacro:big_shelf_ns name="{d["name"]}_p{pi}b_{yi}" x="{x2}" y="{yc}"/>')
+            count += 2
+
+    label = f'{d["name"]} shelves (big, N-S)'
     s.w(f'    <!-- {label}: {count} -->')
     s.w('')
     s.stat(label, count)
@@ -645,6 +764,7 @@ def main():
 
     write_header(s)
     write_ground_plane(s)
+    write_corridor_lines(s)
     write_macros(s)
     write_perimeter_walls(s)
     write_columns(s)
@@ -652,6 +772,7 @@ def main():
     for zone in ALL_ZONES:
         write_shelf_zone(s, zone)
 
+    write_zone_d(s)
     write_inbound_staging(s)
     write_pallet_stacks(s)
     write_footer(s)

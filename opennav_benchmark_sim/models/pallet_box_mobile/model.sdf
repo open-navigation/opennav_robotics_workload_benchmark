@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+<sdf version="1.7">
+    <model name="pallet_box_mobile">
+        <pose>0 0 0.01 0 0 0</pose>
+        <self_collide>false</self_collide>
+        <link name="pallet_base">
+            <pose>0 0 0 0 0 0</pose>
+            <visual name="pallet_visual">
+                <pose>0 0 0 0 0 0</pose>
+                <geometry>
+                    <mesh>
+                        <scale>1 1 1</scale>
+                        <uri>https://fuel.ignitionrobotics.org/1.0/MovAi/models/pallet/tip/files/meshes/pallet.dae</uri>
+                    </mesh>
+                </geometry>
+            </visual>
+            <visual name="boxes_visual">
+                <pose>-0.053875 0 0 0 0 0</pose>
+                <geometry>
+                    <mesh>
+                        <scale>1 1 1</scale>
+                        <uri>https://fuel.gazebosim.org/1.0/movai/models/pallet_box_mobile/3/files/meshes/boxes.dae</uri>
+                    </mesh>
+                </geometry>
+            </visual>
+        </link>
+        <static>1</static>
+    </model>
+</sdf>

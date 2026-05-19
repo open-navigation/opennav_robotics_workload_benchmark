@@ -4,7 +4,7 @@ project(opennav_benchmark_sim)
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY config launch scripts worlds
+  DIRECTORY config launch models scripts worlds
   DESTINATION share/${PROJECT_NAME}
 )
 
