@@ -1,0 +1,656 @@
+<?xml version="1.0"?>
+<sdf version="1.7" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="namespace" default=""/>
+
+  <xacro:property name="ns" value="$(arg namespace)"/>
+
+  <model name="benchmark_robot">
+    <self_collide>false</self_collide>
+    <static>false</static>
+
+    <!-- Visibility: bit 0 cleared on robot visuals, lidar sensors only see bit 0 -->
+    <!-- This prevents lidars from seeing the robot's own geometry (self-occlusion) -->
+    <xacro:property name="robot_visibility_flags" value="0xFFFE"/>
+    <xacro:property name="lidar_visibility_mask" value="0x0001"/>
+
+    <!-- Base footprint link (ground reference) -->
+    <link name="base_footprint"/>
+
+    <!-- ============ CHASSIS (rounded mesh) ============ -->
+    <link name="base_link">
+      <pose relative_to="base_footprint">0 0 0.25 0 0 0</pose>
+      <inertial>
+        <mass>200.0</mass>
+        <inertia>
+          <ixx>12.08</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>26.17</iyy><iyz>0</iyz>
+          <izz>35.33</izz>
+        </inertia>
+      </inertial>
+      <visual name="chassis_visual">
+        <visibility_flags>${robot_visibility_flags}</visibility_flags>
+        <geometry>
+          <mesh><uri>package://opennav_benchmark_robot/meshes/chassis_body.stl</uri></mesh>
+        </geometry>
+        <material>
+          <ambient>0.28 0.66 0.85 1.0</ambient>
+          <diffuse>0.28 0.66 0.85 1.0</diffuse>
+          <specular>0.1 0.1 0.1 1.0</specular>
+        </material>
+      </visual>
+      <collision name="chassis_collision">
+        <geometry>
+          <box><size>1.2 0.8 0.3</size></box>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="base_joint" type="fixed">
+      <parent>base_footprint</parent>
+      <child>base_link</child>
+    </joint>
+
+    <!-- ============ SENSOR TOWER (front, Nav2 grey) ============ -->
+    <link name="sensor_tower_link">
+      <pose relative_to="base_link">0.15 0 0.31 0 0 0</pose>
+      <inertial>
+        <mass>3.0</mass>
+        <inertia>
+          <ixx>0.03</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>0.03</iyy><iyz>0</iyz>
+          <izz>0.01</izz>
+        </inertia>
+      </inertial>
+      <visual name="tower_visual">
+        <visibility_flags>${robot_visibility_flags}</visibility_flags>
+        <geometry>
+          <mesh><uri>package://opennav_benchmark_robot/meshes/sensor_tower.stl</uri></mesh>
+        </geometry>
+        <material>
+          <ambient>0.6 0.62 0.65 1.0</ambient>
+          <diffuse>0.6 0.62 0.65 1.0</diffuse>
+          <specular>0.05 0.05 0.05 1.0</specular>
+        </material>
+      </visual>
+    </link>
+
+    <joint name="sensor_tower_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>sensor_tower_link</child>
+    </joint>
+
+    <!-- ============ DRIVE WHEELS ============ -->
+    <link name="wheel_left_link">
+      <pose relative_to="base_link">0 0.36 -0.125 -1.5708 0 0</pose>
+      <inertial>
+        <mass>5.0</mass>
+        <inertia>
+          <ixx>0.02103</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>0.02103</iyy><iyz>0</iyz>
+          <izz>0.03906</izz>
+        </inertia>
+      </inertial>
+      <visual name="wheel_visual">
+        <visibility_flags>${robot_visibility_flags}</visibility_flags>
+        <pose>0 0 0 1.5708 0 0</pose>
+        <geometry>
+          <mesh><uri>package://opennav_benchmark_robot/meshes/drive_wheel.dae</uri><scale>0.002 0.001667 0.001667</scale></mesh>
+        </geometry>
+        <material>
+          <ambient>0.2 0.2 0.2 1.0</ambient>
+          <diffuse>0.2 0.2 0.2 1.0</diffuse>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder><radius>0.125</radius><length>0.06</length></cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode><mu>1.0</mu><mu2>1.0</mu2><slip1>0.035</slip1></ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <joint name="wheel_left_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>wheel_left_link</child>
+      <axis><xyz>0 0 1</xyz></axis>
+    </joint>
+
+    <link name="wheel_right_link">
+      <pose relative_to="base_link">0 -0.36 -0.125 -1.5708 0 0</pose>
+      <inertial>
+        <mass>5.0</mass>
+        <inertia>
+          <ixx>0.02103</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>0.02103</iyy><iyz>0</iyz>
+          <izz>0.03906</izz>
+        </inertia>
+      </inertial>
+      <visual name="wheel_visual">
+        <visibility_flags>${robot_visibility_flags}</visibility_flags>
+        <pose>0 0 0 1.5708 0 0</pose>
+        <geometry>
+          <mesh><uri>package://opennav_benchmark_robot/meshes/drive_wheel.dae</uri><scale>0.002 0.001667 0.001667</scale></mesh>
+        </geometry>
+        <material>
+          <ambient>0.2 0.2 0.2 1.0</ambient>
+          <diffuse>0.2 0.2 0.2 1.0</diffuse>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder><radius>0.125</radius><length>0.06</length></cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode><mu>1.0</mu><mu2>1.0</mu2><slip1>0.035</slip1></ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <joint name="wheel_right_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>wheel_right_link</child>
+      <axis><xyz>0 0 1</xyz></axis>
+    </joint>
+
+    <!-- ============ CASTER WHEELS (4x) ============ -->
+    <xacro:macro name="caster_sdf" params="name x y">
+      <link name="caster_${name}_link">
+        <pose relative_to="base_link">${x} ${y} -0.20 0 0 1.5708</pose>
+        <inertial>
+          <mass>0.5</mass>
+          <inertia>
+            <ixx>0.0001</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>0.0001</iyy><iyz>0</iyz>
+            <izz>0.0001</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <visibility_flags>${robot_visibility_flags}</visibility_flags>
+          <geometry>
+            <mesh><uri>package://opennav_benchmark_robot/meshes/caster_wheel.dae</uri><scale>0.001 0.001 0.001</scale></mesh>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1.0</ambient>
+            <diffuse>0.2 0.2 0.2 1.0</diffuse>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <sphere><radius>0.05</radius></sphere>
+          </geometry>
+          <surface>
+            <friction>
+              <ode><mu>0.01</mu><mu2>0.01</mu2></ode>
+            </friction>
+          </surface>
+        </collision>
+      </link>
+      <joint name="caster_${name}_joint" type="fixed">
+        <parent>base_link</parent>
+        <child>caster_${name}_link</child>
+      </joint>
+    </xacro:macro>
+
+    <xacro:caster_sdf name="front_left" x="0.45" y="0.30"/>
+    <xacro:caster_sdf name="front_right" x="0.45" y="-0.30"/>
+    <xacro:caster_sdf name="rear_left" x="-0.45" y="0.30"/>
+    <xacro:caster_sdf name="rear_right" x="-0.45" y="-0.30"/>
+
+    <!-- ============ IMU ============ -->
+    <link name="imu_link">
+      <pose relative_to="base_link">0 0 -0.05 0 0 0</pose>
+      <inertial>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>0.00001</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>0.00001</iyy><iyz>0</iyz>
+          <izz>0.00001</izz>
+        </inertia>
+      </inertial>
+      <sensor name="imu_sensor" type="imu">
+        <always_on>true</always_on>
+        <update_rate>200</update_rate>
+        <imu>
+          <angular_velocity>
+            <x><noise type="gaussian"><mean>0</mean><stddev>0.0002</stddev></noise></x>
+            <y><noise type="gaussian"><mean>0</mean><stddev>0.0002</stddev></noise></y>
+            <z><noise type="gaussian"><mean>0</mean><stddev>0.0002</stddev></noise></z>
+          </angular_velocity>
+          <linear_acceleration>
+            <x><noise type="gaussian"><mean>0</mean><stddev>0.017</stddev></noise></x>
+            <y><noise type="gaussian"><mean>0</mean><stddev>0.017</stddev></noise></y>
+            <z><noise type="gaussian"><mean>0</mean><stddev>0.017</stddev></noise></z>
+          </linear_acceleration>
+        </imu>
+        <topic>${ns}/imu/data</topic>
+        <gz_frame_id>imu_link</gz_frame_id>
+      </sensor>
+    </link>
+
+    <joint name="imu_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>imu_link</child>
+    </joint>
+
+    <!-- ============ 3D LIDARS (mounted on sensor tower) ============ -->
+    <!-- Center: top of tower, 360deg, 32ch, 75m -->
+    <link name="lidar_3d_center_link">
+      <pose relative_to="sensor_tower_link">0 0 0.17 0 0 0</pose>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.0003</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>0.0003</iyy><iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <visibility_flags>${robot_visibility_flags}</visibility_flags>
+        <geometry>
+          <mesh><uri>package://opennav_benchmark_robot/meshes/ouster_os1.stl</uri></mesh>
+        </geometry>
+        <material>
+          <ambient>0.75 0.75 0.78 1.0</ambient>
+          <diffuse>0.75 0.75 0.78 1.0</diffuse>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder><radius>0.0425</radius><length>0.085</length></cylinder>
+        </geometry>
+      </collision>
+      <sensor name="lidar_3d_center_sensor" type="gpu_lidar">
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>512</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>32</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.2618</min_angle>
+              <max_angle>0.2618</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.3</min>
+            <max>75.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.008</stddev>
+          </noise>
+        </lidar>
+        <topic>${ns}/lidar_3d_center/points</topic>
+        <gz_frame_id>lidar_3d_center_link</gz_frame_id>
+        <visibility_mask>${lidar_visibility_mask}</visibility_mask>
+      </sensor>
+    </link>
+
+    <joint name="lidar_3d_center_joint" type="fixed">
+      <parent>sensor_tower_link</parent>
+      <child>lidar_3d_center_link</child>
+    </joint>
+
+    <!-- Front-left: on left arm, 120deg, 16ch, 30m, tilted down 15deg -->
+    <link name="lidar_3d_front_left_link">
+      <pose relative_to="sensor_tower_link">0 0.24 0.17 -0.2618 0 0</pose>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.0003</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>0.0003</iyy><iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <visibility_flags>${robot_visibility_flags}</visibility_flags>
+        <geometry>
+          <mesh><uri>package://opennav_benchmark_robot/meshes/ouster_os1.stl</uri></mesh>
+        </geometry>
+        <material>
+          <ambient>0.75 0.75 0.78 1.0</ambient>
+          <diffuse>0.75 0.75 0.78 1.0</diffuse>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder><radius>0.0425</radius><length>0.085</length></cylinder>
+        </geometry>
+      </collision>
+      <sensor name="lidar_3d_front_left_sensor" type="gpu_lidar">
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>256</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.2618</min_angle>
+              <max_angle>0.2618</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.3</min>
+            <max>30.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.008</stddev>
+          </noise>
+        </lidar>
+        <topic>${ns}/lidar_3d_front_left/points</topic>
+        <gz_frame_id>lidar_3d_front_left_link</gz_frame_id>
+        <visibility_mask>${lidar_visibility_mask}</visibility_mask>
+      </sensor>
+    </link>
+
+    <joint name="lidar_3d_front_left_joint" type="fixed">
+      <parent>sensor_tower_link</parent>
+      <child>lidar_3d_front_left_link</child>
+    </joint>
+
+    <!-- Front-right: on right arm, 120deg, 16ch, 30m, tilted down 15deg -->
+    <link name="lidar_3d_front_right_link">
+      <pose relative_to="sensor_tower_link">0 -0.24 0.17 0.2618 0 0</pose>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.0003</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>0.0003</iyy><iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <visibility_flags>${robot_visibility_flags}</visibility_flags>
+        <geometry>
+          <mesh><uri>package://opennav_benchmark_robot/meshes/ouster_os1.stl</uri></mesh>
+        </geometry>
+        <material>
+          <ambient>0.75 0.75 0.78 1.0</ambient>
+          <diffuse>0.75 0.75 0.78 1.0</diffuse>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder><radius>0.0425</radius><length>0.085</length></cylinder>
+        </geometry>
+      </collision>
+      <sensor name="lidar_3d_front_right_sensor" type="gpu_lidar">
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>256</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.2618</min_angle>
+              <max_angle>0.2618</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.3</min>
+            <max>30.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.008</stddev>
+          </noise>
+        </lidar>
+        <topic>${ns}/lidar_3d_front_right/points</topic>
+        <gz_frame_id>lidar_3d_front_right_link</gz_frame_id>
+        <visibility_mask>${lidar_visibility_mask}</visibility_mask>
+      </sensor>
+    </link>
+
+    <joint name="lidar_3d_front_right_joint" type="fixed">
+      <parent>sensor_tower_link</parent>
+      <child>lidar_3d_front_right_link</child>
+    </joint>
+
+    <!-- ============ 2D LIDARS (SICK TiM781 on chassis corners) ============ -->
+    <link name="lidar_2d_front_link">
+      <pose relative_to="base_link">0.50 0.30 0.13 0 0 0.7854</pose>
+      <inertial>
+        <mass>0.4</mass>
+        <inertia>
+          <ixx>0.0001</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>0.0001</iyy><iyz>0</iyz>
+          <izz>0.00005</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <visibility_flags>${robot_visibility_flags}</visibility_flags>
+        <geometry>
+          <mesh><uri>package://opennav_benchmark_robot/meshes/sick_tim.stl</uri></mesh>
+        </geometry>
+        <material>
+          <ambient>0.1 0.1 0.1 1.0</ambient>
+          <diffuse>0.1 0.1 0.1 1.0</diffuse>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder><radius>0.03</radius><length>0.095</length></cylinder>
+        </geometry>
+      </collision>
+      <sensor name="lidar_2d_front_sensor" type="gpu_lidar">
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>720</samples>
+              <resolution>1</resolution>
+              <min_angle>-2.356</min_angle>
+              <max_angle>2.356</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>1</samples>
+              <resolution>1</resolution>
+              <min_angle>0</min_angle>
+              <max_angle>0</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.1</min>
+            <max>25.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </lidar>
+        <topic>${ns}/scan_front</topic>
+        <gz_frame_id>lidar_2d_front_link</gz_frame_id>
+        <visibility_mask>${lidar_visibility_mask}</visibility_mask>
+      </sensor>
+    </link>
+
+    <joint name="lidar_2d_front_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>lidar_2d_front_link</child>
+    </joint>
+
+    <link name="lidar_2d_rear_link">
+      <pose relative_to="base_link">-0.50 -0.30 0.13 0 0 -2.356</pose>
+      <inertial>
+        <mass>0.4</mass>
+        <inertia>
+          <ixx>0.0001</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>0.0001</iyy><iyz>0</iyz>
+          <izz>0.00005</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <visibility_flags>${robot_visibility_flags}</visibility_flags>
+        <geometry>
+          <mesh><uri>package://opennav_benchmark_robot/meshes/sick_tim.stl</uri></mesh>
+        </geometry>
+        <material>
+          <ambient>0.1 0.1 0.1 1.0</ambient>
+          <diffuse>0.1 0.1 0.1 1.0</diffuse>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder><radius>0.03</radius><length>0.095</length></cylinder>
+        </geometry>
+      </collision>
+      <sensor name="lidar_2d_rear_sensor" type="gpu_lidar">
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>720</samples>
+              <resolution>1</resolution>
+              <min_angle>-2.356</min_angle>
+              <max_angle>2.356</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>1</samples>
+              <resolution>1</resolution>
+              <min_angle>0</min_angle>
+              <max_angle>0</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.1</min>
+            <max>25.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </lidar>
+        <topic>${ns}/scan_rear</topic>
+        <gz_frame_id>lidar_2d_rear_link</gz_frame_id>
+        <visibility_mask>${lidar_visibility_mask}</visibility_mask>
+      </sensor>
+    </link>
+
+    <joint name="lidar_2d_rear_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>lidar_2d_rear_link</child>
+    </joint>
+
+    <!-- ============ DEPTH CAMERAS (Orbbec Gemini 335 on chassis faces) ============ -->
+    <xacro:macro name="camera_sdf" params="name x y z pitch yaw">
+      <link name="${name}_link">
+        <pose relative_to="base_link">${x} ${y} ${z} 0 ${pitch} ${yaw}</pose>
+        <inertial>
+          <mass>0.1</mass>
+          <inertia>
+            <ixx>0.00001</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>0.00001</iyy><iyz>0</iyz>
+            <izz>0.00001</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <visibility_flags>${robot_visibility_flags}</visibility_flags>
+          <geometry>
+            <mesh><uri>package://opennav_benchmark_robot/meshes/gemini335_camera.STL</uri></mesh>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1.0</ambient>
+            <diffuse>0.1 0.1 0.1 1.0</diffuse>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box><size>0.025 0.09 0.025</size></box>
+          </geometry>
+        </collision>
+        <sensor name="${name}_rgbd" type="rgbd_camera">
+          <always_on>true</always_on>
+          <update_rate>10</update_rate>
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image>
+              <width>320</width>
+              <height>240</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>10.0</far>
+            </clip>
+          </camera>
+          <topic>${ns}/${name}</topic>
+          <gz_frame_id>${name}_link</gz_frame_id>
+        </sensor>
+      </link>
+      <joint name="${name}_joint" type="fixed">
+        <parent>base_link</parent>
+        <child>${name}_link</child>
+      </joint>
+    </xacro:macro>
+
+    <xacro:camera_sdf name="camera_front_left" x="0.60" y="0.20" z="0.05" pitch="0.2618" yaw="-0.5245"/>
+    <xacro:camera_sdf name="camera_front_right" x="0.60" y="-0.20" z="0.05" pitch="0.2618" yaw="0.5245"/>
+    <xacro:camera_sdf name="camera_rear" x="-0.60" y="0" z="0.05" pitch="0" yaw="3.14159"/>
+
+    <!-- ============ PLUGINS ============ -->
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+      <left_joint>wheel_left_joint</left_joint>
+      <right_joint>wheel_right_joint</right_joint>
+      <wheel_separation>0.72</wheel_separation>
+      <wheel_radius>0.125</wheel_radius>
+      <max_linear_acceleration>1.5</max_linear_acceleration>
+      <min_linear_acceleration>-1.5</min_linear_acceleration>
+      <max_angular_acceleration>3.0</max_angular_acceleration>
+      <min_angular_acceleration>-3.0</min_angular_acceleration>
+      <max_linear_velocity>1.5</max_linear_velocity>
+      <min_linear_velocity>-1.5</min_linear_velocity>
+      <max_angular_velocity>2.0</max_angular_velocity>
+      <min_angular_velocity>-2.0</min_angular_velocity>
+      <topic>${ns}/cmd_vel</topic>
+      <odom_topic>${ns}/odom</odom_topic>
+      <tf_topic>${ns}/tf</tf_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_footprint</child_frame_id>
+      <odom_publish_frequency>100</odom_publish_frequency>
+    </plugin>
+
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+      <joint_name>wheel_left_joint</joint_name>
+      <joint_name>wheel_right_joint</joint_name>
+      <topic>${ns}/joint_states</topic>
+      <update_rate>30</update_rate>
+    </plugin>
+
+  </model>
+</sdf>

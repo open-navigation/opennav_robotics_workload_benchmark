@@ -1,0 +1,310 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="benchmark_robot">
+
+  <!-- Properties -->
+  <xacro:property name="chassis_length" value="1.2"/>
+  <xacro:property name="chassis_width" value="0.8"/>
+  <xacro:property name="chassis_height" value="0.3"/>
+  <xacro:property name="chassis_mass" value="200.0"/>
+  <xacro:property name="chassis_z_offset" value="0.25"/>
+
+  <xacro:property name="wheel_radius" value="0.125"/>
+  <xacro:property name="wheel_width" value="0.06"/>
+  <xacro:property name="wheel_mass" value="5.0"/>
+  <xacro:property name="wheel_separation" value="0.72"/>
+
+  <xacro:property name="caster_radius" value="0.05"/>
+  <xacro:property name="caster_mass" value="0.5"/>
+
+  <!-- Tower: sits on chassis top at front area -->
+  <xacro:property name="tower_x" value="0.15"/>
+  <xacro:property name="tower_half_h" value="0.15"/>
+
+  <!-- Colors -->
+  <material name="nav2_blue">
+    <color rgba="0.28 0.66 0.85 1.0"/>
+  </material>
+  <material name="nav2_grey">
+    <color rgba="0.6 0.62 0.65 1.0"/>
+  </material>
+  <material name="dark_grey">
+    <color rgba="0.2 0.2 0.2 1.0"/>
+  </material>
+  <material name="black">
+    <color rgba="0.1 0.1 0.1 1.0"/>
+  </material>
+  <material name="silver">
+    <color rgba="0.75 0.75 0.78 1.0"/>
+  </material>
+
+  <!-- Inertia macros -->
+  <xacro:macro name="box_inertia" params="m x y z">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${m*(y*y+z*z)/12.0}" ixy="0" ixz="0"
+               iyy="${m*(x*x+z*z)/12.0}" iyz="0"
+               izz="${m*(x*x+y*y)/12.0}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${m*(3*r*r+h*h)/12.0}" ixy="0" ixz="0"
+               iyy="${m*(3*r*r+h*h)/12.0}" iyz="0"
+               izz="${m*r*r/2.0}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="sphere_inertia" params="m r">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${2*m*r*r/5.0}" ixy="0" ixz="0"
+               iyy="${2*m*r*r/5.0}" iyz="0"
+               izz="${2*m*r*r/5.0}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- ============ BASE ============ -->
+  <link name="base_footprint"/>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://opennav_benchmark_robot/meshes/chassis_body.stl"/>
+      </geometry>
+      <material name="nav2_blue"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="${chassis_mass}" x="${chassis_length}" y="${chassis_width}" z="${chassis_height}"/>
+  </link>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 ${chassis_z_offset}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ============ SENSOR TOWER ============ -->
+  <link name="sensor_tower_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://opennav_benchmark_robot/meshes/sensor_tower.stl"/>
+      </geometry>
+      <material name="nav2_grey"/>
+    </visual>
+    <inertial>
+      <mass value="3.0"/>
+      <inertia ixx="0.03" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.01"/>
+    </inertial>
+  </link>
+
+  <joint name="sensor_tower_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="sensor_tower_link"/>
+    <origin xyz="${tower_x} 0 ${chassis_height/2 + tower_half_h}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ============ DRIVE WHEELS ============ -->
+  <xacro:macro name="drive_wheel" params="side y_offset">
+    <link name="wheel_${side}_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 ${pi/2}"/>
+        <geometry>
+          <mesh filename="package://opennav_benchmark_robot/meshes/drive_wheel.dae" scale="0.002 0.001667 0.001667"/>
+        </geometry>
+        <material name="dark_grey"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_inertia m="${wheel_mass}" r="${wheel_radius}" h="${wheel_width}"/>
+    </link>
+    <joint name="wheel_${side}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="wheel_${side}_link"/>
+      <origin xyz="0 ${y_offset} ${-chassis_z_offset + wheel_radius}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:drive_wheel side="left" y_offset="${wheel_separation/2}"/>
+  <xacro:drive_wheel side="right" y_offset="${-wheel_separation/2}"/>
+
+  <!-- ============ CASTER WHEELS ============ -->
+  <xacro:macro name="caster_wheel" params="name x y">
+    <link name="caster_${name}_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://opennav_benchmark_robot/meshes/caster_wheel.dae" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="dark_grey"/>
+      </visual>
+      <collision>
+        <geometry>
+          <sphere radius="${caster_radius}"/>
+        </geometry>
+      </collision>
+      <xacro:sphere_inertia m="${caster_mass}" r="${caster_radius}"/>
+    </link>
+    <joint name="caster_${name}_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="caster_${name}_link"/>
+      <origin xyz="${x} ${y} ${-chassis_z_offset + caster_radius}" rpy="0 0 ${pi/2}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:caster_wheel name="front_left" x="0.45" y="0.30"/>
+  <xacro:caster_wheel name="front_right" x="0.45" y="-0.30"/>
+  <xacro:caster_wheel name="rear_left" x="-0.45" y="0.30"/>
+  <xacro:caster_wheel name="rear_right" x="-0.45" y="-0.30"/>
+
+  <!-- ============ IMU ============ -->
+  <link name="imu_link">
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+  </link>
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ============ 3D LIDARS (Ouster OS1-32 on tower) ============ -->
+  <!-- Center: top of tower -->
+  <link name="lidar_3d_center_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://opennav_benchmark_robot/meshes/ouster_os1.stl"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.0425" length="0.085"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.0003" ixy="0" ixz="0" iyy="0.0003" iyz="0" izz="0.0002"/>
+    </inertial>
+  </link>
+  <joint name="lidar_3d_center_joint" type="fixed">
+    <parent link="sensor_tower_link"/>
+    <child link="lidar_3d_center_link"/>
+    <origin xyz="0 0 ${tower_half_h + 0.01}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Front-left: on left arm of tower crossbar -->
+  <link name="lidar_3d_front_left_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://opennav_benchmark_robot/meshes/ouster_os1.stl"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.0425" length="0.085"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.0003" ixy="0" ixz="0" iyy="0.0003" iyz="0" izz="0.0002"/>
+    </inertial>
+  </link>
+  <joint name="lidar_3d_front_left_joint" type="fixed">
+    <parent link="sensor_tower_link"/>
+    <child link="lidar_3d_front_left_link"/>
+    <origin xyz="0 0.22 ${tower_half_h + 0.02}" rpy="${-pi/12} 0 0"/>
+  </joint>
+
+  <!-- Front-right: on right arm of tower crossbar -->
+  <link name="lidar_3d_front_right_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://opennav_benchmark_robot/meshes/ouster_os1.stl"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.0425" length="0.085"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.0003" ixy="0" ixz="0" iyy="0.0003" iyz="0" izz="0.0002"/>
+    </inertial>
+  </link>
+  <joint name="lidar_3d_front_right_joint" type="fixed">
+    <parent link="sensor_tower_link"/>
+    <child link="lidar_3d_front_right_link"/>
+    <origin xyz="0 -0.22 ${tower_half_h + 0.02}" rpy="${pi/12} 0 0"/>
+  </joint>
+
+  <!-- ============ 2D LIDARS (SICK TiM781 on chassis corners) ============ -->
+  <xacro:macro name="lidar_2d" params="name x y yaw">
+    <link name="${name}_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://opennav_benchmark_robot/meshes/sick_tim.stl"/>
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <geometry><cylinder radius="0.03" length="0.095"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="0.4"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.00005"/>
+      </inertial>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${name}_link"/>
+      <origin xyz="${x} ${y} ${chassis_height/2 - 0.02}" rpy="0 0 ${yaw}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:lidar_2d name="lidar_2d_front" x="0.50" y="0.30" yaw="${pi/4}"/>
+  <xacro:lidar_2d name="lidar_2d_rear" x="-0.50" y="-0.30" yaw="${-3*pi/4}"/>
+
+  <!-- ============ DEPTH CAMERAS (Orbbec Gemini 335) ============ -->
+  <xacro:macro name="depth_camera" params="name x y z pitch yaw">
+    <link name="${name}_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://opennav_benchmark_robot/meshes/gemini335_camera.STL"/>
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <geometry><box size="0.03 0.09 0.025"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+      </inertial>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${name}_link"/>
+      <origin xyz="${x} ${y} ${z}" rpy="0 ${pitch} ${yaw}"/>
+    </joint>
+    <link name="${name}_optical_frame"/>
+    <joint name="${name}_optical_joint" type="fixed">
+      <parent link="${name}_link"/>
+      <child link="${name}_optical_frame"/>
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:depth_camera name="camera_front_left" x="0.60" y="0.20" z="0.05" pitch="${pi/12}" yaw="-0.5245"/>
+  <xacro:depth_camera name="camera_front_right" x="0.60" y="-0.20" z="0.05" pitch="${pi/12}" yaw="0.5245"/>
+  <xacro:depth_camera name="camera_rear" x="-0.60" y="0" z="0.05" pitch="0" yaw="${pi}"/>
+
+</robot>

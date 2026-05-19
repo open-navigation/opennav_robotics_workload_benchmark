@@ -1,0 +1,722 @@
+<?xml version="1.0"?>
+<sdf version="1.7" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="headless" default="false"/>
+
+  <world name="benchmark_warehouse">
+
+    <!-- Physics -->
+    <physics name="3ms" type="ode">
+      <max_step_size>0.003</max_step_size>
+      <real_time_update_rate>1000.0</real_time_update_rate>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <!-- Plugins -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <xacro:unless value="$(arg headless)">
+      <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    </xacro:unless>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu"/>
+
+    <!-- Scene -->
+    <scene>
+      <ambient>0.8 0.8 0.8 1</ambient>
+      <background>0.3 0.7 0.9 1</background>
+      <shadows>0</shadows>
+      <grid>false</grid>
+    </scene>
+
+    <!-- Lighting -->
+    <light type="directional" name="sun">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 50 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.3 0.3 0.3 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.001</linear>
+        <quadratic>0.0001</quadratic>
+      </attenuation>
+      <direction>-0.3 0.2 -1.0</direction>
+    </light>
+
+    <!-- Ground plane (matches wall dimensions: 120m x 155m) -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>120 155</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>120 155</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.55 0.55 0.53 1</ambient>
+            <diffuse>0.55 0.55 0.53 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+      <pose>0 0 0 0 0 0</pose>
+    </model>
+
+    <!-- ============================================================ -->
+    <!-- PERIMETER WALLS (120m x 155m, 5m tall)                       -->
+    <!-- Two-tone: dark concrete base (1.5m) + metal upper (3.5m)     -->
+    <!-- ============================================================ -->
+
+    <xacro:macro name="wall_segment" params="name x y yaw length">
+      <model name="wall_${name}">
+        <static>true</static>
+        <pose>${x} ${y} 0 0 0 ${yaw}</pose>
+        <link name="link">
+          <visual name="lower">
+            <pose>0 0 0.75 0 0 0</pose>
+            <geometry>
+              <box><size>${length} 0.3 1.5</size></box>
+            </geometry>
+            <material>
+              <ambient>0.4 0.4 0.42 1</ambient>
+              <diffuse>0.4 0.4 0.42 1</diffuse>
+              <specular>0.1 0.1 0.1 1</specular>
+            </material>
+          </visual>
+          <visual name="upper">
+            <pose>0 0 3.25 0 0 0</pose>
+            <geometry>
+              <box><size>${length} 0.3 3.5</size></box>
+            </geometry>
+            <material>
+              <ambient>0.678 0.678 0.678 1</ambient>
+              <diffuse>0.678 0.678 0.678 1</diffuse>
+              <specular>0.3 0.3 0.3 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <pose>0 0 2.5 0 0 0</pose>
+            <geometry>
+              <box><size>${length} 0.3 5.0</size></box>
+            </geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <xacro:wall_segment name="north" x="0" y="77.5" yaw="0" length="120"/>
+    <xacro:wall_segment name="south" x="0" y="-77.5" yaw="0" length="120"/>
+    <xacro:wall_segment name="east" x="60" y="0" yaw="1.5708" length="155"/>
+    <xacro:wall_segment name="west" x="-60" y="0" yaw="1.5708" length="155"/>
+
+    <!-- Support columns every 15m along walls -->
+    <xacro:macro name="support_column" params="name x y">
+      <model name="column_${name}">
+        <static>true</static>
+        <pose>${x} ${y} 2.5 0 0 0</pose>
+        <link name="link">
+          <visual name="visual">
+            <geometry>
+              <box><size>0.4 0.4 5.0</size></box>
+            </geometry>
+            <material>
+              <ambient>0.5 0.5 0.55 1</ambient>
+              <diffuse>0.5 0.5 0.55 1</diffuse>
+              <specular>0.2 0.2 0.2 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry>
+              <box><size>0.4 0.4 5.0</size></box>
+            </geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <!-- North/South wall columns -->
+    <xacro:support_column name="n1" x="-45" y="77.5"/>
+    <xacro:support_column name="n2" x="-30" y="77.5"/>
+    <xacro:support_column name="n3" x="-15" y="77.5"/>
+    <xacro:support_column name="n4" x="0" y="77.5"/>
+    <xacro:support_column name="n5" x="15" y="77.5"/>
+    <xacro:support_column name="n6" x="30" y="77.5"/>
+    <xacro:support_column name="n7" x="45" y="77.5"/>
+    <xacro:support_column name="s1" x="-45" y="-77.5"/>
+    <xacro:support_column name="s2" x="-30" y="-77.5"/>
+    <xacro:support_column name="s3" x="-15" y="-77.5"/>
+    <xacro:support_column name="s4" x="0" y="-77.5"/>
+    <xacro:support_column name="s5" x="15" y="-77.5"/>
+    <xacro:support_column name="s6" x="30" y="-77.5"/>
+    <xacro:support_column name="s7" x="45" y="-77.5"/>
+    <!-- East/West wall columns -->
+    <xacro:support_column name="e1" x="60" y="-60"/>
+    <xacro:support_column name="e2" x="60" y="-30"/>
+    <xacro:support_column name="e3" x="60" y="0"/>
+    <xacro:support_column name="e4" x="60" y="30"/>
+    <xacro:support_column name="e5" x="60" y="60"/>
+    <xacro:support_column name="w1" x="-60" y="-60"/>
+    <xacro:support_column name="w2" x="-60" y="-30"/>
+    <xacro:support_column name="w3" x="-60" y="0"/>
+    <xacro:support_column name="w4" x="-60" y="30"/>
+    <xacro:support_column name="w5" x="-60" y="60"/>
+
+    <!-- ============================================================ -->
+    <!-- SHELF MACROS                                                  -->
+    <!-- All shelves rotated 90deg (yaw=1.5708) so long axis is N-S   -->
+    <!-- shelf: ~3.5m long x ~1m deep -> rotated: ~1m in X, ~3.5m in Y-->
+    <!-- shelf_big: ~7.5m long x ~1.2m deep -> rotated: ~1.2m X, ~7.5m Y -->
+    <!-- ============================================================ -->
+
+    <xacro:macro name="small_shelf" params="name x y">
+      <include>
+        <uri>https://fuel.gazebosim.org/1.0/MovAi/models/shelf</uri>
+        <name>${name}</name>
+        <pose>${x} ${y} 0 0 0 1.5708</pose>
+        <static>true</static>
+      </include>
+    </xacro:macro>
+
+    <xacro:macro name="big_shelf" params="name x y">
+      <include>
+        <uri>https://fuel.gazebosim.org/1.0/MovAi/models/shelf_big</uri>
+        <name>${name}</name>
+        <pose>${x} ${y} 0 0 0 1.5708</pose>
+        <static>true</static>
+      </include>
+    </xacro:macro>
+
+    <!-- ============================================================ -->
+    <!-- ZONE A: HIGH-DENSITY (small shelves, 2.5m aisles)            -->
+    <!-- x=-55 to -17, 8 rows, center-to-center 5m in X              -->
+    <!-- Shelf ~1m wide rotated + 2.5m aisle -> NOT overlapping but   -->
+    <!-- the models may be wider; using 5m spacing to be safe         -->
+    <!-- Upper: y=+35 to +63, Lower: y=+8 to +28                     -->
+    <!-- Shelves placed ~4m apart in Y (each ~3.5m long rotated)      -->
+    <!-- ============================================================ -->
+
+    <!-- Zone A Upper (y=+35 to +63): 8 rows, 7 shelves per row in Y -->
+    <xacro:small_shelf name="za_r1_u1" x="-55" y="36"/>
+    <xacro:small_shelf name="za_r1_u2" x="-55" y="40"/>
+    <xacro:small_shelf name="za_r1_u3" x="-55" y="44"/>
+    <xacro:small_shelf name="za_r1_u4" x="-55" y="48"/>
+    <xacro:small_shelf name="za_r1_u5" x="-55" y="52"/>
+    <xacro:small_shelf name="za_r1_u6" x="-55" y="56"/>
+    <xacro:small_shelf name="za_r1_u7" x="-55" y="60"/>
+
+    <xacro:small_shelf name="za_r2_u1" x="-50" y="36"/>
+    <xacro:small_shelf name="za_r2_u2" x="-50" y="40"/>
+    <xacro:small_shelf name="za_r2_u3" x="-50" y="44"/>
+    <xacro:small_shelf name="za_r2_u4" x="-50" y="48"/>
+    <xacro:small_shelf name="za_r2_u5" x="-50" y="52"/>
+    <xacro:small_shelf name="za_r2_u6" x="-50" y="56"/>
+    <xacro:small_shelf name="za_r2_u7" x="-50" y="60"/>
+
+    <xacro:small_shelf name="za_r3_u1" x="-45" y="36"/>
+    <xacro:small_shelf name="za_r3_u2" x="-45" y="40"/>
+    <xacro:small_shelf name="za_r3_u3" x="-45" y="44"/>
+    <xacro:small_shelf name="za_r3_u4" x="-45" y="48"/>
+    <xacro:small_shelf name="za_r3_u5" x="-45" y="52"/>
+    <xacro:small_shelf name="za_r3_u6" x="-45" y="56"/>
+    <xacro:small_shelf name="za_r3_u7" x="-45" y="60"/>
+
+    <xacro:small_shelf name="za_r4_u1" x="-40" y="36"/>
+    <xacro:small_shelf name="za_r4_u2" x="-40" y="40"/>
+    <xacro:small_shelf name="za_r4_u3" x="-40" y="44"/>
+    <xacro:small_shelf name="za_r4_u4" x="-40" y="48"/>
+    <xacro:small_shelf name="za_r4_u5" x="-40" y="52"/>
+    <xacro:small_shelf name="za_r4_u6" x="-40" y="56"/>
+    <xacro:small_shelf name="za_r4_u7" x="-40" y="60"/>
+
+    <xacro:small_shelf name="za_r5_u1" x="-35" y="36"/>
+    <xacro:small_shelf name="za_r5_u2" x="-35" y="40"/>
+    <xacro:small_shelf name="za_r5_u3" x="-35" y="44"/>
+    <xacro:small_shelf name="za_r5_u4" x="-35" y="48"/>
+    <xacro:small_shelf name="za_r5_u5" x="-35" y="52"/>
+    <xacro:small_shelf name="za_r5_u6" x="-35" y="56"/>
+    <xacro:small_shelf name="za_r5_u7" x="-35" y="60"/>
+
+    <xacro:small_shelf name="za_r6_u1" x="-30" y="36"/>
+    <xacro:small_shelf name="za_r6_u2" x="-30" y="40"/>
+    <xacro:small_shelf name="za_r6_u3" x="-30" y="44"/>
+    <xacro:small_shelf name="za_r6_u4" x="-30" y="48"/>
+    <xacro:small_shelf name="za_r6_u5" x="-30" y="52"/>
+    <xacro:small_shelf name="za_r6_u6" x="-30" y="56"/>
+    <xacro:small_shelf name="za_r6_u7" x="-30" y="60"/>
+
+    <xacro:small_shelf name="za_r7_u1" x="-25" y="36"/>
+    <xacro:small_shelf name="za_r7_u2" x="-25" y="40"/>
+    <xacro:small_shelf name="za_r7_u3" x="-25" y="44"/>
+    <xacro:small_shelf name="za_r7_u4" x="-25" y="48"/>
+    <xacro:small_shelf name="za_r7_u5" x="-25" y="52"/>
+    <xacro:small_shelf name="za_r7_u6" x="-25" y="56"/>
+    <xacro:small_shelf name="za_r7_u7" x="-25" y="60"/>
+
+    <xacro:small_shelf name="za_r8_u1" x="-20" y="36"/>
+    <xacro:small_shelf name="za_r8_u2" x="-20" y="40"/>
+    <xacro:small_shelf name="za_r8_u3" x="-20" y="44"/>
+    <xacro:small_shelf name="za_r8_u4" x="-20" y="48"/>
+    <xacro:small_shelf name="za_r8_u5" x="-20" y="52"/>
+    <xacro:small_shelf name="za_r8_u6" x="-20" y="56"/>
+    <xacro:small_shelf name="za_r8_u7" x="-20" y="60"/>
+
+    <!-- Zone A Lower (y=+8 to +28): 8 rows, 5 shelves per row -->
+    <xacro:small_shelf name="za_r1_l1" x="-55" y="10"/>
+    <xacro:small_shelf name="za_r1_l2" x="-55" y="14"/>
+    <xacro:small_shelf name="za_r1_l3" x="-55" y="18"/>
+    <xacro:small_shelf name="za_r1_l4" x="-55" y="22"/>
+    <xacro:small_shelf name="za_r1_l5" x="-55" y="26"/>
+
+    <xacro:small_shelf name="za_r2_l1" x="-50" y="10"/>
+    <xacro:small_shelf name="za_r2_l2" x="-50" y="14"/>
+    <xacro:small_shelf name="za_r2_l3" x="-50" y="18"/>
+    <xacro:small_shelf name="za_r2_l4" x="-50" y="22"/>
+    <xacro:small_shelf name="za_r2_l5" x="-50" y="26"/>
+
+    <xacro:small_shelf name="za_r3_l1" x="-45" y="10"/>
+    <xacro:small_shelf name="za_r3_l2" x="-45" y="14"/>
+    <xacro:small_shelf name="za_r3_l3" x="-45" y="18"/>
+    <xacro:small_shelf name="za_r3_l4" x="-45" y="22"/>
+    <xacro:small_shelf name="za_r3_l5" x="-45" y="26"/>
+
+    <xacro:small_shelf name="za_r4_l1" x="-40" y="10"/>
+    <xacro:small_shelf name="za_r4_l2" x="-40" y="14"/>
+    <xacro:small_shelf name="za_r4_l3" x="-40" y="18"/>
+    <xacro:small_shelf name="za_r4_l4" x="-40" y="22"/>
+    <xacro:small_shelf name="za_r4_l5" x="-40" y="26"/>
+
+    <xacro:small_shelf name="za_r5_l1" x="-35" y="10"/>
+    <xacro:small_shelf name="za_r5_l2" x="-35" y="14"/>
+    <xacro:small_shelf name="za_r5_l3" x="-35" y="18"/>
+    <xacro:small_shelf name="za_r5_l4" x="-35" y="22"/>
+    <xacro:small_shelf name="za_r5_l5" x="-35" y="26"/>
+
+    <xacro:small_shelf name="za_r6_l1" x="-30" y="10"/>
+    <xacro:small_shelf name="za_r6_l2" x="-30" y="14"/>
+    <xacro:small_shelf name="za_r6_l3" x="-30" y="18"/>
+    <xacro:small_shelf name="za_r6_l4" x="-30" y="22"/>
+    <xacro:small_shelf name="za_r6_l5" x="-30" y="26"/>
+
+    <xacro:small_shelf name="za_r7_l1" x="-25" y="10"/>
+    <xacro:small_shelf name="za_r7_l2" x="-25" y="14"/>
+    <xacro:small_shelf name="za_r7_l3" x="-25" y="18"/>
+    <xacro:small_shelf name="za_r7_l4" x="-25" y="22"/>
+    <xacro:small_shelf name="za_r7_l5" x="-25" y="26"/>
+
+    <xacro:small_shelf name="za_r8_l1" x="-20" y="10"/>
+    <xacro:small_shelf name="za_r8_l2" x="-20" y="14"/>
+    <xacro:small_shelf name="za_r8_l3" x="-20" y="18"/>
+    <xacro:small_shelf name="za_r8_l4" x="-20" y="22"/>
+    <xacro:small_shelf name="za_r8_l5" x="-20" y="26"/>
+
+    <!-- ============================================================ -->
+    <!-- ZONE B: STANDARD (big shelves, 3.5m aisles)                  -->
+    <!-- x=-10 to +55, 10 rows, center-to-center 7m in X             -->
+    <!-- shelf_big ~1.2m wide rotated + 3.5m aisle, 7m safe spacing  -->
+    <!-- Upper: y=+35 to +63, Lower: y=+8 to +28                     -->
+    <!-- Shelves ~8m apart in Y (each ~7.5m long rotated)             -->
+    <!-- ============================================================ -->
+
+    <!-- Zone B Upper (y=+35 to +63): 10 rows, 3 shelves per row -->
+    <xacro:big_shelf name="zb_r1_u1" x="-10" y="39"/>
+    <xacro:big_shelf name="zb_r1_u2" x="-10" y="47"/>
+    <xacro:big_shelf name="zb_r1_u3" x="-10" y="55"/>
+
+    <xacro:big_shelf name="zb_r2_u1" x="-3" y="39"/>
+    <xacro:big_shelf name="zb_r2_u2" x="-3" y="47"/>
+    <xacro:big_shelf name="zb_r2_u3" x="-3" y="55"/>
+
+    <xacro:big_shelf name="zb_r3_u1" x="4" y="39"/>
+    <xacro:big_shelf name="zb_r3_u2" x="4" y="47"/>
+    <xacro:big_shelf name="zb_r3_u3" x="4" y="55"/>
+
+    <xacro:big_shelf name="zb_r4_u1" x="11" y="39"/>
+    <xacro:big_shelf name="zb_r4_u2" x="11" y="47"/>
+    <xacro:big_shelf name="zb_r4_u3" x="11" y="55"/>
+
+    <xacro:big_shelf name="zb_r5_u1" x="18" y="39"/>
+    <xacro:big_shelf name="zb_r5_u2" x="18" y="47"/>
+    <xacro:big_shelf name="zb_r5_u3" x="18" y="55"/>
+
+    <xacro:big_shelf name="zb_r6_u1" x="25" y="39"/>
+    <xacro:big_shelf name="zb_r6_u2" x="25" y="47"/>
+    <xacro:big_shelf name="zb_r6_u3" x="25" y="55"/>
+
+    <xacro:big_shelf name="zb_r7_u1" x="32" y="39"/>
+    <xacro:big_shelf name="zb_r7_u2" x="32" y="47"/>
+    <xacro:big_shelf name="zb_r7_u3" x="32" y="55"/>
+
+    <xacro:big_shelf name="zb_r8_u1" x="39" y="39"/>
+    <xacro:big_shelf name="zb_r8_u2" x="39" y="47"/>
+    <xacro:big_shelf name="zb_r8_u3" x="39" y="55"/>
+
+    <xacro:big_shelf name="zb_r9_u1" x="46" y="39"/>
+    <xacro:big_shelf name="zb_r9_u2" x="46" y="47"/>
+    <xacro:big_shelf name="zb_r9_u3" x="46" y="55"/>
+
+    <xacro:big_shelf name="zb_r10_u1" x="53" y="39"/>
+    <xacro:big_shelf name="zb_r10_u2" x="53" y="47"/>
+    <xacro:big_shelf name="zb_r10_u3" x="53" y="55"/>
+
+    <!-- Zone B Lower (y=+8 to +28): 10 rows, 2 shelves per row -->
+    <xacro:big_shelf name="zb_r1_l1" x="-10" y="12"/>
+    <xacro:big_shelf name="zb_r1_l2" x="-10" y="20"/>
+
+    <xacro:big_shelf name="zb_r2_l1" x="-3" y="12"/>
+    <xacro:big_shelf name="zb_r2_l2" x="-3" y="20"/>
+
+    <xacro:big_shelf name="zb_r3_l1" x="4" y="12"/>
+    <xacro:big_shelf name="zb_r3_l2" x="4" y="20"/>
+
+    <xacro:big_shelf name="zb_r4_l1" x="11" y="12"/>
+    <xacro:big_shelf name="zb_r4_l2" x="11" y="20"/>
+
+    <xacro:big_shelf name="zb_r5_l1" x="18" y="12"/>
+    <xacro:big_shelf name="zb_r5_l2" x="18" y="20"/>
+
+    <xacro:big_shelf name="zb_r6_l1" x="25" y="12"/>
+    <xacro:big_shelf name="zb_r6_l2" x="25" y="20"/>
+
+    <xacro:big_shelf name="zb_r7_l1" x="32" y="12"/>
+    <xacro:big_shelf name="zb_r7_l2" x="32" y="20"/>
+
+    <xacro:big_shelf name="zb_r8_l1" x="39" y="12"/>
+    <xacro:big_shelf name="zb_r8_l2" x="39" y="20"/>
+
+    <xacro:big_shelf name="zb_r9_l1" x="46" y="12"/>
+    <xacro:big_shelf name="zb_r9_l2" x="46" y="20"/>
+
+    <xacro:big_shelf name="zb_r10_l1" x="53" y="12"/>
+    <xacro:big_shelf name="zb_r10_l2" x="53" y="20"/>
+
+    <!-- ============================================================ -->
+    <!-- ZONE C: MEDIUM-DENSITY (big shelves, 3m aisles)              -->
+    <!-- x=-55 to +55, 16 rows, center-to-center 7m in X             -->
+    <!-- y=-20 to +5                                                   -->
+    <!-- ============================================================ -->
+
+    <xacro:big_shelf name="zc_r1_1" x="-52" y="-4"/>
+    <xacro:big_shelf name="zc_r1_2" x="-52" y="-12"/>
+
+    <xacro:big_shelf name="zc_r2_1" x="-45" y="-4"/>
+    <xacro:big_shelf name="zc_r2_2" x="-45" y="-12"/>
+
+    <xacro:big_shelf name="zc_r3_1" x="-38" y="-4"/>
+    <xacro:big_shelf name="zc_r3_2" x="-38" y="-12"/>
+
+    <xacro:big_shelf name="zc_r4_1" x="-31" y="-4"/>
+    <xacro:big_shelf name="zc_r4_2" x="-31" y="-12"/>
+
+    <xacro:big_shelf name="zc_r5_1" x="-24" y="-4"/>
+    <xacro:big_shelf name="zc_r5_2" x="-24" y="-12"/>
+
+    <xacro:big_shelf name="zc_r6_1" x="-17" y="-4"/>
+    <xacro:big_shelf name="zc_r6_2" x="-17" y="-12"/>
+
+    <xacro:big_shelf name="zc_r7_1" x="-10" y="-4"/>
+    <xacro:big_shelf name="zc_r7_2" x="-10" y="-12"/>
+
+    <xacro:big_shelf name="zc_r8_1" x="-3" y="-4"/>
+    <xacro:big_shelf name="zc_r8_2" x="-3" y="-12"/>
+
+    <xacro:big_shelf name="zc_r9_1" x="4" y="-4"/>
+    <xacro:big_shelf name="zc_r9_2" x="4" y="-12"/>
+
+    <xacro:big_shelf name="zc_r10_1" x="11" y="-4"/>
+    <xacro:big_shelf name="zc_r10_2" x="11" y="-12"/>
+
+    <xacro:big_shelf name="zc_r11_1" x="18" y="-4"/>
+    <xacro:big_shelf name="zc_r11_2" x="18" y="-12"/>
+
+    <xacro:big_shelf name="zc_r12_1" x="25" y="-4"/>
+    <xacro:big_shelf name="zc_r12_2" x="25" y="-12"/>
+
+    <xacro:big_shelf name="zc_r13_1" x="32" y="-4"/>
+    <xacro:big_shelf name="zc_r13_2" x="32" y="-12"/>
+
+    <xacro:big_shelf name="zc_r14_1" x="39" y="-4"/>
+    <xacro:big_shelf name="zc_r14_2" x="39" y="-12"/>
+
+    <xacro:big_shelf name="zc_r15_1" x="46" y="-4"/>
+    <xacro:big_shelf name="zc_r15_2" x="46" y="-12"/>
+
+    <xacro:big_shelf name="zc_r16_1" x="53" y="-4"/>
+    <xacro:big_shelf name="zc_r16_2" x="53" y="-12"/>
+
+    <!-- ============================================================ -->
+    <!-- ZONE D: STANDARD DENSITY (big shelves, 3.5m aisles)          -->
+    <!-- x=-55 to +55, 16 rows, center-to-center 7m in X             -->
+    <!-- y=-55 to -20                                                  -->
+    <!-- ============================================================ -->
+
+    <xacro:big_shelf name="zd_r1_1" x="-52" y="-27"/>
+    <xacro:big_shelf name="zd_r1_2" x="-52" y="-35"/>
+    <xacro:big_shelf name="zd_r1_3" x="-52" y="-43"/>
+    <xacro:big_shelf name="zd_r1_4" x="-52" y="-51"/>
+
+    <xacro:big_shelf name="zd_r2_1" x="-45" y="-27"/>
+    <xacro:big_shelf name="zd_r2_2" x="-45" y="-35"/>
+    <xacro:big_shelf name="zd_r2_3" x="-45" y="-43"/>
+    <xacro:big_shelf name="zd_r2_4" x="-45" y="-51"/>
+
+    <xacro:big_shelf name="zd_r3_1" x="-38" y="-27"/>
+    <xacro:big_shelf name="zd_r3_2" x="-38" y="-35"/>
+    <xacro:big_shelf name="zd_r3_3" x="-38" y="-43"/>
+    <xacro:big_shelf name="zd_r3_4" x="-38" y="-51"/>
+
+    <xacro:big_shelf name="zd_r4_1" x="-31" y="-27"/>
+    <xacro:big_shelf name="zd_r4_2" x="-31" y="-35"/>
+    <xacro:big_shelf name="zd_r4_3" x="-31" y="-43"/>
+    <xacro:big_shelf name="zd_r4_4" x="-31" y="-51"/>
+
+    <xacro:big_shelf name="zd_r5_1" x="-24" y="-27"/>
+    <xacro:big_shelf name="zd_r5_2" x="-24" y="-35"/>
+    <xacro:big_shelf name="zd_r5_3" x="-24" y="-43"/>
+    <xacro:big_shelf name="zd_r5_4" x="-24" y="-51"/>
+
+    <xacro:big_shelf name="zd_r6_1" x="-17" y="-27"/>
+    <xacro:big_shelf name="zd_r6_2" x="-17" y="-35"/>
+    <xacro:big_shelf name="zd_r6_3" x="-17" y="-43"/>
+    <xacro:big_shelf name="zd_r6_4" x="-17" y="-51"/>
+
+    <xacro:big_shelf name="zd_r7_1" x="-10" y="-27"/>
+    <xacro:big_shelf name="zd_r7_2" x="-10" y="-35"/>
+    <xacro:big_shelf name="zd_r7_3" x="-10" y="-43"/>
+    <xacro:big_shelf name="zd_r7_4" x="-10" y="-51"/>
+
+    <xacro:big_shelf name="zd_r8_1" x="-3" y="-27"/>
+    <xacro:big_shelf name="zd_r8_2" x="-3" y="-35"/>
+    <xacro:big_shelf name="zd_r8_3" x="-3" y="-43"/>
+    <xacro:big_shelf name="zd_r8_4" x="-3" y="-51"/>
+
+    <xacro:big_shelf name="zd_r9_1" x="4" y="-27"/>
+    <xacro:big_shelf name="zd_r9_2" x="4" y="-35"/>
+    <xacro:big_shelf name="zd_r9_3" x="4" y="-43"/>
+    <xacro:big_shelf name="zd_r9_4" x="4" y="-51"/>
+
+    <xacro:big_shelf name="zd_r10_1" x="11" y="-27"/>
+    <xacro:big_shelf name="zd_r10_2" x="11" y="-35"/>
+    <xacro:big_shelf name="zd_r10_3" x="11" y="-43"/>
+    <xacro:big_shelf name="zd_r10_4" x="11" y="-51"/>
+
+    <xacro:big_shelf name="zd_r11_1" x="18" y="-27"/>
+    <xacro:big_shelf name="zd_r11_2" x="18" y="-35"/>
+    <xacro:big_shelf name="zd_r11_3" x="18" y="-43"/>
+    <xacro:big_shelf name="zd_r11_4" x="18" y="-51"/>
+
+    <xacro:big_shelf name="zd_r12_1" x="25" y="-27"/>
+    <xacro:big_shelf name="zd_r12_2" x="25" y="-35"/>
+    <xacro:big_shelf name="zd_r12_3" x="25" y="-43"/>
+    <xacro:big_shelf name="zd_r12_4" x="25" y="-51"/>
+
+    <xacro:big_shelf name="zd_r13_1" x="32" y="-27"/>
+    <xacro:big_shelf name="zd_r13_2" x="32" y="-35"/>
+    <xacro:big_shelf name="zd_r13_3" x="32" y="-43"/>
+    <xacro:big_shelf name="zd_r13_4" x="32" y="-51"/>
+
+    <xacro:big_shelf name="zd_r14_1" x="39" y="-27"/>
+    <xacro:big_shelf name="zd_r14_2" x="39" y="-35"/>
+    <xacro:big_shelf name="zd_r14_3" x="39" y="-43"/>
+    <xacro:big_shelf name="zd_r14_4" x="39" y="-51"/>
+
+    <xacro:big_shelf name="zd_r15_1" x="46" y="-27"/>
+    <xacro:big_shelf name="zd_r15_2" x="46" y="-35"/>
+    <xacro:big_shelf name="zd_r15_3" x="46" y="-43"/>
+    <xacro:big_shelf name="zd_r15_4" x="46" y="-51"/>
+
+    <xacro:big_shelf name="zd_r16_1" x="53" y="-27"/>
+    <xacro:big_shelf name="zd_r16_2" x="53" y="-35"/>
+    <xacro:big_shelf name="zd_r16_3" x="53" y="-43"/>
+    <xacro:big_shelf name="zd_r16_4" x="53" y="-51"/>
+
+    <!-- ============================================================ -->
+    <!-- STAGING AREA (y=+65 to +77.5, scattered pallets)             -->
+    <!-- ============================================================ -->
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_s1</name>
+      <pose>-35 70 0.01 0 0 0.3</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_s2</name>
+      <pose>-20 72 0.01 0 0 -0.1</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_s3</name>
+      <pose>-8 69 0.01 0 0 0.5</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_s4</name>
+      <pose>10 73 0.01 0 0 -0.2</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_s5</name>
+      <pose>25 68 0.01 0 0 0.8</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_s6</name>
+      <pose>40 71 0.01 0 0 -0.4</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_s7</name>
+      <pose>-45 74 0.01 0 0 0.1</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_s8</name>
+      <pose>50 69 0.01 0 0 -0.6</pose>
+      <static>true</static>
+    </include>
+
+    <!-- ============================================================ -->
+    <!-- LOADING DOCK (y=-55 to -77.5, chaotic pallets + barriers)    -->
+    <!-- ============================================================ -->
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Jersey Barrier</uri>
+      <name>barrier_1</name>
+      <pose>-40 -58 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Jersey Barrier</uri>
+      <name>barrier_2</name>
+      <pose>-20 -58 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Jersey Barrier</uri>
+      <name>barrier_3</name>
+      <pose>15 -58 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_d1</name>
+      <pose>-45 -63 0.01 0 0 0.4</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_d2</name>
+      <pose>-30 -66 0.01 0 0 -0.3</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_d3</name>
+      <pose>-15 -62 0.01 0 0 0.7</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_d4</name>
+      <pose>5 -68 0.01 0 0 -0.5</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_d5</name>
+      <pose>20 -64 0.01 0 0 0.2</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_d6</name>
+      <pose>35 -70 0.01 0 0 -0.8</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_d7</name>
+      <pose>-5 -72 0.01 0 0 1.2</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/MovAi/models/pallet_box_mobile</uri>
+      <name>pallet_d8</name>
+      <pose>45 -65 0.01 0 0 0.1</pose>
+      <static>true</static>
+    </include>
+
+    <!-- ============================================================ -->
+    <!-- BREAK AREA (east side)                                       -->
+    <!-- ============================================================ -->
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Table</uri>
+      <name>break_table</name>
+      <pose>55 -5 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Chair</uri>
+      <name>break_chair_1</name>
+      <pose>54 -3.5 0 0 0 -1.5</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Chair</uri>
+      <name>break_chair_2</name>
+      <pose>54 -6.5 0 0 0 1.5</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/foldable_chair</uri>
+      <name>break_fchair_1</name>
+      <pose>56.5 -4 0 0 0 1.9</pose>
+      <static>true</static>
+    </include>
+
+    <!-- ============================================================ -->
+    <!-- PEOPLE (static obstacles)                                    -->
+    <!-- ============================================================ -->
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/MaleVisitorOnPhone</uri>
+      <name>person_1</name>
+      <pose>-10 -65 0 0 0 1.57</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/plateau/models/Casual female</uri>
+      <name>person_2</name>
+      <pose>30 -67 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/MaleVisitorOnPhone</uri>
+      <name>person_3</name>
+      <pose>-30 0 0 0 0 0.5</pose>
+      <static>true</static>
+    </include>
+
+  </world>
+</sdf>

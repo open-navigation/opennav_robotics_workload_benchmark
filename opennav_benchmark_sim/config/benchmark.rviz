@@ -1,0 +1,324 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Views
+    Name: Views
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+      Value: true
+      Cell Size: 1
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Normal Cell Count: 0
+      Plane: XY
+      Plane Cell Count: 100
+      Reference Frame: <Fixed Frame>
+
+    - Class: rviz_default_plugins/TF
+      Name: TF
+      Enabled: true
+      Value: true
+      Show Arrows: false
+      Show Axes: true
+      Show Names: true
+      Update Interval: 0
+      Frame Timeout: 15
+
+    - Class: rviz_default_plugins/RobotModel
+      Name: RobotModel
+      Enabled: true
+      Value: true
+      Description Source: Topic
+      Description Topic:
+        Value: /robot_description
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Update Interval: 0
+
+    # 2D Lidars
+    - Class: rviz_default_plugins/LaserScan
+      Name: Front Lidar
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /scan_front
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+      Size (m): 0.03
+      Color Transformer: FlatColor
+      Color: 255; 0; 0
+      Style: Points
+      Min Intensity: 0
+      Max Intensity: 4096
+      Decay Time: 0
+
+    - Class: rviz_default_plugins/LaserScan
+      Name: Rear Lidar
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /scan_rear
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+      Size (m): 0.03
+      Color Transformer: FlatColor
+      Color: 0; 0; 255
+      Style: Points
+      Min Intensity: 0
+      Max Intensity: 4096
+      Decay Time: 0
+
+    # 3D Lidars
+    - Class: rviz_default_plugins/PointCloud2
+      Name: 3D Lidar Center
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /lidar_3d_center/points
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+      Size (Pixels): 2
+      Style: Points
+      Color Transformer: Intensity
+      Decay Time: 0
+      Min Intensity: 0
+      Max Intensity: 4096
+
+    - Class: rviz_default_plugins/PointCloud2
+      Name: 3D Lidar Front Left
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /lidar_3d_front_left/points
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+      Size (Pixels): 2
+      Style: Points
+      Color Transformer: Intensity
+      Decay Time: 0
+      Min Intensity: 0
+      Max Intensity: 4096
+
+    - Class: rviz_default_plugins/PointCloud2
+      Name: 3D Lidar Front Right
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /lidar_3d_front_right/points
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+      Size (Pixels): 2
+      Style: Points
+      Color Transformer: Intensity
+      Decay Time: 0
+      Min Intensity: 0
+      Max Intensity: 4096
+
+    # Depth Camera Point Clouds
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Front Left Camera Points
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /camera_front_left/points
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Size (Pixels): 2
+      Style: Points
+      Color Transformer: RGB8
+      Decay Time: 0
+
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Front Right Camera Points
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /camera_front_right/points
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Size (Pixels): 2
+      Style: Points
+      Color Transformer: RGB8
+      Decay Time: 0
+
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Rear Camera Points
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /camera_rear/points
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Size (Pixels): 2
+      Style: Points
+      Color Transformer: RGB8
+      Decay Time: 0
+
+    # Nav2 Costmaps
+    - Class: rviz_default_plugins/Map
+      Name: Global Costmap
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /global_costmap/costmap
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Alpha: 0.7
+      Color Scheme: costmap
+      Draw Behind: true
+      Update Topic:
+        Value: /global_costmap/costmap_updates
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+
+    - Class: rviz_default_plugins/Map
+      Name: Local Costmap
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /local_costmap/costmap
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Alpha: 0.7
+      Color Scheme: costmap
+      Draw Behind: false
+      Update Topic:
+        Value: /local_costmap/costmap_updates
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+
+    # Nav2 Plans
+    - Class: rviz_default_plugins/Path
+      Name: Global Plan
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /plan
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Color: 255; 0; 0
+      Line Style: Lines
+      Width: 0.03
+      Alpha: 1
+      Pose Style: None
+
+    - Class: rviz_default_plugins/Path
+      Name: Local Plan
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /local_plan
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Color: 0; 255; 0
+      Line Style: Lines
+      Width: 0.03
+      Alpha: 1
+      Pose Style: None
+
+    # Footprint
+    - Class: rviz_default_plugins/Polygon
+      Name: Local Costmap Footprint
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /local_costmap/published_footprint
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Color: 0; 255; 0
+      Alpha: 1
+
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: odom
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+      Line color: 128; 128; 0
+    - Class: rviz_default_plugins/SetInitialPose
+      Topic:
+        Value: /initialpose
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+    - Class: rviz_default_plugins/SetGoal
+      Topic:
+        Value: /goal_pose
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/ThirdPersonFollower
+      Distance: 15
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.06
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.01
+      Pitch: 0.5
+      Target Frame: base_link
+      Value: ThirdPersonFollower (rviz_default_plugins)
+      Yaw: 0
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 1000
+  Width: 1600
+  X: 0
+  Y: 0
