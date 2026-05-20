@@ -510,6 +510,42 @@ def write_macros(s: SDFWriter):
     s.w('    </xacro:macro>')
     s.w('')
 
+    # Overturned pallet macro (tipped on its side)
+    s.w('    <!-- Overturned pallet (tipped on side, roll=90deg) -->')
+    s.w('    <xacro:macro name="overturned_pallet" params="name x y yaw">')
+    s.w('      <include>')
+    s.w('        <uri>pallet_box_mobile</uri>')
+    s.w('        <name>${name}</name>')
+    s.w('        <pose>${x} ${y} 0.55 1.5708 0 ${yaw}</pose>')
+    s.w('        <static>true</static>')
+    s.w('      </include>')
+    s.w('    </xacro:macro>')
+    s.w('')
+
+    # Person macro (Gazebo Fuel human model)
+    s.w('    <!-- Person (Fuel "Casual female" model from OpenRobotics) -->')
+    s.w('    <xacro:macro name="person" params="name x y yaw">')
+    s.w('      <include>')
+    s.w('        <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Casual female</uri>')
+    s.w('        <name>${name}</name>')
+    s.w('        <pose>${x} ${y} 0 0 0 ${yaw}</pose>')
+    s.w('        <static>true</static>')
+    s.w('      </include>')
+    s.w('    </xacro:macro>')
+    s.w('')
+
+    # Forklift macro (Gazebo Fuel model)
+    s.w('    <!-- Forklift (Fuel model from OpenRobotics) -->')
+    s.w('    <xacro:macro name="forklift" params="name x y yaw">')
+    s.w('      <include>')
+    s.w('        <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Forklift</uri>')
+    s.w('        <name>${name}</name>')
+    s.w('        <pose>${x} ${y} 0 0 0 ${yaw}</pose>')
+    s.w('        <static>true</static>')
+    s.w('      </include>')
+    s.w('    </xacro:macro>')
+    s.w('')
+
 
 def write_perimeter_walls(s: SDFWriter):
     hx = WAREHOUSE_X / 2.0
@@ -733,6 +769,46 @@ def write_pallet_stacks(s: SDFWriter):
     s.stat('Block-stack pallets', total)
 
 
+
+def write_aisle_obstacles(s: SDFWriter):
+    """Place overturned pallets and people in two Zone A aisles."""
+    s.w('    <!-- ============================================================ -->')
+    s.w('    <!-- AISLE OBSTACLES (overturned pallets + people in Zone A)        -->')
+    s.w('    <!-- ============================================================ -->')
+    s.w('')
+
+    # Aisle 1: between south pairs 1 & 2 (y=-35.4 to y=-33.4, center -34.4)
+    # Shelves at x=22+offset=24 span 20.25-27.75; gap between shelves at ~27.75-28.25
+    # Place pallets at the gap between two shelf units, sprawled across the aisle
+    a1_y = -34.4
+    a1_x = 28.0  # in the gap between shelf units at x=24 (ends 27.75) and x=32 (starts 28.25)
+    s.w('    <!-- Aisle 1: overturned pallets blocking aisle + 3 people -->')
+    s.w(f'    <xacro:overturned_pallet name="spill1_a" x="{a1_x}" y="{a1_y}" yaw="0.3"/>')
+    s.w(f'    <xacro:overturned_pallet name="spill1_b" x="{a1_x + 1.8}" y="{a1_y + 0.15}" yaw="-0.5"/>')
+    s.w('')
+    # 3 people standing around the spill, facing inward
+    # Person 1: west of spill, facing east toward pallets (clear of shelf edge at 27.75)
+    s.w(f'    <xacro:person name="spill1_p1" x="{a1_x + 0.3}" y="{a1_y + 0.8}" yaw="-1.57"/>')
+    # Person 2: east of spill, facing west toward pallets
+    s.w(f'    <xacro:person name="spill1_p2" x="{a1_x + 3.5}" y="{a1_y + 0.2}" yaw="3.14"/>')
+    # Person 3: south side, facing north toward pallets
+    s.w(f'    <xacro:person name="spill1_p3" x="{a1_x + 0.9}" y="{a1_y - 0.9}" yaw="1.57"/>')
+    s.w('')
+
+    # Aisle 2: between north pairs 2 & 3 (y=-15.8 to y=-13.8, center -14.8)
+    # Place at gap between shelf units around x=-30+offset=-28
+    a2_y = -14.8
+    a2_x = -28.0  # between shelf units
+    s.w('    <!-- Aisle 2: overturned pallets + person and forklift -->')
+    s.w(f'    <xacro:overturned_pallet name="spill2_a" x="{a2_x}" y="{a2_y}" yaw="-0.2"/>')
+    s.w(f'    <xacro:overturned_pallet name="spill2_b" x="{a2_x + 1.6}" y="{a2_y - 0.1}" yaw="0.45"/>')
+    # Forklift approaching pallets from east, aligned along aisle
+    s.w(f'    <xacro:forklift name="spill2_forklift" x="-25.6955" y="-10.5044" yaw="3.0"/>')
+    # Person beside forklift, slightly north of center, watching the spill
+    s.w(f'    <xacro:person name="spill2_p1" x="{a2_x + 3.5}" y="{a2_y + 0.6}" yaw="3.14"/>')
+    s.w('')
+
+
 def write_footer(s: SDFWriter):
     s.w('  </world>')
     s.w('</sdf>')
@@ -757,6 +833,7 @@ def main():
     write_zone_d(s)
     write_inbound_staging(s)
     write_pallet_stacks(s)
+    write_aisle_obstacles(s)
     write_footer(s)
 
     s.dump(sys.stdout)

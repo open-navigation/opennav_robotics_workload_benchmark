@@ -194,6 +194,36 @@
       </include>
     </xacro:macro>
 
+    <!-- Overturned pallet (tipped on side, roll=90deg) -->
+    <xacro:macro name="overturned_pallet" params="name x y yaw">
+      <include>
+        <uri>pallet_box_mobile</uri>
+        <name>${name}</name>
+        <pose>${x} ${y} 0.55 1.5708 0 ${yaw}</pose>
+        <static>true</static>
+      </include>
+    </xacro:macro>
+
+    <!-- Person (Fuel "Casual female" model from OpenRobotics) -->
+    <xacro:macro name="person" params="name x y yaw">
+      <include>
+        <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Casual female</uri>
+        <name>${name}</name>
+        <pose>${x} ${y} 0 0 0 ${yaw}</pose>
+        <static>true</static>
+      </include>
+    </xacro:macro>
+
+    <!-- Forklift (Fuel model from OpenRobotics) -->
+    <xacro:macro name="forklift" params="name x y yaw">
+      <include>
+        <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Forklift</uri>
+        <name>${name}</name>
+        <pose>${x} ${y} 0 0 0 ${yaw}</pose>
+        <static>true</static>
+      </include>
+    </xacro:macro>
+
     <!-- ============================================================ -->
     <!-- PERIMETER WALLS (128m x 140m, 10.0m tall brick) -->
     <!-- ============================================================ -->
@@ -1650,6 +1680,24 @@
     <xacro:pallet name="ps_dock_13_9_L2" x="58.31" y="-53.93" z="1.21" yaw="-0.0048"/>
 
     <!-- Block-stack pallets: 718 models -->
+
+    <!-- ============================================================ -->
+    <!-- AISLE OBSTACLES (overturned pallets + people in Zone A)        -->
+    <!-- ============================================================ -->
+
+    <!-- Aisle 1: overturned pallets blocking aisle + 3 people -->
+    <xacro:overturned_pallet name="spill1_a" x="28.0" y="-34.4" yaw="0.3"/>
+    <xacro:overturned_pallet name="spill1_b" x="29.8" y="-34.25" yaw="-0.5"/>
+
+    <xacro:person name="spill1_p1" x="28.3" y="-33.6" yaw="-1.57"/>
+    <xacro:person name="spill1_p2" x="31.5" y="-34.199999999999996" yaw="3.14"/>
+    <xacro:person name="spill1_p3" x="28.9" y="-35.3" yaw="1.57"/>
+
+    <!-- Aisle 2: overturned pallets + person and forklift -->
+    <xacro:overturned_pallet name="spill2_a" x="-28.0" y="-14.8" yaw="-0.2"/>
+    <xacro:overturned_pallet name="spill2_b" x="-26.4" y="-14.9" yaw="0.45"/>
+    <xacro:forklift name="spill2_forklift" x="-25.6955" y="-10.5044" yaw="3.0"/>
+    <xacro:person name="spill2_p1" x="-24.5" y="-14.200000000000001" yaw="3.14"/>
 
   </world>
 </sdf>
