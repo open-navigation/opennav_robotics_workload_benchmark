@@ -13,12 +13,12 @@
     <xacro:property name="robot_visibility_flags" value="0xFFFE"/>
     <xacro:property name="lidar_visibility_mask" value="0x0001"/>
 
-    <!-- Base footprint link (ground reference) -->
-    <link name="base_footprint"/>
-
     <!-- ============ CHASSIS (rounded mesh) ============ -->
     <link name="base_link">
-      <pose relative_to="base_footprint">0 0 0.25 0 0 0</pose>
+
+    <!-- Base footprint link (ground reference) -->
+    <link name="base_footprint">
+      <pose relative_to="base_link">0 0 -0.25 0 0 0</pose>
       <inertial>
         <mass>200.0</mass>
         <inertia>

@@ -24,7 +24,7 @@ def generate_launch_description():
             'slam', default_value='False',
             description='Whether to run SLAM'),
         DeclareLaunchArgument(
-            'map', default_value=os.path.join(nav2_pkg, 'map', 'benchmark_warehouse_map.yaml'),
+            'map', default_value=os.path.join(nav2_pkg, 'map', 'benchmark_warehouse.yaml'),
             description='Full path to map yaml file to load'),
         DeclareLaunchArgument(
             'use_sim_time', default_value='true',
