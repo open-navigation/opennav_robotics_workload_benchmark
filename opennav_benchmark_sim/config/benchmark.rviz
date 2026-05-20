@@ -177,6 +177,21 @@ Visualization Manager:
       Color Transformer: RGB8
       Decay Time: 0
 
+    # Map
+    - Class: rviz_default_plugins/Map
+      Name: Map
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /map
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Alpha: 0.7
+      Color Scheme: map
+      Draw Behind: true
+
     # Nav2 Costmaps
     - Class: rviz_default_plugins/Map
       Name: Global Costmap
