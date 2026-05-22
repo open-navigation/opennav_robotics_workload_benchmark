@@ -130,10 +130,10 @@ def generate_launch_description():
         default_value=os.path.join(robot_pkg, 'urdf', 'benchmark_robot.sdf.xacro'))
     declare_use_sim_time = DeclareLaunchArgument(
         'use_sim_time', default_value='true')
-    declare_x_pose = DeclareLaunchArgument('x_pose', default_value='0.0')
-    declare_y_pose = DeclareLaunchArgument('y_pose', default_value='-60.0')
+    declare_x_pose = DeclareLaunchArgument('x_pose', default_value='62.6405')
+    declare_y_pose = DeclareLaunchArgument('y_pose', default_value='35.9279')
     declare_z_pose = DeclareLaunchArgument('z_pose', default_value='0.1')
-    declare_yaw = DeclareLaunchArgument('yaw', default_value='1.5708')
+    declare_yaw = DeclareLaunchArgument('yaw', default_value='3.151')
 
     return LaunchDescription([
         declare_robot_name,

@@ -99,7 +99,7 @@ def generate_launch_description():
     sim_pkg = get_package_share_directory('opennav_benchmark_sim')
 
     declare_headless = DeclareLaunchArgument(
-        'headless', default_value='false',
+        'headless', default_value='true',
         description='Run Gazebo without GUI client')
     declare_world = DeclareLaunchArgument(
         'world',
@@ -112,16 +112,16 @@ def generate_launch_description():
         'use_sim_time', default_value='true',
         description='Use simulation clock')
     declare_x_pose = DeclareLaunchArgument(
-        'x_pose', default_value='0.0',
+        'x_pose', default_value='62.6405',
         description='Robot initial X position')
     declare_y_pose = DeclareLaunchArgument(
-        'y_pose', default_value='-60.0',
+        'y_pose', default_value='35.9279',
         description='Robot initial Y position')
     declare_z_pose = DeclareLaunchArgument(
         'z_pose', default_value='0.1',
         description='Robot initial Z position')
     declare_yaw = DeclareLaunchArgument(
-        'yaw', default_value='1.5708',
+        'yaw', default_value='3.151',
         description='Robot initial yaw')
     declare_use_rviz = DeclareLaunchArgument(
         'use_rviz', default_value='true',

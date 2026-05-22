@@ -5,10 +5,10 @@
   <world name="benchmark_warehouse">
 
     <!-- Physics -->
-    <physics name="5ms" type="bullet">
-      <max_step_size>0.005</max_step_size>
-      <real_time_update_rate>500.0</real_time_update_rate>
-      <real_time_factor>1.0</real_time_factor>
+    <physics name="tpe" type="tpe">
+      <engine>
+        <filename>gz-physics-tpe-plugin</filename>
+      </engine>
     </physics>
 
     <!-- Plugins -->
@@ -208,6 +208,16 @@
     <xacro:macro name="person" params="name x y yaw">
       <include>
         <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Casual female</uri>
+        <name>${name}</name>
+        <pose>${x} ${y} 0 0 0 ${yaw}</pose>
+        <static>true</static>
+      </include>
+    </xacro:macro>
+
+    <!-- Charging station (Fuel model from MovAi) -->
+    <xacro:macro name="charging_station" params="name x y yaw">
+      <include>
+        <uri>https://fuel.gazebosim.org/1.0/MovAi/models/Tugbot-charging-station</uri>
         <name>${name}</name>
         <pose>${x} ${y} 0 0 0 ${yaw}</pose>
         <static>true</static>
@@ -1698,6 +1708,9 @@
     <xacro:overturned_pallet name="spill2_b" x="-26.4" y="-14.9" yaw="0.45"/>
     <xacro:forklift name="spill2_forklift" x="-25.6955" y="-10.5044" yaw="3.0"/>
     <xacro:person name="spill2_p1" x="-24.5" y="-14.200000000000001" yaw="3.14"/>
+
+    <!-- Charging station -->
+    <xacro:charging_station name="charging_station_1" x="63.7013" y="35.9283" yaw="0"/>
 
   </world>
 </sdf>

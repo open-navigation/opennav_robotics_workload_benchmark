@@ -1,3 +1,15 @@
+laserscan_merger:
+  ros__parameters:
+    destination_frame: "base_link"
+    scan_topics: ["/scan_front_left", "/scan_front_right"]
+    merged_scan_topic: "/scan_merged"
+    angle_min: -3.141592653589793
+    angle_max: 3.141592653589793
+    angle_increment: 0.006544
+    range_min: 0.1
+    range_max: 25.0
+    scan_stale_dur: 0.5
+
 amcl:
   ros__parameters:
     alpha1: 0.2
@@ -59,6 +71,7 @@ bt_navigator:
 controller_server:
   ros__parameters:
     controller_frequency: 30.0
+    enable_stamped_cmd_vel: true
     costmap_update_timeout: 0.30
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
@@ -80,8 +93,10 @@ controller_server:
       xy_goal_tolerance: 0.25
       yaw_goal_tolerance: 0.25
 
+    # MPPI allows the vehicle to have dynamic behavior, track paths accurately, and get out 
+    # of confined or challenging situations by itself.
     FollowPath:
-      plugin: "nav2_mppi_controller::MPPIController"
+      plugin: "nav2_mppi_controller::MPPIController" #TODO tune, maybe more samples? Higher speed for sure tuning
       time_steps: 56
       model_dt: 0.05
       batch_size: 2000
@@ -135,13 +150,11 @@ controller_server:
         cost_weight: 3.81
         near_collision_cost: 253
         critical_cost: 300.0
-        # L-shaped forklift footprint requires full footprint collision checking
-        # in tight warehouse aisles, unlike a small circular robot
         consider_footprint: true
         collision_cost: 1000000.0
         near_goal_distance: 1.0
         trajectory_point_step: 2
-      PathAlignCritic:
+      PathAlignCritic: #TODO reeds shepp? see dex
         enabled: true
         cost_power: 1
         cost_weight: 14.0
@@ -156,7 +169,7 @@ controller_server:
         cost_weight: 5.0
         offset_from_furthest: 5
         threshold_to_consider: 1.4
-      PathAngleCritic:
+      PathAngleCritic: #TODO reeds shepp? see dex
         enabled: true
         cost_power: 1
         cost_weight: 2.0
@@ -171,7 +184,7 @@ planner_server:
     planner_plugins: ["GridBased"]
     costmap_update_timeout: 1.0
 
-    # SmacPlannerHybrid with Reeds-Shepp for forklift warehouse navigation:
+    # SmacPlannerHybrid with Reeds-Shepp for forklift warehouse navigation
     # enables reverse motion planning needed for pallet approach/dock maneuvers
     GridBased:
       plugin: "nav2_smac_planner::SmacPlannerHybrid"
@@ -181,24 +194,21 @@ planner_server:
       allow_unknown: true
       max_iterations: 1000000
       max_on_approach_iterations: 1000
-      max_planning_time: 5.0
+      max_planning_time: 8.0
       motion_model_for_search: "REEDS_SHEPP"
       angle_quantization_bins: 72
       analytic_expansion_ratio: 3.5
       analytic_expansion_max_length: 3.0
       analytic_expansion_max_cost: 200.0
       analytic_expansion_max_cost_override: false
-      # Diff drive can turn in place, but Reeds-Shepp needs a minimum radius
-      # 0.5m is appropriate for this 1.2m long forklift in warehouse aisles
-      minimum_turning_radius: 0.5
+      minimum_turning_radius: 0.75
       reverse_penalty: 2.0
       change_penalty: 0.0
-      non_free_space_penalty: 15.0
+      non_straight_penalty: 1.2
       cost_penalty: 2.0
       retrospective_penalty: 0.015
-      lookup_table_size: 20.0
+      lookup_table_size: 5.0
       cache_obstacle_heuristic: false
-      cost_travel_multiplier: 1.0
       smooth_path: True
       smoother:
         max_iterations: 1000
@@ -210,15 +220,32 @@ planner_server:
 
 smoother_server:
   ros__parameters:
-    smoother_plugins: ["simple_smoother"]
-    simple_smoother:
-      plugin: "nav2_smoother::SimpleSmoother"
-      tolerance: 1.0e-10
-      max_its: 1000
-      do_refinement: True
+    smoother_plugins: ["path_smoother"]
+    # Path smoother using complex constraints to consider robot non-circular footprint, with turning constraints, and away from obstacles
+    path_smoother: 
+      plugin: "nav2_constrained_smoother/ConstrainedSmoother"
+      reversing_enabled: true
+      path_downsampling_factor: 3
+      path_upsampling_factor: 1
+      keep_start_orientation: true
+      keep_goal_orientation: true
+      minimum_turning_radius: 0.75
+      w_curve: 0.5
+      w_dist: 0.0
+      w_smooth: 3.0e+3
+      w_cost: 0.000045
+      w_cost_cusp_multiplier: 3.0
+      cusp_zone_length: 2.5
+      optimizer:
+        max_iterations: 70
+        debug_optimizer: false
+        gradient_tol: 50.0
+        fn_tol: 1.0e-15
+        param_tol: 1.0e-20
 
 behavior_server:
   ros__parameters:
+    enable_stamped_cmd_vel: true
     local_costmap_topic: local_costmap/costmap_raw
     global_costmap_topic: global_costmap/costmap_raw
     local_footprint_topic: local_costmap/published_footprint
@@ -240,12 +267,13 @@ behavior_server:
     robot_base_frame: base_link
     transform_tolerance: 0.1
     simulate_ahead_time: 2.0
-    max_rotational_vel: 1.0
-    min_rotational_vel: 0.4
+    max_rotational_vel: 1.5
+    min_rotational_vel: 0.5
     rotational_acc_lim: 3.2
 
 velocity_smoother:
   ros__parameters:
+    enable_stamped_cmd_vel: true
     smoothing_frequency: 20.0
     stamp_smoothed_velocity_with_smoothing_time: False
     scale_velocities: False
@@ -282,10 +310,12 @@ local_costmap:
       width: 10
       height: 10
       resolution: 0.05
-      # Forklift footprint: chassis 1.2x0.8m + tines extending ~0.8m rearward (positive X)
-      # With 0.1m padding on all sides
-      footprint: "[[1.35, -0.45], [1.35, 0.45], [0.7, 0.45], [0.7, 0.6], [-0.7, 0.6], [-0.7, -0.6], [0.7, -0.6], [0.7, -0.45]]"
-      plugins: ["obstacle_layer", "voxel_layer", "inflation_layer"]
+      # Forklift footprint: chassis 1.2x0.8m + tines with pallet
+      footprint: "[[1.35, -0.6], [1.35, 0.6], [-0.7, 0.6], [-0.7, -0.6]]"
+      # Forklift footprint: chassis 1.2x0.8m + tines without pallet, to switch to when not holding a pallet
+      # footprint: "[[1.35, -0.45], [1.35, 0.45], [0.7, 0.45], [0.7, 0.6], [-0.7, 0.6], [-0.7, -0.6], [0.7, -0.6], [0.7, -0.45]]"
+      plugins: ["obstacle_layer", "voxel_layer", "stvl_layer", "inflation_layer"]
+      # 2D lidars use 2D obstacle layer
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
@@ -312,50 +342,18 @@ local_costmap:
           obstacle_max_range: 24.0
           obstacle_min_range: 0.1
           inf_is_valid: True
+      # Depth cameras use the Voxel Layer
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
-        publish_voxel_map: True
+        publish_voxel_map: false
         origin_z: 0.0
-        z_resolution: 0.1
+        z_resolution: 0.05
         z_voxels: 16
         max_obstacle_height: 2.0
-        mark_threshold: 0
+        mark_threshold: 2
         # 3D Ouster lidars (360deg, 30m range) + Orbbec depth cameras (7m range)
-        observation_sources: lidar_3d_center lidar_3d_top lidar_3d_tilted camera_front_left camera_front_right camera_rear
-        lidar_3d_center:
-          topic: /lidar_3d_center/points
-          max_obstacle_height: 2.0
-          min_obstacle_height: 0.1
-          clearing: True
-          marking: True
-          data_type: "PointCloud2"
-          raytrace_max_range: 25.0
-          raytrace_min_range: 0.3
-          obstacle_max_range: 24.0
-          obstacle_min_range: 0.3
-        lidar_3d_top:
-          topic: /lidar_3d_top/points
-          max_obstacle_height: 2.5
-          min_obstacle_height: 0.1
-          clearing: True
-          marking: True
-          data_type: "PointCloud2"
-          raytrace_max_range: 25.0
-          raytrace_min_range: 0.3
-          obstacle_max_range: 24.0
-          obstacle_min_range: 0.3
-        lidar_3d_tilted:
-          topic: /lidar_3d_tilted/points
-          max_obstacle_height: 2.0
-          min_obstacle_height: 0.1
-          clearing: True
-          marking: True
-          data_type: "PointCloud2"
-          raytrace_max_range: 25.0
-          raytrace_min_range: 0.3
-          obstacle_max_range: 24.0
-          obstacle_min_range: 0.3
+        observation_sources:  camera_front_left camera_front_right camera_rear
         camera_front_left:
           topic: /camera_front_left/points
           max_obstacle_height: 2.0
@@ -389,6 +387,85 @@ local_costmap:
           raytrace_min_range: 0.1
           obstacle_max_range: 5.5
           obstacle_min_range: 0.1
+      stvl_layer:
+        plugin: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"
+        enabled: true
+        voxel_decay: 15.0
+        decay_model: 0
+        voxel_size: 0.05
+        track_unknown_space: true
+        mark_threshold: 0
+        update_footprint_enabled: true
+        combination_method: 1
+        origin_z: 0.0
+        publish_voxel_map: false
+        transform_tolerance: 0.2
+        mapping_mode: false
+        map_save_duration: 60.0
+        observation_sources: lidar_3d_center lidar_3d_top lidar_3d_tilted
+        lidar_3d_center:
+          data_type: PointCloud2
+          topic: /lidar_3d_center/points
+          marking: true
+          clearing: true
+          obstacle_range: 15.0
+          min_obstacle_height: 0.2
+          max_obstacle_height: 2.5
+          expected_update_rate: 0.0
+          observation_persistence: 0.0
+          inf_is_valid: false
+          filter: "voxel"
+          voxel_min_points: 0
+          clear_after_reading: true
+          max_z: 15.0
+          min_z: 0.3
+          vertical_fov_angle: 0.558505361
+          vertical_fov_padding: 0.05 
+          horizontal_fov_angle: 6.29
+          decay_acceleration: 5.0
+          model_type: 1
+        lidar_3d_tilted:
+          data_type: PointCloud2
+          topic: /lidar_3d_tilted/points
+          marking: true
+          clearing: true
+          obstacle_range: 15.0
+          min_obstacle_height: 0.2
+          max_obstacle_height: 2.5
+          expected_update_rate: 0.0
+          observation_persistence: 0.0
+          inf_is_valid: false
+          filter: "voxel"
+          voxel_min_points: 0
+          clear_after_reading: true
+          max_z: 15.0
+          min_z: 0.3
+          vertical_fov_angle: 0.558505361
+          vertical_fov_padding: 0.05 
+          horizontal_fov_angle: 6.29
+          decay_acceleration: 5.0
+          model_type: 1
+        lidar_3d_top:
+          data_type: PointCloud2
+          topic: /lidar_3d_top/points
+          marking: true
+          clearing: true
+          obstacle_range: 15.0
+          min_obstacle_height: 0.2
+          max_obstacle_height: 2.5
+          expected_update_rate: 0.0
+          observation_persistence: 0.0
+          inf_is_valid: false
+          filter: "voxel"
+          voxel_min_points: 0
+          clear_after_reading: true
+          max_z: 15.0
+          min_z: 0.3
+          vertical_fov_angle: 0.558505361
+          vertical_fov_padding: 0.05 
+          horizontal_fov_angle: 6.29
+          decay_acceleration: 5.0
+          model_type: 1
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
@@ -402,15 +479,17 @@ global_costmap:
       publish_frequency: 1.0
       global_frame: map
       robot_base_frame: base_link
-      # Forklift footprint: chassis 1.2x0.8m + tines extending ~0.8m rearward (positive X)
-      # With 0.1m padding on all sides
-      footprint: "[[1.35, -0.45], [1.35, 0.45], [0.7, 0.45], [0.7, 0.6], [-0.7, 0.6], [-0.7, -0.6], [0.7, -0.6], [0.7, -0.45]]"
+      # Forklift footprint: chassis 1.2x0.8m + tines with pallet
+      footprint: "[[1.35, -0.6], [1.35, 0.6], [-0.7, 0.6], [-0.7, -0.6]]"
+      # Forklift footprint: chassis 1.2x0.8m + tines without pallet, to switch to when not holding a pallet
+      # footprint: "[[1.35, -0.45], [1.35, 0.45], [0.7, 0.45], [0.7, 0.6], [-0.7, 0.6], [-0.7, -0.6], [0.7, -0.6], [0.7, -0.45]]"
       resolution: 0.05
       track_unknown_space: true
-      plugins: ["static_layer", "obstacle_layer", "voxel_layer", "inflation_layer"]
+      plugins: ["static_layer", "obstacle_layer", "voxel_layer", "stvl_layer", "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
+      # 2D lidars use 2D obstacle layer
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
@@ -437,49 +516,17 @@ global_costmap:
           obstacle_max_range: 24.0
           obstacle_min_range: 0.1
           inf_is_valid: True
+      # Depth cameras use the Voxel Layer
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
-        publish_voxel_map: True
+        publish_voxel_map: false
         origin_z: 0.0
         z_resolution: 0.1
         z_voxels: 16
         max_obstacle_height: 2.0
-        mark_threshold: 0
-        observation_sources: lidar_3d_center lidar_3d_top lidar_3d_tilted camera_front_left camera_front_right camera_rear
-        lidar_3d_center:
-          topic: /lidar_3d_center/points
-          max_obstacle_height: 2.0
-          min_obstacle_height: 0.1
-          clearing: True
-          marking: True
-          data_type: "PointCloud2"
-          raytrace_max_range: 25.0
-          raytrace_min_range: 0.3
-          obstacle_max_range: 24.0
-          obstacle_min_range: 0.3
-        lidar_3d_top:
-          topic: /lidar_3d_top/points
-          max_obstacle_height: 2.5
-          min_obstacle_height: 0.1
-          clearing: True
-          marking: True
-          data_type: "PointCloud2"
-          raytrace_max_range: 25.0
-          raytrace_min_range: 0.3
-          obstacle_max_range: 24.0
-          obstacle_min_range: 0.3
-        lidar_3d_tilted:
-          topic: /lidar_3d_tilted/points
-          max_obstacle_height: 2.0
-          min_obstacle_height: 0.1
-          clearing: True
-          marking: True
-          data_type: "PointCloud2"
-          raytrace_max_range: 25.0
-          raytrace_min_range: 0.3
-          obstacle_max_range: 24.0
-          obstacle_min_range: 0.3
+        mark_threshold: 2
+        observation_sources: camera_front_left camera_front_right camera_rear
         camera_front_left:
           topic: /camera_front_left/points
           max_obstacle_height: 2.0
@@ -513,6 +560,85 @@ global_costmap:
           raytrace_min_range: 0.1
           obstacle_max_range: 5.5
           obstacle_min_range: 0.1
+      stvl_layer:
+        plugin: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"
+        enabled: true
+        voxel_decay: 15.0
+        decay_model: 0
+        voxel_size: 0.05
+        track_unknown_space: true
+        mark_threshold: 0
+        update_footprint_enabled: true
+        combination_method: 1
+        origin_z: 0.0
+        publish_voxel_map: false
+        transform_tolerance: 0.2
+        mapping_mode: false
+        map_save_duration: 60.0
+        observation_sources: lidar_3d_center lidar_3d_top lidar_3d_tilted
+        lidar_3d_center:
+          data_type: PointCloud2
+          topic: /lidar_3d_center/points
+          marking: true
+          clearing: true
+          obstacle_range: 15.0
+          min_obstacle_height: 0.2
+          max_obstacle_height: 2.5
+          expected_update_rate: 0.0
+          observation_persistence: 0.0
+          inf_is_valid: false
+          filter: "voxel"
+          voxel_min_points: 0
+          clear_after_reading: true
+          max_z: 15.0
+          min_z: 0.3
+          vertical_fov_angle: 0.558505361
+          vertical_fov_padding: 0.05 
+          horizontal_fov_angle: 6.29
+          decay_acceleration: 5.0
+          model_type: 1
+        lidar_3d_tilted:
+          data_type: PointCloud2
+          topic: /lidar_3d_tilted/points
+          marking: true
+          clearing: true
+          obstacle_range: 15.0
+          min_obstacle_height: 0.2
+          max_obstacle_height: 2.5
+          expected_update_rate: 0.0
+          observation_persistence: 0.0
+          inf_is_valid: false
+          filter: "voxel"
+          voxel_min_points: 0
+          clear_after_reading: true
+          max_z: 15.0
+          min_z: 0.3
+          vertical_fov_angle: 0.558505361
+          vertical_fov_padding: 0.05 
+          horizontal_fov_angle: 6.29
+          decay_acceleration: 5.0
+          model_type: 1
+        lidar_3d_top:
+          data_type: PointCloud2
+          topic: /lidar_3d_top/points
+          marking: true
+          clearing: true
+          obstacle_range: 15.0
+          min_obstacle_height: 0.2
+          max_obstacle_height: 2.5
+          expected_update_rate: 0.0
+          observation_persistence: 0.0
+          inf_is_valid: false
+          filter: "voxel"
+          voxel_min_points: 0
+          clear_after_reading: true
+          max_z: 15.0
+          min_z: 0.3
+          vertical_fov_angle: 0.558505361
+          vertical_fov_padding: 0.05 
+          horizontal_fov_angle: 6.29
+          decay_acceleration: 5.0
+          model_type: 1
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
@@ -547,6 +673,7 @@ route_server:
 
 collision_monitor:
   ros__parameters:
+    enable_stamped_cmd_vel: true
     base_frame_id: "base_footprint"
     odom_frame_id: "odom"
     cmd_vel_in_topic: "cmd_vel_smoothed"
@@ -561,12 +688,12 @@ collision_monitor:
       type: "polygon"
       action_type: "approach"
       footprint_topic: "/local_costmap/published_footprint"
-      time_before_collision: 1.2
+      time_before_collision: 1.7
       simulation_time_step: 0.1
       min_points: 6
       visualize: False
       enabled: True
-    # Using both 2D lidars (270deg FOV each, 30Hz) for collision monitoring
+    # Using both safety 2D lidars for collision monitoring
     observation_sources: ["scan_front_left", "scan_front_right"]
     scan_front_left:
       type: "scan"
@@ -583,6 +710,7 @@ collision_monitor:
 
 docking_server:
   ros__parameters:
+    enable_stamped_cmd_vel: true
     controller_frequency: 50.0
     initial_perception_timeout: 5.0
     wait_charge_timeout: 5.0
@@ -600,17 +728,16 @@ docking_server:
       plugin: 'opennav_docking::SimpleChargingDock'
       docking_threshold: 0.05
       staging_x_offset: -0.7
-      use_external_detection_pose: true
+      use_external_detection_pose: false
       use_battery_status: false
       use_stall_detection: false
 
-      external_detection_timeout: 1.0
-      external_detection_translation_x: -0.18
-      external_detection_translation_y: 0.0
-      external_detection_rotation_roll: -1.57
-      external_detection_rotation_pitch: -1.57
-      external_detection_rotation_yaw: 0.0
-      filter_coef: 0.1
+    # Dock instances
+    docks: ['home_dock']
+    home_dock:
+      type: 'simple_charging_dock'
+      frame: map
+      pose: [63.001, 36.551, -3.139]
 
     controller:
       k_phi: 3.0
@@ -625,13 +752,3 @@ docking_server:
       simulation_step: 0.1
       dock_collision_threshold: 0.3
 
-laserscan_merger:
-  ros__parameters:
-    destination_frame: "base_link"
-    scan_topics: ["/scan_front_left", "/scan_front_right"]
-    merged_scan_topic: "/scan_merged"
-    angle_min: -3.141592653589793
-    angle_max: 3.141592653589793
-    angle_increment: 0.006544
-    range_min: 0.1
-    range_max: 25.0

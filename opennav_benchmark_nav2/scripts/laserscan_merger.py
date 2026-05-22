@@ -22,6 +22,7 @@ class LaserScanMerger(Node):
         self.declare_parameter('angle_increment', 0.006544)
         self.declare_parameter('range_min', 0.1)
         self.declare_parameter('range_max', 25.0)
+        self.declare_parameter('scan_stale_dur', 0.5)
 
         self.dest_frame = self.get_parameter('destination_frame').value
         self.scan_topics = self.get_parameter('scan_topics').value
@@ -30,6 +31,9 @@ class LaserScanMerger(Node):
         self.angle_increment = self.get_parameter('angle_increment').value
         self.range_min = self.get_parameter('range_min').value
         self.range_max = self.get_parameter('range_max').value
+        self.scan_stale_dur = rclpy.duration.Duration(
+            seconds=self.get_parameter('scan_stale_dur').value
+        )
 
         self.num_bins = int((self.angle_max - self.angle_min) / self.angle_increment)
         self.latest_scans = {}
@@ -66,10 +70,17 @@ class LaserScanMerger(Node):
         ranges = np.full(self.num_bins, float('inf'))
         latest_stamp = None
 
-        for topic, scan in self.latest_scans.items():
+        # Find the most recent stamp across all cached scans
+        for scan in self.latest_scans.values():
             stamp = rclpy.time.Time.from_msg(scan.header.stamp)
             if latest_stamp is None or stamp > latest_stamp:
                 latest_stamp = stamp
+
+        for topic, scan in self.latest_scans.items():
+            stamp = rclpy.time.Time.from_msg(scan.header.stamp)
+            if (latest_stamp - stamp) > self.scan_stale_dur:
+                self.get_logger().warn(f'Skipping stale scan from {topic}')
+                continue
             try:
                 transform = self.tf_buffer.lookup_transform(
                     self.dest_frame, scan.header.frame_id,

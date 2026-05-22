@@ -248,7 +248,7 @@
             </vertical>
           </scan>
           <range>
-            <min>0.3</min>
+            <min>1.0</min>
             <max>30.0</max>
             <resolution>0.01</resolution>
           </range>
@@ -309,7 +309,7 @@
             </vertical>
           </scan>
           <range>
-            <min>0.3</min>
+            <min>1.0</min>
             <max>30.0</max>
             <resolution>0.01</resolution>
           </range>
@@ -355,6 +355,7 @@
         <always_on>true</always_on>
         <update_rate>10</update_rate>
         <lidar>
+          <visibility_mask>${lidar_visibility_mask}</visibility_mask>
           <scan>
             <horizontal>
               <samples>256</samples>
@@ -370,7 +371,7 @@
             </vertical>
           </scan>
           <range>
-            <min>0.3</min>
+            <min>1.0</min>
             <max>30.0</max>
             <resolution>0.01</resolution>
           </range>
@@ -420,8 +421,8 @@
             <horizontal>
               <samples>720</samples>
               <resolution>1</resolution>
-              <min_angle>-2.356</min_angle>
-              <max_angle>2.356</max_angle>
+              <min_angle>-2.0944</min_angle>  <!-- 270 - 15 deg for robot self collision filter clearance-->
+              <max_angle>2.0944</max_angle>
             </horizontal>
             <vertical>
               <samples>1</samples>
@@ -480,8 +481,8 @@
             <horizontal>
               <samples>720</samples>
               <resolution>1</resolution>
-              <min_angle>-2.356</min_angle>
-              <max_angle>2.356</max_angle>
+              <min_angle>-2.0944</min_angle> <!-- 270 - 15 deg for robot self collision filter clearance -->
+              <max_angle>2.0944</max_angle>
             </horizontal>
             <vertical>
               <samples>1</samples>

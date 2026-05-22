@@ -4,7 +4,7 @@ project(opennav_benchmark_nav2)
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY config launch map
+  DIRECTORY config launch
   DESTINATION share/${PROJECT_NAME}
 )
 
