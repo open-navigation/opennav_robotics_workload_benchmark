@@ -47,7 +47,7 @@ class RobotMissionRunner(Node):
         autonomy_pkg = get_package_share_directory('opennav_benchmark_autonomy')
         annotations_file = os.path.join(
             autonomy_pkg, 'annotations', 'warehouse_waypoints.yaml')
-        self.dispatcher = TaskDispatcher(annotations_file)
+        self.dispatcher = TaskDispatcher(annotations_file, self)
 
         print('Sending initial pose...')
         self.setInitialPose()

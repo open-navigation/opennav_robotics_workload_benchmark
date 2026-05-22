@@ -23,6 +23,12 @@ import random
 
 import yaml
 
+from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
+from visualization_msgs.msg import MarkerArray
+
+from .waypoint_visualizer import create_waypoint_markers
+
 PICK_ZONES = ['zone_pickups']
 DROP_ZONES = ['zone_a', 'zone_bw', 'zone_be', 'zone_c', 'zone_d']
 
@@ -38,11 +44,12 @@ class TaskDispatcher:
     centralized cloud warehouse management system in production.
     """
 
-    def __init__(self, annotations_filepath):
+    def __init__(self, annotations_filepath, node: Node):
         """
         Parse the warehouse annotations YAML into pick and drop databases.
 
         :param annotations_filepath: Path to the warehouse annotations YAML file.
+        :param node: A ROS 2 node to create the waypoint marker publisher on.
         """
         random.seed(42)
         with open(annotations_filepath) as f:
@@ -64,6 +71,17 @@ class TaskDispatcher:
                     for slot_name, wp in slots.items():
                         key = f'{zone_name}/{aisle_name}/{slot_name}'
                         self.drop_locations[key] = wp
+
+        # Publish waypoint markers for RViz (transient local so late joiners get them)
+        latched_qos = QoSProfile(
+            depth=1,
+            durability=DurabilityPolicy.TRANSIENT_LOCAL,
+            reliability=ReliabilityPolicy.RELIABLE,
+        )
+        self._marker_pub = node.create_publisher(
+            MarkerArray, '/waypoint_markers', latched_qos)
+        all_waypoints = {**self.picking_locations, **self.drop_locations}
+        self._marker_pub.publish(create_waypoint_markers(all_waypoints))
 
     def get_next_picks(self, num_picks=1):
         """
