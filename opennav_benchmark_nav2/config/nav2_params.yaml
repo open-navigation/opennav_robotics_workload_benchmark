@@ -103,13 +103,13 @@ controller_server:
       ax_max: 3.0
       ax_min: -3.0
       az_max: 3.5
-      vx_std: 0.2
-      wz_std: 0.4
+      vx_std: 0.2  # TODO SPEED: Explore more 0.4-0.5
+      wz_std: 0.4  # TODO SPEED: Explore more 0.5
       vx_max: 2.0
       vx_min: -2.0
       wz_max: 1.9
       iteration_count: 1
-      prune_distance: 8.0
+      prune_distance: 10.0
       transform_tolerance: 0.1
       temperature: 0.3
       gamma: 0.015
@@ -154,7 +154,7 @@ controller_server:
         collision_cost: 1000000.0
         near_goal_distance: 1.0
         trajectory_point_step: 2
-      PathAlignCritic: #TODO reeds shepp? see dex
+      PathAlignCritic:
         enabled: true
         cost_power: 1
         cost_weight: 14.0
@@ -162,21 +162,21 @@ controller_server:
         trajectory_point_step: 4
         threshold_to_consider: 0.5
         offset_from_furthest: 20
-        use_path_orientations: false
+        use_path_orientations: true
       PathFollowCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 5.0
-        offset_from_furthest: 5
+        cost_weight: 5.0 
+        offset_from_furthest: 5 # TODO SPEED: Explore more
         threshold_to_consider: 1.4
-      PathAngleCritic: #TODO reeds shepp? see dex
+      PathAngleCritic:
         enabled: true
         cost_power: 1
         cost_weight: 2.0
         offset_from_furthest: 4
         threshold_to_consider: 0.5
         max_angle_to_furthest: 1.0
-        mode: 0
+        mode: 2
 
 planner_server:
   ros__parameters:
@@ -307,8 +307,8 @@ local_costmap:
       robot_base_frame: base_link
       rolling_window: true
       # Larger window for higher speed, prediction horizon, maneuvering opportunity, stopping requirements
-      width: 10
-      height: 10
+      width: 12
+      height: 12
       resolution: 0.05
       # Forklift footprint: chassis 1.2x0.8m + tines with pallet
       footprint: "[[1.35, -0.6], [1.35, 0.6], [-0.7, 0.6], [-0.7, -0.6]]"
