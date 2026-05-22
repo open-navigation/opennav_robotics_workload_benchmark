@@ -30,10 +30,13 @@ import rclpy
 from rclpy.duration import Duration
 from rclpy.node import Node
 
+from nav2_simple_commander.robot_navigator import TaskResult
+
 from .task_dispatcher import TaskDispatcher
 
 MISSIONS_PER_CHARGE = 1000
 CHARGE_WAIT_SECONDS = 10
+MAX_RETRIES = 3
 
 
 class RobotMissionRunner(Node):
@@ -95,6 +98,7 @@ class RobotMissionRunner(Node):
         Navigate to a waypoint and block until complete.
 
         :param wp: Waypoint dict with 'x', 'y', 'yaw' keys.
+        :return: True if navigation succeeded, False otherwise.
         """
         nav_start = self.navigator.get_clock().now()
         last_log_time = self.navigator.get_clock().now()
@@ -117,20 +121,45 @@ class RobotMissionRunner(Node):
 
         result = self.navigator.getResult()
         print(f'  Navigation result: {result.name}')
+        return result == TaskResult.SUCCEEDED
+
+    def navigateWithRetries(self, wp, label):
+        """
+        Navigate to a waypoint with up to MAX_RETRIES attempts.
+
+        :param wp: Waypoint dict with 'x', 'y', 'yaw' keys.
+        :param label: Description of this navigation for logging.
+        :return: True if navigation succeeded, False if all retries exhausted.
+        """
+        for attempt in range(1, MAX_RETRIES + 1):
+            print(f'  {label}, attempt {attempt}/{MAX_RETRIES}...')
+            if self.navigateToWaypoint(wp):
+                return True
+            print(f'  {label} attempt {attempt} failed.')
+        return False
 
     def runMission(self):
-        """Execute a single pick-and-place mission: pick then drop."""
+        """
+        Execute a single pick-and-place mission: pick then drop.
+
+        Each navigation leg is retried independently up to MAX_RETRIES times.
+
+        :return: True if the mission succeeded, False otherwise.
+        """
         pick_wp = self.dispatcher.get_next_pick()
         drop_wp = self.dispatcher.get_next_drop()
         print(f'Picking from {pick_wp}, dropping at {drop_wp}...')
 
         # Navigate to pick location, simulate picking (10s)
-        self.navigateToWaypoint(pick_wp)
+        if not self.navigateWithRetries(pick_wp, 'Navigating to pick'):
+            return False
         time.sleep(10)
 
         # Navigate to drop location, simulate dropping (10s)
-        self.navigateToWaypoint(drop_wp)
+        if not self.navigateWithRetries(drop_wp, 'Navigating to drop'):
+            return False
         time.sleep(10)
+        return True
 
     def chargeCycle(self):
         """Dock, wait for simulated charge, then undock."""
@@ -157,10 +186,14 @@ class RobotMissionRunner(Node):
 
         mission_count = 0
         while rclpy.ok():
-            self.runMission()
             mission_count += 1
-            print(f'Mission {mission_count} completed.')
+            if not self.runMission():
+                print(f'Mission {mission_count} failed after retries, '
+                      'returning to dock for charge cycle.')
+                self.chargeCycle()
+                continue
 
+            print(f'Mission {mission_count} completed.')
             if mission_count % MISSIONS_PER_CHARGE == 0:
                 self.chargeCycle()
 
