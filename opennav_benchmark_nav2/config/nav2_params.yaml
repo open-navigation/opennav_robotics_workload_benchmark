@@ -36,8 +36,7 @@ amcl:
     z_max: 0.05
     z_rand: 0.5
     z_short: 0.05
-    # Using front-left 2D lidar (270deg FOV, 30Hz, 25m range)
-    scan_topic: scan_front_left
+    scan_topic: /scan_merged
 
 bt_navigator:
   ros__parameters:
@@ -251,7 +250,6 @@ velocity_smoother:
     stamp_smoothed_velocity_with_smoothing_time: False
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    # 2.0 m/s max to match MPPI controller limits for this robot
     max_velocity: [2.0, 0.0, 1.9]
     min_velocity: [-2.0, 0.0, -1.9]
     max_accel: [2.5, 0.0, 3.2]
@@ -280,20 +278,18 @@ local_costmap:
       global_frame: odom
       robot_base_frame: base_link
       rolling_window: true
-      # Larger window than default (3m) for higher speed (2 m/s) stopping distance
+      # Larger window for higher speed, prediction horizon, maneuvering opportunity, stopping requirements
       width: 10
       height: 10
       resolution: 0.05
       # Forklift footprint: chassis 1.2x0.8m + tines extending ~0.8m rearward (positive X)
       # With 0.1m padding on all sides
-      # Tines are narrower (~0.5m wide) than chassis (0.8m wide)
       footprint: "[[1.35, -0.45], [1.35, 0.45], [0.7, 0.45], [0.7, 0.6], [-0.7, 0.6], [-0.7, -0.6], [0.7, -0.6], [0.7, -0.45]]"
       plugins: ["obstacle_layer", "voxel_layer", "inflation_layer"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
         observation_sources: scan_front_left scan_front_right
-        # 2D SICK TiM781 lidars: 270deg FOV, 25m range, 30Hz
         scan_front_left:
           topic: /scan_front_left
           max_obstacle_height: 2.0
@@ -628,3 +624,14 @@ docking_server:
       projection_time: 5.0
       simulation_step: 0.1
       dock_collision_threshold: 0.3
+
+laserscan_merger:
+  ros__parameters:
+    destination_frame: "base_link"
+    scan_topics: ["/scan_front_left", "/scan_front_right"]
+    merged_scan_topic: "/scan_merged"
+    angle_min: -3.141592653589793
+    angle_max: 3.141592653589793
+    angle_increment: 0.006544
+    range_min: 0.1
+    range_max: 25.0

@@ -5,6 +5,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
 
 
 def generate_launch_description():
@@ -35,6 +36,14 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'autostart', default_value='true',
             description='Automatically startup the nav2 stack'),
+
+        Node(
+            package='opennav_benchmark_nav2',
+            executable='laserscan_merger.py',
+            name='laserscan_merger',
+            parameters=[params_file, {'use_sim_time': use_sim_time}],
+            output='screen',
+        ),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
