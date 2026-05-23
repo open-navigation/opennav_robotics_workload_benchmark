@@ -6,6 +6,7 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
+from rclpy.time import Time
 
 from sensor_msgs.msg import Image
 
@@ -32,6 +33,7 @@ class VLMNode(Node):
         self.declare_parameter('max_retries', 3)
         self.declare_parameter('executor_threads', 1)
         self.declare_parameter('default_image_topic', '/camera/rgb/image')
+        self.declare_parameter('max_image_age', 1.0)
         self.declare_parameter(
             'system_prompt',
             'You are the perception assistant for a mobile robot operating in an active '
@@ -62,6 +64,7 @@ class VLMNode(Node):
         )
         self._request_timeout = float(self.get_parameter('request_timeout').value)
         self._max_retries = max(1, int(self.get_parameter('max_retries').value))
+        self._max_image_age = float(self.get_parameter('max_image_age').value)
         self._system_prompt = self.get_parameter('system_prompt').value
 
         self._latest_image = None
@@ -116,6 +119,14 @@ class VLMNode(Node):
         with self._image_lock:
             return self._latest_image
 
+    def _image_age_seconds(self, img_msg: Image) -> float | None:
+        """Age in seconds against the node clock; None if the header stamp is unset (sec=0, nanosec=0)."""
+        stamp = img_msg.header.stamp
+        if stamp.sec == 0 and stamp.nanosec == 0:
+            return None
+        age_ns = (self.get_clock().now() - Time.from_msg(stamp)).nanoseconds
+        return max(0.0, age_ns / 1e9)
+
     def _exec_bool(self, goal_handle):
         """ActionServer execute callback for QueryBool — delegates to the shared retry loop."""
         return self._execute(goal_handle, BoolParser(), QueryBool.Result, QueryBool.Feedback)
@@ -139,6 +150,14 @@ class VLMNode(Node):
         if img_msg is None:
             self._publish_feedback(goal_handle, feedback_cls, 'no image available')
             self.get_logger().warn('Action goal aborted: no image available.')
+            goal_handle.abort()
+            return result
+
+        age = self._image_age_seconds(img_msg)
+        if age is not None and age > self._max_image_age:
+            msg = f'image is stale ({age:.2f}s > {self._max_image_age:.2f}s)'
+            self._publish_feedback(goal_handle, feedback_cls, msg)
+            self.get_logger().warn(f'Action goal aborted: {msg}.')
             goal_handle.abort()
             return result
 

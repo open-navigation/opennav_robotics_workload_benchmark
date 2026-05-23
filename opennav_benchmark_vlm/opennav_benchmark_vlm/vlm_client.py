@@ -12,7 +12,11 @@ class VLMClient:
     def __init__(self, base_url: str, api_key: str, model: str,
                  temperature: float, max_tokens: int):
         """Configure the HTTP client; nothing is sent until `chat` is called."""
-        self._client = OpenAI(base_url=base_url, api_key=api_key or 'EMPTY')
+        self._client = OpenAI(
+            base_url=base_url,
+            api_key=api_key or 'EMPTY',
+            max_retries=2,
+        )
         self._model = model
         self._temperature = temperature
         self._max_tokens = max_tokens
