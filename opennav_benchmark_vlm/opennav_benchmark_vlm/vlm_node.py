@@ -205,7 +205,7 @@ class VLMNode(Node):
                 return result
 
             last_raw = raw
-            ok, parsed = parser.parse(raw)
+            ok, parsed, reason = parser.parse(raw)
             if ok:
                 if parsed is not None:
                     result.value = parsed
@@ -216,10 +216,10 @@ class VLMNode(Node):
             self._publish_feedback(
                 goal_handle, feedback_cls,
                 f'attempt {attempt}/{self._max_retries}: '
-                f'response did not match required format',
+                f'{reason or "response did not match required format"}',
             )
             messages.append({'role': 'assistant', 'content': raw})
-            messages.append({'role': 'user', 'content': parser.correction_hint})
+            messages.append({'role': 'user', 'content': parser.format_correction(raw, reason)})
 
         self.get_logger().warn(
             f'VLM retries exhausted ({self._max_retries}); last raw response: {last_raw!r}')
