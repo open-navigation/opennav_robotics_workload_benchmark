@@ -1,0 +1,7 @@
+string prompt
+sensor_msgs/Image image
+---
+string value
+bool success
+---
+string status
