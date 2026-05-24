@@ -27,7 +27,7 @@ class VLMNode(Node):
         self.declare_parameter('base_url', 'http://localhost:8080/v1')
         self.declare_parameter('api_key', 'EMPTY')
         self.declare_parameter('model', 'gemma-4')
-        self.declare_parameter('temperature', 0.0)
+        self.declare_parameter('temperature', 1.0)
         self.declare_parameter('max_tokens', 256)
         self.declare_parameter('request_timeout', 30.0)
         self.declare_parameter('max_retries', 3)
@@ -153,13 +153,15 @@ class VLMNode(Node):
             goal_handle.abort()
             return result
 
-        age = self._image_age_seconds(img_msg)
-        if age is not None and age > self._max_image_age:
-            msg = f'image is stale ({age:.2f}s > {self._max_image_age:.2f}s)'
-            self._publish_feedback(goal_handle, feedback_cls, msg)
-            self.get_logger().warn(f'Action goal aborted: {msg}.')
-            goal_handle.abort()
-            return result
+        # If using the live stream, make sure its recent enough
+        if is_image_empty(goal.image):
+            age = self._image_age_seconds(img_msg)
+            if age is not None and age > self._max_image_age:
+                msg = f'image is stale ({age:.2f}s > {self._max_image_age:.2f}s)'
+                self._publish_feedback(goal_handle, feedback_cls, msg)
+                self.get_logger().warn(f'Action goal aborted: {msg}.')
+                goal_handle.abort()
+                return result
 
         try:
             image_url = encode_image(img_msg)
@@ -176,8 +178,8 @@ class VLMNode(Node):
         user_msg = {
             'role': 'user',
             'content': [
-                {'type': 'text', 'text': goal.prompt},
                 {'type': 'image_url', 'image_url': {'url': image_url}},
+                {'type': 'text', 'text': goal.prompt},
             ],
         }
         messages = [system_msg, user_msg]
@@ -205,6 +207,7 @@ class VLMNode(Node):
                 return result
 
             last_raw = raw
+            self.get_logger().debug(f'VLM raw response (attempt {attempt}): {raw!r}')
             ok, parsed, reason = parser.parse(raw)
             if ok:
                 if parsed is not None:

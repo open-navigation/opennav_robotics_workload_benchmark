@@ -3,7 +3,7 @@
     base_url: "http://localhost:8080/v1"
     api_key: "EMPTY"
     model: "gemma-4"
-    temperature: 0.0
+    temperature: 1.0  # Try 1.5!
     max_tokens: 256
     request_timeout: 30.0
     max_retries: 3

@@ -11,6 +11,7 @@ _THINK_RE = re.compile(
     re.DOTALL | re.IGNORECASE,
 )
 _CODE_FENCE_RE = re.compile(r'```[a-zA-Z]*\s*(.*?)```', re.DOTALL)
+_STRAY_TOKEN_RE = re.compile(r'<(?:unused\d+|s|/s|bos|eos|pad)>', re.IGNORECASE)
 _ANSWER_PREFIX_RE = re.compile(
     r'^\s*(?:final\s+)?(?:answer|response|reply)\s*[:=\-]\s*',
     re.IGNORECASE,
@@ -21,9 +22,10 @@ _MARKDOWN_EMPHASIS_RE = re.compile(
 
 
 def _strip_outer_noise(raw: str) -> str:
-    """Layer 1: remove reasoning blocks, code fences, leading 'Answer:' labels, and outer quotes."""
+    """Layer 1: remove reasoning blocks, code fences, stray special tokens, leading 'Answer:' labels, and outer quotes."""
     s = _THINK_RE.sub('', raw)
     s = _CODE_FENCE_RE.sub(r'\1', s)
+    s = _STRAY_TOKEN_RE.sub('', s)
     s = s.strip()
     if len(s) >= 2 and s[0] in '"\'' and s[-1] == s[0]:
         s = s[1:-1].strip()
