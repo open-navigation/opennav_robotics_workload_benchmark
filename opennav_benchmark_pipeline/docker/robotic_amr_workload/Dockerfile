@@ -14,7 +14,7 @@ RUN pip3 install --break-system-packages --no-cache-dir openai
 WORKDIR /root/ws
 COPY opennav_benchmark_application/                    src/opennav_benchmark_application/
 COPY opennav_benchmark_nav2/                           src/opennav_benchmark_nav2/
-COPY opennav_benchmark_robot/                          src/opennav_benchmark_robot/
+COPY opennav_benchmark_simulation/opennav_benchmark_robot/  src/opennav_benchmark_robot/
 COPY opennav_benchmark_ai/opennav_benchmark_vlm/       src/opennav_benchmark_vlm/
 COPY opennav_benchmark_ai/opennav_benchmark_vlm_msgs/  src/opennav_benchmark_vlm_msgs/
 

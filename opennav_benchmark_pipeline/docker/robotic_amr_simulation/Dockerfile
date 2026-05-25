@@ -19,8 +19,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /root/ws
-COPY opennav_benchmark_sim/    src/opennav_benchmark_sim/
-COPY opennav_benchmark_robot/  src/opennav_benchmark_robot/
+COPY opennav_benchmark_simulation/opennav_benchmark_sim/    src/opennav_benchmark_sim/
+COPY opennav_benchmark_simulation/opennav_benchmark_robot/  src/opennav_benchmark_robot/
 
 RUN apt-get update \
  && rosdep update --rosdistro jazzy \
