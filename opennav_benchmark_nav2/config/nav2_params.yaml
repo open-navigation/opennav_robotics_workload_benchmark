@@ -768,7 +768,7 @@ docking_server:
     home_dock:
       type: 'simple_charging_dock'
       frame: map
-      pose: [63.001, 36.551, 0.0]
+      pose: [62.6405, 35.9279, 0.0]
 
     controller:
       k_phi: 3.0

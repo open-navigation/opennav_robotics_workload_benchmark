@@ -184,6 +184,9 @@ class RobotMissionRunner(Node):
         self.navigator.undockRobot(dock_type='simple_charging_dock')
         while not self.navigator.isTaskComplete() and rclpy.ok():
             time.sleep(0.1)
+        self.navigator.backup(backup_dist=0.5, backup_speed=0.40)
+        while not self.navigator.isTaskComplete() and rclpy.ok():
+            time.sleep(0.1)
 
         mission_count = 0
         while rclpy.ok():
