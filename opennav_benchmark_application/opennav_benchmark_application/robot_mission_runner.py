@@ -100,6 +100,7 @@ class RobotMissionRunner(Node):
         :param wp: Waypoint dict with 'x', 'y', 'yaw' keys.
         :return: True if navigation succeeded, False otherwise.
         """
+        self.navigator.clearAllCostmaps()
         nav_start = self.navigator.get_clock().now()
         last_log_time = self.navigator.get_clock().now()
         self.navigator.goToPose(self.wpToPose(wp))
