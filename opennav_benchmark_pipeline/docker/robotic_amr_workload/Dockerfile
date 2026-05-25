@@ -17,6 +17,7 @@ COPY opennav_benchmark_nav2/                           src/opennav_benchmark_nav
 COPY opennav_benchmark_simulation/opennav_benchmark_robot/  src/opennav_benchmark_robot/
 COPY opennav_benchmark_ai/opennav_benchmark_vlm/       src/opennav_benchmark_vlm/
 COPY opennav_benchmark_ai/opennav_benchmark_vlm_msgs/  src/opennav_benchmark_vlm_msgs/
+COPY opennav_benchmark_ai/opennav_benchmark_vlm_bt/    src/opennav_benchmark_vlm_bt/
 
 RUN apt-get update \
  && rosdep update --rosdistro jazzy \

@@ -23,15 +23,29 @@
 namespace opennav_benchmark_vlm_bt
 {
 
+/**
+ * @class CancelQueryInt
+ * @brief BT node to cancel an in-flight QueryInt VLM action request.
+ */
 class CancelQueryInt
   : public nav2_behavior_tree::BtCancelActionNode<opennav_benchmark_vlm_msgs::action::QueryInt>
 {
 public:
+  /**
+   * @brief Constructor
+   * @param xml_tag_name Name of the XML tag for this node
+   * @param action_name ROS 2 action server name
+   * @param conf BT node configuration
+   */
   CancelQueryInt(
     const std::string & xml_tag_name,
     const std::string & action_name,
     const BT::NodeConfiguration & conf);
 
+  /**
+   * @brief Creates list of BT ports
+   * @return Empty BT::PortsList
+   */
   static BT::PortsList providedPorts()
   {
     return providedBasicPorts({});

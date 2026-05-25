@@ -66,7 +66,7 @@
 
   <link name="base_link">
     <visual>
-      <origin xyz="0 0 -0.25" rpy="1.5708 0 -1.5708"/>
+      <origin xyz="0 0 -0.25" rpy="1.5708 0 1.5708"/>
       <geometry>
         <mesh filename="package://opennav_benchmark_robot/meshes/Forklift_agv_01.obj"/>
       </geometry>
@@ -137,10 +137,10 @@
     </joint>
   </xacro:macro>
 
-  <xacro:caster_wheel name="rear_left" x="0.45" y="0.30"/>
-  <xacro:caster_wheel name="rear_right" x="0.45" y="-0.30"/>
-  <xacro:caster_wheel name="front_left" x="-0.45" y="0.30"/>
-  <xacro:caster_wheel name="front_right" x="-0.45" y="-0.30"/>
+  <xacro:caster_wheel name="front_left" x="0.45" y="0.30"/>
+  <xacro:caster_wheel name="front_right" x="0.45" y="-0.30"/>
+  <xacro:caster_wheel name="rear_left" x="-0.45" y="0.30"/>
+  <xacro:caster_wheel name="rear_right" x="-0.45" y="-0.30"/>
 
   <!-- ============ IMU ============ -->
   <link name="imu_link">
@@ -175,7 +175,7 @@
   <joint name="lidar_3d_center_joint" type="fixed">
     <parent link="base_link"/>
     <child link="lidar_3d_center_link"/>
-    <origin xyz="0.10 0 0.825" rpy="0 0 0"/>
+    <origin xyz="-0.10 0 0.825" rpy="0 0 ${pi}"/>
   </joint>
 
   <!-- Top: on tower surface, in front of center lidar -->
@@ -197,7 +197,7 @@
   <joint name="lidar_3d_top_joint" type="fixed">
     <parent link="base_link"/>
     <child link="lidar_3d_top_link"/>
-    <origin xyz="0.35 0 2.195" rpy="0 0 0"/>
+    <origin xyz="-0.35 0 2.195" rpy="0 0 ${pi}"/>
   </joint>
 
   <!-- Tilted: 16ch, pitched 270deg -->
@@ -219,7 +219,7 @@
   <joint name="lidar_3d_tilted_joint" type="fixed">
     <parent link="base_link"/>
     <child link="lidar_3d_tilted_link"/>
-    <origin xyz="0.10 0 1.845" rpy="${pi/4} 0 ${pi/2}"/>
+    <origin xyz="-0.10 0 1.845" rpy="${pi/4} 0 ${-pi/2}"/>
   </joint>
 
   <!-- ============ 2D LIDARS (SICK TiM781 on chassis corners) ============ -->
@@ -246,8 +246,8 @@
     </joint>
   </xacro:macro>
 
-  <xacro:lidar_2d name="lidar_2d_front_left" x="-0.50" y="0.40" yaw="${3*pi/4}"/>
-  <xacro:lidar_2d name="lidar_2d_front_right" x="-0.50" y="-0.40" yaw="${-3*pi/4}"/>
+  <xacro:lidar_2d name="lidar_2d_front_left" x="0.50" y="0.40" yaw="${pi/4}"/>
+  <xacro:lidar_2d name="lidar_2d_front_right" x="0.50" y="-0.40" yaw="${-pi/4}"/>
 
   <!-- ============ DEPTH CAMERAS (Orbbec Gemini 335) ============ -->
   <xacro:macro name="depth_camera" params="name x y z pitch yaw">
@@ -279,8 +279,8 @@
     </joint>
   </xacro:macro>
 
-  <xacro:depth_camera name="camera_rear" x="0.235" y="0" z="0.175" pitch="0" yaw="0"/>
-  <xacro:depth_camera name="camera_front_left" x="-0.63" y="0.20" z="0.10" pitch="${pi/12}" yaw="${pi + 0.5245}"/>
-  <xacro:depth_camera name="camera_front_right" x="-0.63" y="-0.20" z="0.10" pitch="${pi/12}" yaw="${pi - 0.5245}"/>
+  <xacro:depth_camera name="camera_rear" x="-0.235" y="0" z="0.175" pitch="0" yaw="${pi}"/>
+  <xacro:depth_camera name="camera_front_left" x="0.63" y="0.20" z="0.10" pitch="${pi/12}" yaw="${-0.5245}"/>
+  <xacro:depth_camera name="camera_front_right" x="0.63" y="-0.20" z="0.10" pitch="${pi/12}" yaw="${0.5245}"/>
 
 </robot>

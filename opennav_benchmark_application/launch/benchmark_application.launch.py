@@ -32,6 +32,9 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(
                 os.path.join(vlm_pkg, 'launch', 'vlm.launch.py')
             ),
+            launch_arguments={
+                'use_sim_time': use_sim_time,
+            }.items(),
         ),
 
         Node(

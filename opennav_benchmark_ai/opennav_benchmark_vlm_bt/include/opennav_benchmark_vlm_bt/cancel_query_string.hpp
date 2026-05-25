@@ -23,15 +23,29 @@
 namespace opennav_benchmark_vlm_bt
 {
 
+/**
+ * @class CancelQueryString
+ * @brief BT node to cancel an in-flight QueryString VLM action request.
+ */
 class CancelQueryString
   : public nav2_behavior_tree::BtCancelActionNode<opennav_benchmark_vlm_msgs::action::QueryString>
 {
 public:
+  /**
+   * @brief Constructor
+   * @param xml_tag_name Name of the XML tag for this node
+   * @param action_name ROS 2 action server name
+   * @param conf BT node configuration
+   */
   CancelQueryString(
     const std::string & xml_tag_name,
     const std::string & action_name,
     const BT::NodeConfiguration & conf);
 
+  /**
+   * @brief Creates list of BT ports
+   * @return Empty BT::PortsList
+   */
   static BT::PortsList providedPorts()
   {
     return providedBasicPorts({});

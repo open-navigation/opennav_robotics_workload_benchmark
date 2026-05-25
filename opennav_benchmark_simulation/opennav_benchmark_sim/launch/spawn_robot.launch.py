@@ -147,7 +147,7 @@ def generate_launch_description():
     declare_x_pose = DeclareLaunchArgument('x_pose', default_value='62.6405')
     declare_y_pose = DeclareLaunchArgument('y_pose', default_value='35.9279')
     declare_z_pose = DeclareLaunchArgument('z_pose', default_value='0.1')
-    declare_yaw = DeclareLaunchArgument('yaw', default_value='3.151')
+    declare_yaw = DeclareLaunchArgument('yaw', default_value='0.0094')
     declare_use_gt_loc = DeclareLaunchArgument(
         'use_ground_truth_localization', default_value='true',
         description='Use static map->odom TF from spawn pose instead of AMCL')

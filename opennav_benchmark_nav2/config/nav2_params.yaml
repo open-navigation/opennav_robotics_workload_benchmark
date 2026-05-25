@@ -64,6 +64,13 @@ bt_navigator:
       plugin: "nav2_bt_navigator::NavigateToPoseNavigator"
     navigate_through_poses:
       plugin: "nav2_bt_navigator::NavigateThroughPosesNavigator"
+    default_nav_to_pose_bt_xml: $(find-pkg-share opennav_benchmark_nav2)/config/nav2_vlm_hazard_bt.xml
+    plugin_lib_names:
+      - vlm_query_bool_action_bt_node
+      - vlm_query_int_action_bt_node
+      - vlm_query_string_action_bt_node
+      - vlm_check_bool_bt_node
+      - vlm_mark_lethal_ahead_bt_node
     error_code_names:
       - compute_path_error_code
       - follow_path_error_code
@@ -180,7 +187,7 @@ controller_server:
 
 planner_server:
   ros__parameters:
-    expected_planner_frequency: 1.0
+    expected_planner_frequency: 0.5
     planner_plugins: ["GridBased"]
     costmap_update_timeout: 1.0
 
@@ -313,9 +320,9 @@ local_costmap:
       height: 12
       resolution: 0.05
       # Forklift footprint: chassis 1.2x0.8m + tines with pallet
-      footprint: "[[1.35, -0.6], [1.35, 0.6], [-0.7, 0.6], [-0.7, -0.6]]"
+      footprint: "[[0.7, -0.6], [0.7, 0.6], [-1.35, 0.6], [-1.35, -0.6]]"
       # Forklift footprint: chassis 1.2x0.8m + tines without pallet, to switch to when not holding a pallet
-      # footprint: "[[1.35, -0.45], [1.35, 0.45], [0.7, 0.45], [0.7, 0.6], [-0.7, 0.6], [-0.7, -0.6], [0.7, -0.6], [0.7, -0.45]]"
+      # footprint: "[[0.7, -0.6], [0.7, 0.6], [-0.7, 0.6], [-0.7, 0.45], [-1.35, 0.45], [-1.35, -0.45], [-0.7, -0.45], [-0.7, -0.6]]"
       plugins: ["obstacle_layer", "voxel_layer", "stvl_layer", "inflation_layer"]
       # 2D lidars use 2D obstacle layer
       obstacle_layer:
@@ -355,7 +362,7 @@ local_costmap:
         max_obstacle_height: 2.0
         mark_threshold: 2
         # 3D Ouster lidars (360deg, 30m range) + Orbbec depth cameras (7m range)
-        observation_sources:  camera_front_left camera_front_right camera_rear
+        observation_sources: camera_front_left camera_front_right camera_rear vlm_obstacles
         camera_front_left:
           topic: /camera_front_left/points
           max_obstacle_height: 2.0
@@ -389,6 +396,17 @@ local_costmap:
           raytrace_min_range: 0.1
           obstacle_max_range: 5.5
           obstacle_min_range: 0.1
+        vlm_obstacles:
+          topic: /vlm_virtual_obstacles
+          max_obstacle_height: 2.0
+          min_obstacle_height: 0.1
+          clearing: False
+          marking: True
+          data_type: "PointCloud2"
+          raytrace_max_range: 5.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 5.0
+          obstacle_min_range: 0.0
       stvl_layer:
         plugin: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"
         enabled: true
@@ -482,9 +500,9 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       # Forklift footprint: chassis 1.2x0.8m + tines with pallet
-      footprint: "[[1.35, -0.6], [1.35, 0.6], [-0.7, 0.6], [-0.7, -0.6]]"
+      footprint: "[[0.7, -0.6], [0.7, 0.6], [-1.35, 0.6], [-1.35, -0.6]]"
       # Forklift footprint: chassis 1.2x0.8m + tines without pallet, to switch to when not holding a pallet
-      # footprint: "[[1.35, -0.45], [1.35, 0.45], [0.7, 0.45], [0.7, 0.6], [-0.7, 0.6], [-0.7, -0.6], [0.7, -0.6], [0.7, -0.45]]"
+      # footprint: "[[0.7, -0.6], [0.7, 0.6], [-0.7, 0.6], [-0.7, 0.45], [-1.35, 0.45], [-1.35, -0.45], [-0.7, -0.45], [-0.7, -0.6]]"
       resolution: 0.05
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "voxel_layer", "stvl_layer", "inflation_layer"]
@@ -528,7 +546,7 @@ global_costmap:
         z_voxels: 16
         max_obstacle_height: 2.0
         mark_threshold: 2
-        observation_sources: camera_front_left camera_front_right camera_rear
+        observation_sources: camera_front_left camera_front_right camera_rear vlm_obstacles
         camera_front_left:
           topic: /camera_front_left/points
           max_obstacle_height: 2.0
@@ -562,6 +580,17 @@ global_costmap:
           raytrace_min_range: 0.1
           obstacle_max_range: 5.5
           obstacle_min_range: 0.1
+        vlm_obstacles:
+          topic: /vlm_virtual_obstacles
+          max_obstacle_height: 2.0
+          min_obstacle_height: 0.1
+          clearing: False
+          marking: True
+          data_type: "PointCloud2"
+          raytrace_max_range: 5.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 5.0
+          obstacle_min_range: 0.0
       stvl_layer:
         plugin: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"
         enabled: true
@@ -729,7 +758,7 @@ docking_server:
     simple_charging_dock:
       plugin: 'opennav_docking::SimpleChargingDock'
       docking_threshold: 0.05
-      staging_x_offset: -0.7
+      staging_x_offset: -2.0
       use_external_detection_pose: false
       use_battery_status: false
       use_stall_detection: false
@@ -752,5 +781,5 @@ docking_server:
       transform_tolerance: 0.1
       projection_time: 5.0
       simulation_step: 0.1
-      dock_collision_threshold: 0.3
+      dock_collision_threshold: 0.7
 

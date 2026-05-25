@@ -26,7 +26,7 @@
       </inertial>
       <visual name="chassis_visual">
         <visibility_flags>${robot_visibility_flags}</visibility_flags>
-        <pose>0 0 -0.25 1.5708 0 -1.5708</pose>
+        <pose>0 0 -0.25 1.5708 0 1.5708</pose>
         <geometry>
           <mesh><uri>package://opennav_benchmark_robot/meshes/Forklift_agv_01.obj</uri></mesh>
         </geometry>
@@ -166,10 +166,10 @@
       </joint>
     </xacro:macro>
 
-    <xacro:caster_sdf name="rear_left" x="0.45" y="0.30"/>
-    <xacro:caster_sdf name="rear_right" x="0.45" y="-0.30"/>
-    <xacro:caster_sdf name="front_left" x="-0.45" y="0.30"/>
-    <xacro:caster_sdf name="front_right" x="-0.45" y="-0.30"/>
+    <xacro:caster_sdf name="front_left" x="0.45" y="0.30"/>
+    <xacro:caster_sdf name="front_right" x="0.45" y="-0.30"/>
+    <xacro:caster_sdf name="rear_left" x="-0.45" y="0.30"/>
+    <xacro:caster_sdf name="rear_right" x="-0.45" y="-0.30"/>
 
     <!-- ============ IMU ============ -->
     <link name="imu_link">
@@ -210,7 +210,7 @@
     <!-- ============ 3D LIDARS ============ -->
     <!-- Center: 360deg, 32ch -->
     <link name="lidar_3d_center_link">
-      <pose relative_to="base_link">0.10 0 0.825 0 0 0</pose>
+      <pose relative_to="base_link">-0.10 0 0.825 0 0 3.14159</pose>
       <inertial>
         <mass>0.5</mass>
         <inertia>
@@ -271,7 +271,7 @@
 
     <!-- Top: on tower surface, in front of center lidar -->
     <link name="lidar_3d_top_link">
-      <pose relative_to="base_link">0.35 0 2.195 0 0 0</pose>
+      <pose relative_to="base_link">-0.35 0 2.195 0 0 3.14159</pose>
       <inertial>
         <mass>0.5</mass>
         <inertia>
@@ -332,7 +332,7 @@
 
     <!-- Front-right: 16ch, tilted down 15deg -->
     <link name="lidar_3d_tilted_link">
-      <pose relative_to="base_link">0.10 0 1.845 0.7854 0 1.5708</pose>
+      <pose relative_to="base_link">-0.10 0 1.845 0.7854 0 -1.5708</pose>
       <inertial>
         <mass>0.5</mass>
         <inertia>
@@ -394,7 +394,7 @@
 
     <!-- ============ 2D LIDARS (SICK TiM781 on chassis corners) ============ -->
     <link name="lidar_2d_front_left_link">
-      <pose relative_to="base_link">-0.50 0.40 0.60 0 0 2.356</pose>
+      <pose relative_to="base_link">0.50 0.40 0.60 0 0 0.7854</pose>
       <inertial>
         <mass>0.4</mass>
         <inertia>
@@ -454,7 +454,7 @@
     </joint>
 
     <link name="lidar_2d_front_right_link">
-      <pose relative_to="base_link">-0.50 -0.40 0.60 0 0 -2.356</pose>
+      <pose relative_to="base_link">0.50 -0.40 0.60 0 0 -0.7854</pose>
       <inertial>
         <mass>0.4</mass>
         <inertia>
@@ -515,7 +515,7 @@
 
     <!-- ============ CAMERA (between 2D lidars) ============ -->
     <link name="camera_front_link">
-      <pose relative_to="base_link">-0.65 0 0.60 0 0 3.14159</pose>
+      <pose relative_to="base_link">0.65 0 0.60 0 0 0</pose>
       <inertial>
         <mass>0.1</mass>
         <inertia>
@@ -594,9 +594,9 @@
       </joint>
     </xacro:macro>
 
-    <xacro:camera_sdf name="camera_rear" x="0.235" y="0" z="0.175" pitch="0" yaw="0"/>
-    <xacro:camera_sdf name="camera_front_left" x="-0.63" y="0.20" z="0.10" pitch="0.2618" yaw="${3.14159 + 0.5245}"/>
-    <xacro:camera_sdf name="camera_front_right" x="-0.63" y="-0.20" z="0.10" pitch="0.2618" yaw="${3.14159 - 0.5245}"/>
+    <xacro:camera_sdf name="camera_rear" x="-0.235" y="0" z="0.175" pitch="0" yaw="3.14159"/>
+    <xacro:camera_sdf name="camera_front_left" x="0.63" y="0.20" z="0.10" pitch="0.2618" yaw="-0.5245"/>
+    <xacro:camera_sdf name="camera_front_right" x="0.63" y="-0.20" z="0.10" pitch="0.2618" yaw="0.5245"/>
 
     <!-- ============ PLUGINS ============ -->
     <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">

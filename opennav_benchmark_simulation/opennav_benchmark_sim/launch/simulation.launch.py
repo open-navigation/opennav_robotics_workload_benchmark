@@ -121,7 +121,7 @@ def generate_launch_description():
         'z_pose', default_value='0.1',
         description='Robot initial Z position')
     declare_yaw = DeclareLaunchArgument(
-        'yaw', default_value='3.151',
+        'yaw', default_value='0.0094',
         description='Robot initial yaw')
     declare_use_rviz = DeclareLaunchArgument(
         'use_rviz', default_value='true',

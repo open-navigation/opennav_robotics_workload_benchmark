@@ -23,22 +23,57 @@
 namespace opennav_benchmark_vlm_bt
 {
 
+/**
+ * @class QueryStringAction
+ * @brief BT action node that sends a prompt (and optional image) to a VLM
+ * action server and returns a string result. Returns SUCCESS if the VLM
+ * query succeeded, FAILURE otherwise. The string answer is available
+ * via the "value" output port.
+ */
 class QueryStringAction
   : public nav2_behavior_tree::BtActionNode<opennav_benchmark_vlm_msgs::action::QueryString>
 {
   using Action = opennav_benchmark_vlm_msgs::action::QueryString;
 
 public:
+  /**
+   * @brief Constructor
+   * @param xml_tag_name Name of the XML tag for this node
+   * @param action_name ROS 2 action server name
+   * @param conf BT node configuration
+   */
   QueryStringAction(
     const std::string & xml_tag_name,
     const std::string & action_name,
     const BT::NodeConfiguration & conf);
 
+  /**
+   * @brief Populates the action goal with prompt and optional image from input ports
+   */
   void on_tick() override;
+
+  /**
+   * @brief Sets output ports and returns SUCCESS if the VLM query succeeded
+   * @return SUCCESS if result success is true, FAILURE otherwise
+   */
   BT::NodeStatus on_success() override;
+
+  /**
+   * @brief Handles action abort
+   * @return FAILURE
+   */
   BT::NodeStatus on_aborted() override;
+
+  /**
+   * @brief Handles action cancellation
+   * @return SUCCESS
+   */
   BT::NodeStatus on_cancelled() override;
 
+  /**
+   * @brief Creates list of BT ports
+   * @return BT::PortsList containing input and output ports
+   */
   static BT::PortsList providedPorts()
   {
     return providedBasicPorts(

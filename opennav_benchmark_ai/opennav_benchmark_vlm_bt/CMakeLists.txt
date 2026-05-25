@@ -32,6 +32,14 @@ list(APPEND plugin_libs vlm_query_int_action_bt_node)
 add_library(vlm_query_string_action_bt_node SHARED src/query_string_action.cpp)
 list(APPEND plugin_libs vlm_query_string_action_bt_node)
 
+# Condition plugins
+add_library(vlm_check_bool_bt_node SHARED src/check_bool.cpp)
+list(APPEND plugin_libs vlm_check_bool_bt_node)
+
+# Utility plugins
+add_library(vlm_mark_lethal_ahead_bt_node SHARED src/mark_lethal_ahead.cpp)
+list(APPEND plugin_libs vlm_mark_lethal_ahead_bt_node)
+
 # Cancel plugins
 add_library(vlm_cancel_query_bool_bt_node SHARED src/cancel_query_bool.cpp)
 list(APPEND plugin_libs vlm_cancel_query_bool_bt_node)
