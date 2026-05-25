@@ -21,7 +21,6 @@
   <exec_depend>nav2_smac_planner</exec_depend>
   <exec_depend>nav2_velocity_smoother</exec_depend>
   <exec_depend>nav2_waypoint_follower</exec_depend>
-  <exec_depend>opennav_benchmark_application</exec_depend>
   <exec_depend>opennav_benchmark_robot</exec_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>

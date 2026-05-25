@@ -1,0 +1,1783 @@
+<?xml version="1.0"?>
+<sdf version="1.7" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="headless" default="false"/>
+
+  <world name="benchmark_warehouse_simplified">
+
+    <!-- Physics -->
+    <physics name="tpe" type="tpe">
+      <engine>
+        <filename>gz-physics-tpe-plugin</filename>
+      </engine>
+    </physics>
+
+    <!-- Plugins -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <xacro:unless value="$(arg headless)">
+      <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    </xacro:unless>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu"/>
+
+    <!-- Scene -->
+    <scene>
+      <ambient>0.8 0.8 0.8 1</ambient>
+      <background>0.3 0.7 0.9 1</background>
+      <shadows>0</shadows>
+      <grid>false</grid>
+    </scene>
+
+    <!-- Lighting -->
+    <light type="directional" name="sun">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 50 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.3 0.3 0.3 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.001</linear>
+        <quadratic>0.0001</quadratic>
+      </attenuation>
+      <direction>-0.3 0.2 -1.0</direction>
+    </light>
+
+    <!-- Ground plane (128m x 140m) -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>128 140</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>128 140</size></plane></geometry>
+          <material>
+            <ambient>0.55 0.55 0.53 1</ambient>
+            <diffuse>0.55 0.55 0.53 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+      <pose>0 0 0 0 0 0</pose>
+    </model>
+
+    <!-- ============================================================ -->
+    <!-- MACROS - SIMPLIFIED (all box primitives for real-time perf)   -->
+    <!-- Locations mirror benchmark_warehouse.sdf.xacro so the         -->
+    <!-- generated occupancy matches application/maps/benchmark_warehouse. -->
+    <!-- ============================================================ -->
+
+    <!-- Brick perimeter wall (10.0m tall, single box) -->
+    <xacro:macro name="wall_segment" params="name x y yaw length">
+      <model name="wall_${name}">
+        <static>true</static>
+        <pose>${x} ${y} 5.0 0 0 ${yaw}</pose>
+        <link name="link">
+          <visual name="visual">
+            <geometry><box><size>${length} 0.3 10.0</size></box></geometry>
+            <material>
+              <ambient>0.60 0.25 0.10 1</ambient>
+              <diffuse>0.60 0.25 0.10 1</diffuse>
+              <specular>0.05 0.05 0.05 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry><box><size>${length} 0.3 10.0</size></box></geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <!-- Roll-up dock door (4m wide x 10m tall, single box) -->
+    <xacro:macro name="dock_door" params="name x y yaw">
+      <model name="door_${name}">
+        <static>true</static>
+        <pose>${x} ${y} 5.0 0 0 ${yaw}</pose>
+        <link name="link">
+          <visual name="visual">
+            <geometry><box><size>4.0 0.15 10.0</size></box></geometry>
+            <material>
+              <ambient>0.55 0.56 0.58 1</ambient>
+              <diffuse>0.55 0.56 0.58 1</diffuse>
+              <specular>0.2 0.2 0.2 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry><box><size>4.0 0.15 10.0</size></box></geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <!-- Support column (0.4 x 0.4 x 10.0m) -->
+    <xacro:macro name="support_column" params="name x y">
+      <model name="col_${name}">
+        <static>true</static>
+        <pose>${x} ${y} 5.0 0 0 0</pose>
+        <link name="link">
+          <visual name="visual">
+            <geometry><box><size>0.4 0.4 10.0</size></box></geometry>
+            <material>
+              <ambient>0.55 0.52 0.50 1</ambient>
+              <diffuse>0.55 0.52 0.50 1</diffuse>
+              <specular>0.2 0.2 0.2 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry><box><size>0.4 0.4 10.0</size></box></geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <!-- Small shelf: 3.5m X x 1.0m Y x 2.0m Z -->
+    <xacro:macro name="small_shelf" params="name x y">
+      <model name="${name}">
+        <static>true</static>
+        <pose>${x} ${y} 1.0 0 0 0</pose>
+        <link name="link">
+          <visual name="visual">
+            <geometry><box><size>3.5 1.0 2.0</size></box></geometry>
+            <material>
+              <ambient>0.45 0.35 0.20 1</ambient>
+              <diffuse>0.45 0.35 0.20 1</diffuse>
+              <specular>0.1 0.1 0.1 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry><box><size>3.5 1.0 2.0</size></box></geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <!-- Big shelf E-W: 7.5m X x 1.2m Y x 2.0m Z -->
+    <xacro:macro name="big_shelf" params="name x y">
+      <model name="${name}">
+        <static>true</static>
+        <pose>${x} ${y} 1.0 0 0 0</pose>
+        <link name="link">
+          <visual name="visual">
+            <geometry><box><size>7.5 1.2 2.0</size></box></geometry>
+            <material>
+              <ambient>0.40 0.30 0.18 1</ambient>
+              <diffuse>0.40 0.30 0.18 1</diffuse>
+              <specular>0.1 0.1 0.1 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry><box><size>7.5 1.2 2.0</size></box></geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <!-- Big shelf rotated N-S: 1.2m X x 7.5m Y x 2.0m Z -->
+    <xacro:macro name="big_shelf_ns" params="name x y">
+      <model name="${name}">
+        <static>true</static>
+        <pose>${x} ${y} 1.0 0 0 1.5708</pose>
+        <link name="link">
+          <visual name="visual">
+            <geometry><box><size>7.5 1.2 2.0</size></box></geometry>
+            <material>
+              <ambient>0.40 0.30 0.18 1</ambient>
+              <diffuse>0.40 0.30 0.18 1</diffuse>
+              <specular>0.1 0.1 0.1 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry><box><size>7.5 1.2 2.0</size></box></geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <!-- Pallet: 1.2m X x 1.0m Y x 1.2m Z. z param = bottom of pallet -->
+    <xacro:macro name="pallet" params="name x y z yaw">
+      <model name="${name}">
+        <static>true</static>
+        <pose>${x} ${y} ${z + 0.6} 0 0 ${yaw}</pose>
+        <link name="link">
+          <visual name="visual">
+            <geometry><box><size>1.2 1.0 1.2</size></box></geometry>
+            <material>
+              <ambient>0.60 0.45 0.25 1</ambient>
+              <diffuse>0.60 0.45 0.25 1</diffuse>
+              <specular>0.1 0.1 0.1 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry><box><size>1.2 1.0 1.2</size></box></geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <!-- Overturned pallet (tipped on side, roll=90deg) -->
+    <xacro:macro name="overturned_pallet" params="name x y yaw">
+      <model name="${name}">
+        <static>true</static>
+        <pose>${x} ${y} 0.55 1.5708 0 ${yaw}</pose>
+        <link name="link">
+          <visual name="visual">
+            <geometry><box><size>1.2 1.0 1.2</size></box></geometry>
+            <material>
+              <ambient>0.60 0.45 0.25 1</ambient>
+              <diffuse>0.60 0.45 0.25 1</diffuse>
+              <specular>0.1 0.1 0.1 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry><box><size>1.2 1.0 1.2</size></box></geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <!-- Person: 0.5 x 0.4 x 1.75m box stand-in -->
+    <xacro:macro name="person" params="name x y yaw">
+      <model name="${name}">
+        <static>true</static>
+        <pose>${x} ${y} 0.875 0 0 ${yaw}</pose>
+        <link name="link">
+          <visual name="visual">
+            <geometry><box><size>0.5 0.4 1.75</size></box></geometry>
+            <material>
+              <ambient>0.20 0.40 0.60 1</ambient>
+              <diffuse>0.20 0.40 0.60 1</diffuse>
+              <specular>0.1 0.1 0.1 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry><box><size>0.5 0.4 1.75</size></box></geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <!-- Charging station: 0.6 x 0.6 x 0.5m box stand-in -->
+    <xacro:macro name="charging_station" params="name x y yaw">
+      <model name="${name}">
+        <static>true</static>
+        <pose>${x} ${y} 0.25 0 0 ${yaw}</pose>
+        <link name="link">
+          <visual name="visual">
+            <geometry><box><size>0.6 0.6 0.5</size></box></geometry>
+            <material>
+              <ambient>0.15 0.15 0.15 1</ambient>
+              <diffuse>0.15 0.15 0.15 1</diffuse>
+              <specular>0.3 0.3 0.3 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry><box><size>0.6 0.6 0.5</size></box></geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <!-- Forklift: 2.5 x 1.2 x 2.0m box stand-in -->
+    <xacro:macro name="forklift" params="name x y yaw">
+      <model name="${name}">
+        <static>true</static>
+        <pose>${x} ${y} 1.0 0 0 ${yaw}</pose>
+        <link name="link">
+          <visual name="visual">
+            <geometry><box><size>2.5 1.2 2.0</size></box></geometry>
+            <material>
+              <ambient>0.85 0.55 0.10 1</ambient>
+              <diffuse>0.85 0.55 0.10 1</diffuse>
+              <specular>0.1 0.1 0.1 1</specular>
+            </material>
+          </visual>
+          <collision name="collision">
+            <geometry><box><size>2.5 1.2 2.0</size></box></geometry>
+          </collision>
+        </link>
+      </model>
+    </xacro:macro>
+
+    <!-- ============================================================ -->
+    <!-- PERIMETER WALLS (128m x 140m, 10.0m tall brick) -->
+    <!-- ============================================================ -->
+
+    <xacro:wall_segment name="north" x="0" y="70.0" yaw="0" length="128"/>
+    <xacro:wall_segment name="east" x="64.0" y="0" yaw="1.5708" length="140"/>
+    <xacro:wall_segment name="west" x="-64.0" y="0" yaw="1.5708" length="140"/>
+
+    <!-- South wall segments (between dock doors) -->
+    <xacro:wall_segment name="south_1" x="-58.0" y="-70.0" yaw="0" length="12.0"/>
+    <xacro:wall_segment name="south_2" x="-44.0" y="-70.0" yaw="0" length="8.0"/>
+    <xacro:wall_segment name="south_3" x="-32.0" y="-70.0" yaw="0" length="8.0"/>
+    <xacro:wall_segment name="south_4" x="-20.0" y="-70.0" yaw="0" length="8.0"/>
+    <xacro:wall_segment name="south_5" x="-8.0" y="-70.0" yaw="0" length="8.0"/>
+    <xacro:wall_segment name="south_6" x="4.0" y="-70.0" yaw="0" length="8.0"/>
+    <xacro:wall_segment name="south_7" x="16.0" y="-70.0" yaw="0" length="8.0"/>
+    <xacro:wall_segment name="south_8" x="28.0" y="-70.0" yaw="0" length="8.0"/>
+    <xacro:wall_segment name="south_9" x="50.0" y="-70.0" yaw="0" length="28.0"/>
+
+    <!-- Roll-up dock doors -->
+    <xacro:dock_door name="dock1" x="-50" y="-70.0" yaw="0"/>
+    <xacro:dock_door name="dock2" x="-38" y="-70.0" yaw="0"/>
+    <xacro:dock_door name="dock3" x="-26" y="-70.0" yaw="0"/>
+    <xacro:dock_door name="dock4" x="-14" y="-70.0" yaw="0"/>
+    <xacro:dock_door name="dock5" x="-2" y="-70.0" yaw="0"/>
+    <xacro:dock_door name="dock6" x="10" y="-70.0" yaw="0"/>
+    <xacro:dock_door name="dock7" x="22" y="-70.0" yaw="0"/>
+    <xacro:dock_door name="dock8" x="34" y="-70.0" yaw="0"/>
+
+    <!-- ============================================================ -->
+    <!-- SUPPORT COLUMNS                                               -->
+    <!-- ============================================================ -->
+
+    <xacro:support_column name="n0" x="-45" y="70.0"/>
+    <xacro:support_column name="n1" x="-30" y="70.0"/>
+    <xacro:support_column name="n2" x="-15" y="70.0"/>
+    <xacro:support_column name="n3" x="0" y="70.0"/>
+    <xacro:support_column name="n4" x="15" y="70.0"/>
+    <xacro:support_column name="n5" x="30" y="70.0"/>
+    <xacro:support_column name="n6" x="45" y="70.0"/>
+    <xacro:support_column name="s7" x="-56" y="-70.0"/>
+    <xacro:support_column name="s8" x="-44" y="-70.0"/>
+    <xacro:support_column name="s9" x="-32" y="-70.0"/>
+    <xacro:support_column name="s10" x="-20" y="-70.0"/>
+    <xacro:support_column name="s11" x="-8" y="-70.0"/>
+    <xacro:support_column name="s12" x="4" y="-70.0"/>
+    <xacro:support_column name="s13" x="16" y="-70.0"/>
+    <xacro:support_column name="e14" x="64.0" y="-60"/>
+    <xacro:support_column name="e15" x="64.0" y="-40"/>
+    <xacro:support_column name="e16" x="64.0" y="-20"/>
+    <xacro:support_column name="e17" x="64.0" y="0"/>
+    <xacro:support_column name="e18" x="64.0" y="20"/>
+    <xacro:support_column name="e19" x="64.0" y="40"/>
+    <xacro:support_column name="e20" x="64.0" y="60"/>
+    <xacro:support_column name="w21" x="-64.0" y="-60"/>
+    <xacro:support_column name="w22" x="-64.0" y="-40"/>
+    <xacro:support_column name="w23" x="-64.0" y="-20"/>
+    <xacro:support_column name="w24" x="-64.0" y="0"/>
+    <xacro:support_column name="w25" x="-64.0" y="20"/>
+    <xacro:support_column name="w26" x="-64.0" y="40"/>
+    <xacro:support_column name="w27" x="-64.0" y="60"/>
+    <xacro:support_column name="int_28" x="-38.0" y="-40"/>
+    <xacro:support_column name="int_29" x="-38.0" y="-23"/>
+    <xacro:support_column name="int_30" x="-38.0" y="15"/>
+    <xacro:support_column name="int_31" x="-38.0" y="40"/>
+    <xacro:support_column name="int_32" x="-18.0" y="-40"/>
+    <xacro:support_column name="int_33" x="-18.0" y="-23"/>
+    <xacro:support_column name="int_34" x="-18.0" y="15"/>
+    <xacro:support_column name="int_35" x="-18.0" y="40"/>
+    <xacro:support_column name="int_36" x="22.0" y="-40"/>
+    <xacro:support_column name="int_37" x="22.0" y="-23"/>
+    <xacro:support_column name="int_38" x="22.0" y="15"/>
+    <xacro:support_column name="int_39" x="22.0" y="40"/>
+    <xacro:support_column name="int_40" x="42.0" y="-40"/>
+    <xacro:support_column name="int_41" x="42.0" y="-23"/>
+    <xacro:support_column name="int_42" x="42.0" y="15"/>
+
+    <!-- ============================================================ -->
+    <!-- ZONE A: BULK STORAGE (big shelves, back-to-back pairs, 2.0 m aisles) -->
+    <!-- 14 rows x 14 per row, aisle ~2.0m -->
+    <!-- ============================================================ -->
+
+    <xacro:big_shelf name="zone_a_r1_1" x="-54.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_2" x="-46.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_3" x="-38.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_4" x="-30.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_5" x="-22.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_6" x="-14.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_7" x="-6.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_8" x="10.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_9" x="18.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_10" x="26.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_11" x="34.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_12" x="42.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_13" x="50.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r1_14" x="58.0" y="-37.2"/>
+    <xacro:big_shelf name="zone_a_r2_1" x="-54.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_2" x="-46.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_3" x="-38.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_4" x="-30.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_5" x="-22.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_6" x="-14.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_7" x="-6.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_8" x="10.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_9" x="18.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_10" x="26.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_11" x="34.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_12" x="42.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_13" x="50.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r2_14" x="58.0" y="-36.0"/>
+    <xacro:big_shelf name="zone_a_r3_1" x="-54.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_2" x="-46.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_3" x="-38.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_4" x="-30.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_5" x="-22.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_6" x="-14.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_7" x="-6.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_8" x="10.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_9" x="18.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_10" x="26.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_11" x="34.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_12" x="42.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_13" x="50.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r3_14" x="58.0" y="-32.8"/>
+    <xacro:big_shelf name="zone_a_r4_1" x="-54.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_2" x="-46.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_3" x="-38.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_4" x="-30.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_5" x="-22.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_6" x="-14.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_7" x="-6.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_8" x="10.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_9" x="18.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_10" x="26.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_11" x="34.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_12" x="42.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_13" x="50.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r4_14" x="58.0" y="-31.6"/>
+    <xacro:big_shelf name="zone_a_r5_1" x="-54.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_2" x="-46.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_3" x="-38.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_4" x="-30.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_5" x="-22.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_6" x="-14.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_7" x="-6.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_8" x="10.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_9" x="18.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_10" x="26.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_11" x="34.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_12" x="42.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_13" x="50.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r5_14" x="58.0" y="-28.4"/>
+    <xacro:big_shelf name="zone_a_r6_1" x="-54.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_2" x="-46.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_3" x="-38.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_4" x="-30.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_5" x="-22.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_6" x="-14.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_7" x="-6.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_8" x="10.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_9" x="18.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_10" x="26.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_11" x="34.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_12" x="42.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_13" x="50.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r6_14" x="58.0" y="-27.2"/>
+    <xacro:big_shelf name="zone_a_r7_1" x="-54.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_2" x="-46.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_3" x="-38.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_4" x="-30.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_5" x="-22.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_6" x="-14.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_7" x="-6.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_8" x="10.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_9" x="18.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_10" x="26.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_11" x="34.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_12" x="42.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_13" x="50.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r7_14" x="58.0" y="-22.0"/>
+    <xacro:big_shelf name="zone_a_r8_1" x="-54.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_2" x="-46.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_3" x="-38.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_4" x="-30.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_5" x="-22.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_6" x="-14.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_7" x="-6.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_8" x="10.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_9" x="18.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_10" x="26.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_11" x="34.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_12" x="42.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_13" x="50.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r8_14" x="58.0" y="-20.8"/>
+    <xacro:big_shelf name="zone_a_r9_1" x="-54.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_2" x="-46.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_3" x="-38.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_4" x="-30.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_5" x="-22.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_6" x="-14.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_7" x="-6.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_8" x="10.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_9" x="18.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_10" x="26.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_11" x="34.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_12" x="42.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_13" x="50.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r9_14" x="58.0" y="-17.6"/>
+    <xacro:big_shelf name="zone_a_r10_1" x="-54.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_2" x="-46.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_3" x="-38.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_4" x="-30.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_5" x="-22.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_6" x="-14.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_7" x="-6.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_8" x="10.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_9" x="18.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_10" x="26.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_11" x="34.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_12" x="42.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_13" x="50.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r10_14" x="58.0" y="-16.4"/>
+    <xacro:big_shelf name="zone_a_r11_1" x="-54.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_2" x="-46.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_3" x="-38.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_4" x="-30.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_5" x="-22.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_6" x="-14.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_7" x="-6.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_8" x="10.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_9" x="18.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_10" x="26.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_11" x="34.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_12" x="42.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_13" x="50.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r11_14" x="58.0" y="-13.2"/>
+    <xacro:big_shelf name="zone_a_r12_1" x="-54.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_2" x="-46.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_3" x="-38.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_4" x="-30.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_5" x="-22.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_6" x="-14.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_7" x="-6.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_8" x="10.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_9" x="18.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_10" x="26.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_11" x="34.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_12" x="42.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_13" x="50.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r12_14" x="58.0" y="-12.0"/>
+    <xacro:big_shelf name="zone_a_r13_1" x="-54.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_2" x="-46.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_3" x="-38.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_4" x="-30.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_5" x="-22.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_6" x="-14.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_7" x="-6.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_8" x="10.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_9" x="18.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_10" x="26.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_11" x="34.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_12" x="42.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_13" x="50.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r13_14" x="58.0" y="-8.8"/>
+    <xacro:big_shelf name="zone_a_r14_1" x="-54.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_2" x="-46.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_3" x="-38.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_4" x="-30.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_5" x="-22.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_6" x="-14.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_7" x="-6.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_8" x="10.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_9" x="18.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_10" x="26.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_11" x="34.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_12" x="42.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_13" x="50.0" y="-7.6"/>
+    <xacro:big_shelf name="zone_a_r14_14" x="58.0" y="-7.6"/>
+    <!-- zone_a shelves (big): 196 -->
+
+    <!-- ============================================================ -->
+    <!-- ZONE B-WEST: STANDARD (big shelves, back-to-back pairs, 1.6 m aisles) -->
+    <!-- 8 rows x 7 per row, aisle ~1.6m -->
+    <!-- ============================================================ -->
+
+    <xacro:big_shelf name="zone_bw_r1_1" x="-54.0" y="4.0"/>
+    <xacro:big_shelf name="zone_bw_r1_2" x="-46.0" y="4.0"/>
+    <xacro:big_shelf name="zone_bw_r1_3" x="-38.0" y="4.0"/>
+    <xacro:big_shelf name="zone_bw_r1_4" x="-30.0" y="4.0"/>
+    <xacro:big_shelf name="zone_bw_r1_5" x="-22.0" y="4.0"/>
+    <xacro:big_shelf name="zone_bw_r1_6" x="-14.0" y="4.0"/>
+    <xacro:big_shelf name="zone_bw_r1_7" x="-6.0" y="4.0"/>
+    <xacro:big_shelf name="zone_bw_r2_1" x="-54.0" y="5.2"/>
+    <xacro:big_shelf name="zone_bw_r2_2" x="-46.0" y="5.2"/>
+    <xacro:big_shelf name="zone_bw_r2_3" x="-38.0" y="5.2"/>
+    <xacro:big_shelf name="zone_bw_r2_4" x="-30.0" y="5.2"/>
+    <xacro:big_shelf name="zone_bw_r2_5" x="-22.0" y="5.2"/>
+    <xacro:big_shelf name="zone_bw_r2_6" x="-14.0" y="5.2"/>
+    <xacro:big_shelf name="zone_bw_r2_7" x="-6.0" y="5.2"/>
+    <xacro:big_shelf name="zone_bw_r3_1" x="-54.0" y="8.0"/>
+    <xacro:big_shelf name="zone_bw_r3_2" x="-46.0" y="8.0"/>
+    <xacro:big_shelf name="zone_bw_r3_3" x="-38.0" y="8.0"/>
+    <xacro:big_shelf name="zone_bw_r3_4" x="-30.0" y="8.0"/>
+    <xacro:big_shelf name="zone_bw_r3_5" x="-22.0" y="8.0"/>
+    <xacro:big_shelf name="zone_bw_r3_6" x="-14.0" y="8.0"/>
+    <xacro:big_shelf name="zone_bw_r3_7" x="-6.0" y="8.0"/>
+    <xacro:big_shelf name="zone_bw_r4_1" x="-54.0" y="9.2"/>
+    <xacro:big_shelf name="zone_bw_r4_2" x="-46.0" y="9.2"/>
+    <xacro:big_shelf name="zone_bw_r4_3" x="-38.0" y="9.2"/>
+    <xacro:big_shelf name="zone_bw_r4_4" x="-30.0" y="9.2"/>
+    <xacro:big_shelf name="zone_bw_r4_5" x="-22.0" y="9.2"/>
+    <xacro:big_shelf name="zone_bw_r4_6" x="-14.0" y="9.2"/>
+    <xacro:big_shelf name="zone_bw_r4_7" x="-6.0" y="9.2"/>
+    <xacro:big_shelf name="zone_bw_r5_1" x="-54.0" y="12.0"/>
+    <xacro:big_shelf name="zone_bw_r5_2" x="-46.0" y="12.0"/>
+    <xacro:big_shelf name="zone_bw_r5_3" x="-38.0" y="12.0"/>
+    <xacro:big_shelf name="zone_bw_r5_4" x="-30.0" y="12.0"/>
+    <xacro:big_shelf name="zone_bw_r5_5" x="-22.0" y="12.0"/>
+    <xacro:big_shelf name="zone_bw_r5_6" x="-14.0" y="12.0"/>
+    <xacro:big_shelf name="zone_bw_r5_7" x="-6.0" y="12.0"/>
+    <xacro:big_shelf name="zone_bw_r6_1" x="-54.0" y="13.2"/>
+    <xacro:big_shelf name="zone_bw_r6_2" x="-46.0" y="13.2"/>
+    <xacro:big_shelf name="zone_bw_r6_3" x="-38.0" y="13.2"/>
+    <xacro:big_shelf name="zone_bw_r6_4" x="-30.0" y="13.2"/>
+    <xacro:big_shelf name="zone_bw_r6_5" x="-22.0" y="13.2"/>
+    <xacro:big_shelf name="zone_bw_r6_6" x="-14.0" y="13.2"/>
+    <xacro:big_shelf name="zone_bw_r6_7" x="-6.0" y="13.2"/>
+    <xacro:big_shelf name="zone_bw_r7_1" x="-54.0" y="16.0"/>
+    <xacro:big_shelf name="zone_bw_r7_2" x="-46.0" y="16.0"/>
+    <xacro:big_shelf name="zone_bw_r7_3" x="-38.0" y="16.0"/>
+    <xacro:big_shelf name="zone_bw_r7_4" x="-30.0" y="16.0"/>
+    <xacro:big_shelf name="zone_bw_r7_5" x="-22.0" y="16.0"/>
+    <xacro:big_shelf name="zone_bw_r7_6" x="-14.0" y="16.0"/>
+    <xacro:big_shelf name="zone_bw_r7_7" x="-6.0" y="16.0"/>
+    <xacro:big_shelf name="zone_bw_r8_1" x="-54.0" y="17.2"/>
+    <xacro:big_shelf name="zone_bw_r8_2" x="-46.0" y="17.2"/>
+    <xacro:big_shelf name="zone_bw_r8_3" x="-38.0" y="17.2"/>
+    <xacro:big_shelf name="zone_bw_r8_4" x="-30.0" y="17.2"/>
+    <xacro:big_shelf name="zone_bw_r8_5" x="-22.0" y="17.2"/>
+    <xacro:big_shelf name="zone_bw_r8_6" x="-14.0" y="17.2"/>
+    <xacro:big_shelf name="zone_bw_r8_7" x="-6.0" y="17.2"/>
+    <!-- zone_bw shelves (big): 56 -->
+
+    <!-- ============================================================ -->
+    <!-- ZONE B-EAST: NARROW (small shelves, 3.0 m c-t-c, ~2.0 m aisles) -->
+    <!-- 6 rows x 13 per row, aisle ~2.0m -->
+    <!-- ============================================================ -->
+
+    <xacro:small_shelf name="zone_be_r1_1" x="7.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r1_2" x="11.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r1_3" x="15.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r1_4" x="19.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r1_5" x="23.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r1_6" x="27.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r1_7" x="31.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r1_8" x="35.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r1_9" x="39.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r1_10" x="43.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r1_11" x="47.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r1_12" x="51.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r1_13" x="55.0" y="8"/>
+    <xacro:small_shelf name="zone_be_r2_1" x="7.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r2_2" x="11.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r2_3" x="15.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r2_4" x="19.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r2_5" x="23.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r2_6" x="27.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r2_7" x="31.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r2_8" x="35.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r2_9" x="39.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r2_10" x="43.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r2_11" x="47.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r2_12" x="51.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r2_13" x="55.0" y="11"/>
+    <xacro:small_shelf name="zone_be_r3_1" x="7.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r3_2" x="11.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r3_3" x="15.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r3_4" x="19.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r3_5" x="23.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r3_6" x="27.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r3_7" x="31.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r3_8" x="35.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r3_9" x="39.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r3_10" x="43.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r3_11" x="47.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r3_12" x="51.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r3_13" x="55.0" y="14"/>
+    <xacro:small_shelf name="zone_be_r4_1" x="7.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r4_2" x="11.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r4_3" x="15.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r4_4" x="19.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r4_5" x="23.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r4_6" x="27.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r4_7" x="31.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r4_8" x="35.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r4_9" x="39.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r4_10" x="43.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r4_11" x="47.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r4_12" x="51.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r4_13" x="55.0" y="17"/>
+    <xacro:small_shelf name="zone_be_r5_1" x="7.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r5_2" x="11.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r5_3" x="15.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r5_4" x="19.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r5_5" x="23.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r5_6" x="27.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r5_7" x="31.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r5_8" x="35.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r5_9" x="39.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r5_10" x="43.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r5_11" x="47.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r5_12" x="51.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r5_13" x="55.0" y="20"/>
+    <xacro:small_shelf name="zone_be_r6_1" x="7.0" y="23"/>
+    <xacro:small_shelf name="zone_be_r6_2" x="11.0" y="23"/>
+    <xacro:small_shelf name="zone_be_r6_3" x="15.0" y="23"/>
+    <xacro:small_shelf name="zone_be_r6_4" x="19.0" y="23"/>
+    <xacro:small_shelf name="zone_be_r6_5" x="23.0" y="23"/>
+    <xacro:small_shelf name="zone_be_r6_6" x="27.0" y="23"/>
+    <xacro:small_shelf name="zone_be_r6_7" x="31.0" y="23"/>
+    <xacro:small_shelf name="zone_be_r6_8" x="35.0" y="23"/>
+    <xacro:small_shelf name="zone_be_r6_9" x="39.0" y="23"/>
+    <xacro:small_shelf name="zone_be_r6_10" x="43.0" y="23"/>
+    <xacro:small_shelf name="zone_be_r6_11" x="47.0" y="23"/>
+    <xacro:small_shelf name="zone_be_r6_12" x="51.0" y="23"/>
+    <xacro:small_shelf name="zone_be_r6_13" x="55.0" y="23"/>
+    <!-- zone_be shelves (small): 78 -->
+
+    <!-- ============================================================ -->
+    <!-- ZONE C: FORWARD PICK (small shelves, 3.0 m c-t-c, ~2.0 m aisles) -->
+    <!-- 6 rows x 20 per row, aisle ~2.0m -->
+    <!-- ============================================================ -->
+
+    <xacro:small_shelf name="zone_c_r1_1" x="-53.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_2" x="-49.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_3" x="-45.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_4" x="-41.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_5" x="-37.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_6" x="-33.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_7" x="-29.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_8" x="-25.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_9" x="-21.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_10" x="-17.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_11" x="-13.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_12" x="-9.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_13" x="-5.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_14" x="7.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_15" x="11.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_16" x="15.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_17" x="19.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_18" x="23.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_19" x="27.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r1_20" x="31.0" y="30"/>
+    <xacro:small_shelf name="zone_c_r2_1" x="-53.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_2" x="-49.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_3" x="-45.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_4" x="-41.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_5" x="-37.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_6" x="-33.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_7" x="-29.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_8" x="-25.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_9" x="-21.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_10" x="-17.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_11" x="-13.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_12" x="-9.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_13" x="-5.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_14" x="7.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_15" x="11.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_16" x="15.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_17" x="19.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_18" x="23.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_19" x="27.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r2_20" x="31.0" y="33"/>
+    <xacro:small_shelf name="zone_c_r3_1" x="-53.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_2" x="-49.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_3" x="-45.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_4" x="-41.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_5" x="-37.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_6" x="-33.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_7" x="-29.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_8" x="-25.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_9" x="-21.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_10" x="-17.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_11" x="-13.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_12" x="-9.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_13" x="-5.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_14" x="7.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_15" x="11.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_16" x="15.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_17" x="19.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_18" x="23.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_19" x="27.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r3_20" x="31.0" y="36"/>
+    <xacro:small_shelf name="zone_c_r4_1" x="-53.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_2" x="-49.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_3" x="-45.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_4" x="-41.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_5" x="-37.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_6" x="-33.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_7" x="-29.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_8" x="-25.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_9" x="-21.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_10" x="-17.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_11" x="-13.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_12" x="-9.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_13" x="-5.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_14" x="7.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_15" x="11.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_16" x="15.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_17" x="19.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_18" x="23.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_19" x="27.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r4_20" x="31.0" y="39"/>
+    <xacro:small_shelf name="zone_c_r5_1" x="-53.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_2" x="-49.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_3" x="-45.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_4" x="-41.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_5" x="-37.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_6" x="-33.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_7" x="-29.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_8" x="-25.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_9" x="-21.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_10" x="-17.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_11" x="-13.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_12" x="-9.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_13" x="-5.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_14" x="7.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_15" x="11.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_16" x="15.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_17" x="19.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_18" x="23.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_19" x="27.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r5_20" x="31.0" y="42"/>
+    <xacro:small_shelf name="zone_c_r6_1" x="-53.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_2" x="-49.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_3" x="-45.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_4" x="-41.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_5" x="-37.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_6" x="-33.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_7" x="-29.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_8" x="-25.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_9" x="-21.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_10" x="-17.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_11" x="-13.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_12" x="-9.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_13" x="-5.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_14" x="7.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_15" x="11.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_16" x="15.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_17" x="19.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_18" x="23.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_19" x="27.0" y="45"/>
+    <xacro:small_shelf name="zone_c_r6_20" x="31.0" y="45"/>
+    <!-- zone_c shelves (small): 120 -->
+
+    <!-- ============================================================ -->
+    <!-- ZONE D: BACK STORAGE (big shelves N-S, back-to-back pairs, 2.0 m aisles) -->
+    <!-- 10 back-to-back pairs x 2 deep, aisle 2.0m -->
+    <!-- ============================================================ -->
+
+    <xacro:big_shelf_ns name="zone_d_p1a_1" x="-44.0" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p1b_1" x="-42.8" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p1a_2" x="-44.0" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p1b_2" x="-42.8" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p2a_1" x="-39.6" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p2b_1" x="-38.4" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p2a_2" x="-39.6" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p2b_2" x="-38.4" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p3a_1" x="-35.2" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p3b_1" x="-34.0" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p3a_2" x="-35.2" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p3b_2" x="-34.0" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p4a_1" x="-17.6" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p4b_1" x="-16.4" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p4a_2" x="-17.6" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p4b_2" x="-16.4" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p5a_1" x="-13.2" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p5b_1" x="-12.0" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p5a_2" x="-13.2" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p5b_2" x="-12.0" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p6a_1" x="13.2" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p6b_1" x="14.4" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p6a_2" x="13.2" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p6b_2" x="14.4" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p7a_1" x="17.6" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p7b_1" x="18.8" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p7a_2" x="17.6" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p7b_2" x="18.8" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p8a_1" x="22.0" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p8b_1" x="23.2" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p8a_2" x="22.0" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p8b_2" x="23.2" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p9a_1" x="39.6" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p9b_1" x="40.8" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p9a_2" x="39.6" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p9b_2" x="40.8" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p10a_1" x="44.0" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p10b_1" x="45.2" y="51"/>
+    <xacro:big_shelf_ns name="zone_d_p10a_2" x="44.0" y="62"/>
+    <xacro:big_shelf_ns name="zone_d_p10b_2" x="45.2" y="62"/>
+    <!-- zone_d shelves (big, N-S): 40 -->
+
+    <!-- ============================================================ -->
+    <!-- INBOUND STAGING (5 clusters, 3 wide x 7 deep = 21 each) -->
+    <!-- ============================================================ -->
+
+    <!-- Cluster 1 at x=-60 -->
+    <xacro:pallet name="pin_c1_r1_1" x="-59.74" y="-56.11" z="0.01" yaw="0.0487"/>
+    <xacro:pallet name="pin_c1_r1_2" x="-57.88" y="-55.91" z="0.01" yaw="-0.0966"/>
+    <xacro:pallet name="pin_c1_r1_3" x="-56.71" y="-56.04" z="0.01" yaw="0.1369"/>
+    <xacro:pallet name="pin_c1_r2_1" x="-59.64" y="-57.2" z="0.01" yaw="-0.1641"/>
+    <xacro:pallet name="pin_c1_r2_2" x="-58.15" y="-57.13" z="0.01" yaw="-0.1653"/>
+    <xacro:pallet name="pin_c1_r2_3" x="-56.64" y="-57.16" z="0.01" yaw="0.0157"/>
+    <xacro:pallet name="pin_c1_r3_1" x="-59.75" y="-58.25" z="0.01" yaw="0.108"/>
+    <xacro:pallet name="pin_c1_r3_2" x="-58.08" y="-58.57" z="0.01" yaw="0.0692"/>
+    <xacro:pallet name="pin_c1_r3_3" x="-56.58" y="-58.6" z="0.01" yaw="0.1596"/>
+    <xacro:pallet name="pin_c1_r4_1" x="-59.33" y="-59.55" z="0.01" yaw="-0.1408"/>
+    <xacro:pallet name="pin_c1_r4_2" x="-57.89" y="-59.58" z="0.01" yaw="0.1072"/>
+    <xacro:pallet name="pin_c1_r4_3" x="-56.56" y="-59.57" z="0.01" yaw="0.1651"/>
+    <xacro:pallet name="pin_c1_r5_1" x="-59.44" y="-60.62" z="0.01" yaw="0.115"/>
+    <xacro:pallet name="pin_c1_r5_2" x="-57.9" y="-61.03" z="0.01" yaw="0.027"/>
+    <xacro:pallet name="pin_c1_r5_3" x="-56.61" y="-61.01" z="0.01" yaw="-0.095"/>
+    <xacro:pallet name="pin_c1_r6_1" x="-59.7" y="-62.11" z="0.01" yaw="-0.0933"/>
+    <xacro:pallet name="pin_c1_r6_2" x="-58.07" y="-62.06" z="0.01" yaw="0.0474"/>
+    <xacro:pallet name="pin_c1_r6_3" x="-56.62" y="-61.78" z="0.01" yaw="-0.1014"/>
+    <xacro:pallet name="pin_c1_r7_1" x="-59.45" y="-63.36" z="0.01" yaw="0.0517"/>
+    <xacro:pallet name="pin_c1_r7_2" x="-58.17" y="-63.26" z="0.01" yaw="0.08"/>
+    <xacro:pallet name="pin_c1_r7_3" x="-56.43" y="-63.17" z="0.01" yaw="0.1709"/>
+
+    <!-- Cluster 2 at x=-43 -->
+    <xacro:pallet name="pin_c2_r1_1" x="-42.33" y="-55.86" z="0.01" yaw="0.0644"/>
+    <xacro:pallet name="pin_c2_r1_2" x="-41.23" y="-56.09" z="0.01" yaw="-0.0946"/>
+    <xacro:pallet name="pin_c2_r1_3" x="-39.64" y="-55.78" z="0.01" yaw="-0.0811"/>
+    <xacro:pallet name="pin_c2_r2_1" x="-42.59" y="-57.12" z="0.01" yaw="0.1314"/>
+    <xacro:pallet name="pin_c2_r2_2" x="-40.79" y="-57.22" z="0.01" yaw="-0.0364"/>
+    <xacro:pallet name="pin_c2_r2_3" x="-39.63" y="-57.17" z="0.01" yaw="-0.0821"/>
+    <xacro:pallet name="pin_c2_r3_1" x="-42.46" y="-58.2" z="0.01" yaw="-0.0828"/>
+    <xacro:pallet name="pin_c2_r3_2" x="-41.14" y="-58.15" z="0.01" yaw="-0.0351"/>
+    <xacro:pallet name="pin_c2_r3_3" x="-39.7" y="-58.63" z="0.01" yaw="0.0033"/>
+    <xacro:pallet name="pin_c2_r4_1" x="-42.44" y="-59.45" z="0.01" yaw="-0.1363"/>
+    <xacro:pallet name="pin_c2_r4_2" x="-41.22" y="-59.66" z="0.01" yaw="-0.0272"/>
+    <xacro:pallet name="pin_c2_r4_3" x="-39.49" y="-59.36" z="0.01" yaw="0.1732"/>
+    <xacro:pallet name="pin_c2_r5_1" x="-42.74" y="-60.69" z="0.01" yaw="0.1259"/>
+    <xacro:pallet name="pin_c2_r5_2" x="-40.98" y="-60.92" z="0.01" yaw="0.0634"/>
+    <xacro:pallet name="pin_c2_r5_3" x="-39.69" y="-60.83" z="0.01" yaw="0.0492"/>
+    <xacro:pallet name="pin_c2_r6_1" x="-42.27" y="-61.81" z="0.01" yaw="-0.0162"/>
+    <xacro:pallet name="pin_c2_r6_2" x="-41.0" y="-62.16" z="0.01" yaw="-0.0826"/>
+    <xacro:pallet name="pin_c2_r6_3" x="-39.31" y="-62.1" z="0.01" yaw="0.144"/>
+    <xacro:pallet name="pin_c2_r7_1" x="-42.45" y="-63.37" z="0.01" yaw="0.0485"/>
+    <xacro:pallet name="pin_c2_r7_2" x="-40.98" y="-63.06" z="0.01" yaw="0.0916"/>
+    <xacro:pallet name="pin_c2_r7_3" x="-39.75" y="-63.29" z="0.01" yaw="0.0106"/>
+
+    <!-- Cluster 3 at x=-27 -->
+    <xacro:pallet name="pin_c3_r1_1" x="-26.29" y="-55.81" z="0.01" yaw="-0.1677"/>
+    <xacro:pallet name="pin_c3_r1_2" x="-25.1" y="-56.22" z="0.01" yaw="0.1158"/>
+    <xacro:pallet name="pin_c3_r1_3" x="-23.28" y="-56.21" z="0.01" yaw="0.132"/>
+    <xacro:pallet name="pin_c3_r2_1" x="-26.72" y="-57.07" z="0.01" yaw="-0.0049"/>
+    <xacro:pallet name="pin_c3_r2_2" x="-25.19" y="-57.21" z="0.01" yaw="0.0928"/>
+    <xacro:pallet name="pin_c3_r2_3" x="-23.62" y="-57.01" z="0.01" yaw="0.0174"/>
+    <xacro:pallet name="pin_c3_r3_1" x="-26.64" y="-58.38" z="0.01" yaw="-0.0268"/>
+    <xacro:pallet name="pin_c3_r3_2" x="-25.15" y="-58.49" z="0.01" yaw="0.0803"/>
+    <xacro:pallet name="pin_c3_r3_3" x="-23.43" y="-58.43" z="0.01" yaw="0.1728"/>
+    <xacro:pallet name="pin_c3_r4_1" x="-26.69" y="-59.74" z="0.01" yaw="0.0061"/>
+    <xacro:pallet name="pin_c3_r4_2" x="-24.96" y="-59.73" z="0.01" yaw="-0.0565"/>
+    <xacro:pallet name="pin_c3_r4_3" x="-23.71" y="-59.53" z="0.01" yaw="-0.0977"/>
+    <xacro:pallet name="pin_c3_r5_1" x="-26.3" y="-60.62" z="0.01" yaw="-0.0946"/>
+    <xacro:pallet name="pin_c3_r5_2" x="-25.13" y="-60.72" z="0.01" yaw="-0.1498"/>
+    <xacro:pallet name="pin_c3_r5_3" x="-23.68" y="-60.58" z="0.01" yaw="-0.0998"/>
+    <xacro:pallet name="pin_c3_r6_1" x="-26.51" y="-61.86" z="0.01" yaw="0.0248"/>
+    <xacro:pallet name="pin_c3_r6_2" x="-25.15" y="-62.2" z="0.01" yaw="0.1073"/>
+    <xacro:pallet name="pin_c3_r6_3" x="-23.54" y="-62.02" z="0.01" yaw="-0.0241"/>
+    <xacro:pallet name="pin_c3_r7_1" x="-26.41" y="-62.96" z="0.01" yaw="0.08"/>
+    <xacro:pallet name="pin_c3_r7_2" x="-25.05" y="-63.28" z="0.01" yaw="-0.1402"/>
+    <xacro:pallet name="pin_c3_r7_3" x="-23.63" y="-63.35" z="0.01" yaw="0.1262"/>
+
+    <!-- Cluster 4 at x=-10 -->
+    <xacro:pallet name="pin_c4_r1_1" x="-9.54" y="-56.11" z="0.01" yaw="-0.0179"/>
+    <xacro:pallet name="pin_c4_r1_2" x="-7.79" y="-56.03" z="0.01" yaw="-0.0873"/>
+    <xacro:pallet name="pin_c4_r1_3" x="-6.47" y="-56.22" z="0.01" yaw="0.1261"/>
+    <xacro:pallet name="pin_c4_r2_1" x="-9.33" y="-56.97" z="0.01" yaw="0.1743"/>
+    <xacro:pallet name="pin_c4_r2_2" x="-7.83" y="-57.37" z="0.01" yaw="0.1488"/>
+    <xacro:pallet name="pin_c4_r2_3" x="-6.64" y="-57.25" z="0.01" yaw="-0.005"/>
+    <xacro:pallet name="pin_c4_r3_1" x="-9.56" y="-58.16" z="0.01" yaw="-0.1541"/>
+    <xacro:pallet name="pin_c4_r3_2" x="-7.86" y="-58.42" z="0.01" yaw="-0.082"/>
+    <xacro:pallet name="pin_c4_r3_3" x="-6.27" y="-58.15" z="0.01" yaw="-0.0269"/>
+    <xacro:pallet name="pin_c4_r4_1" x="-9.39" y="-59.77" z="0.01" yaw="0.0195"/>
+    <xacro:pallet name="pin_c4_r4_2" x="-7.77" y="-59.56" z="0.01" yaw="-0.071"/>
+    <xacro:pallet name="pin_c4_r4_3" x="-6.38" y="-59.82" z="0.01" yaw="0.0147"/>
+    <xacro:pallet name="pin_c4_r5_1" x="-9.5" y="-60.62" z="0.01" yaw="0.0294"/>
+    <xacro:pallet name="pin_c4_r5_2" x="-7.77" y="-61.01" z="0.01" yaw="-0.1196"/>
+    <xacro:pallet name="pin_c4_r5_3" x="-6.45" y="-60.71" z="0.01" yaw="-0.1097"/>
+    <xacro:pallet name="pin_c4_r6_1" x="-9.69" y="-61.8" z="0.01" yaw="-0.0924"/>
+    <xacro:pallet name="pin_c4_r6_2" x="-7.95" y="-61.94" z="0.01" yaw="-0.0886"/>
+    <xacro:pallet name="pin_c4_r6_3" x="-6.46" y="-61.99" z="0.01" yaw="-0.0282"/>
+    <xacro:pallet name="pin_c4_r7_1" x="-9.65" y="-63.09" z="0.01" yaw="0.1517"/>
+    <xacro:pallet name="pin_c4_r7_2" x="-8.05" y="-63.11" z="0.01" yaw="-0.0912"/>
+    <xacro:pallet name="pin_c4_r7_3" x="-6.59" y="-63.07" z="0.01" yaw="-0.0698"/>
+
+    <!-- Cluster 5 at x=7 -->
+    <xacro:pallet name="pin_c5_r1_1" x="7.48" y="-55.75" z="0.01" yaw="-0.1492"/>
+    <xacro:pallet name="pin_c5_r1_2" x="8.79" y="-56.14" z="0.01" yaw="0.1732"/>
+    <xacro:pallet name="pin_c5_r1_3" x="10.72" y="-55.81" z="0.01" yaw="-0.082"/>
+    <xacro:pallet name="pin_c5_r2_1" x="7.43" y="-57.37" z="0.01" yaw="0.1324"/>
+    <xacro:pallet name="pin_c5_r2_2" x="9.1" y="-57.14" z="0.01" yaw="0.1165"/>
+    <xacro:pallet name="pin_c5_r2_3" x="10.58" y="-57.45" z="0.01" yaw="0.1701"/>
+    <xacro:pallet name="pin_c5_r3_1" x="7.4" y="-58.32" z="0.01" yaw="0.1107"/>
+    <xacro:pallet name="pin_c5_r3_2" x="8.82" y="-58.59" z="0.01" yaw="0.1532"/>
+    <xacro:pallet name="pin_c5_r3_3" x="10.53" y="-58.51" z="0.01" yaw="-0.1372"/>
+    <xacro:pallet name="pin_c5_r4_1" x="7.61" y="-59.75" z="0.01" yaw="0.0366"/>
+    <xacro:pallet name="pin_c5_r4_2" x="8.88" y="-59.61" z="0.01" yaw="0.0469"/>
+    <xacro:pallet name="pin_c5_r4_3" x="10.67" y="-59.8" z="0.01" yaw="0.1415"/>
+    <xacro:pallet name="pin_c5_r5_1" x="7.39" y="-61.05" z="0.01" yaw="-0.0267"/>
+    <xacro:pallet name="pin_c5_r5_2" x="9.07" y="-60.92" z="0.01" yaw="0.0946"/>
+    <xacro:pallet name="pin_c5_r5_3" x="10.53" y="-60.84" z="0.01" yaw="0.0842"/>
+    <xacro:pallet name="pin_c5_r6_1" x="7.29" y="-61.81" z="0.01" yaw="-0.1712"/>
+    <xacro:pallet name="pin_c5_r6_2" x="9.02" y="-61.83" z="0.01" yaw="0.141"/>
+    <xacro:pallet name="pin_c5_r6_3" x="10.32" y="-62.19" z="0.01" yaw="0.0288"/>
+    <xacro:pallet name="pin_c5_r7_1" x="7.7" y="-63.05" z="0.01" yaw="-0.0669"/>
+    <xacro:pallet name="pin_c5_r7_2" x="9.2" y="-63.35" z="0.01" yaw="0.1259"/>
+    <xacro:pallet name="pin_c5_r7_3" x="10.3" y="-63.06" z="0.01" yaw="-0.0874"/>
+
+    <!-- Inbound staging: 105 pallets -->
+
+    <!-- ============================================================ -->
+    <!-- BLOCK-STACK PALLETS (2-4 tall, shortest on outside)           -->
+    <!-- ============================================================ -->
+
+    <!-- Stack ps_a at (37, 33), 5x7 -->
+    <xacro:pallet name="ps_a_0_0_L1" x="36.59" y="29.05" z="0.01" yaw="0.0421"/>
+    <xacro:pallet name="ps_a_0_0_L2" x="36.59" y="29.05" z="1.21" yaw="0.0421"/>
+    <xacro:pallet name="ps_a_0_1_L1" x="36.23" y="30.61" z="0.01" yaw="0.1273"/>
+    <xacro:pallet name="ps_a_0_1_L2" x="36.23" y="30.61" z="1.21" yaw="0.1273"/>
+    <xacro:pallet name="ps_a_0_2_L1" x="36.64" y="31.86" z="0.01" yaw="0.1331"/>
+    <xacro:pallet name="ps_a_0_2_L2" x="36.64" y="31.86" z="1.21" yaw="0.1331"/>
+    <xacro:pallet name="ps_a_0_3_L1" x="36.16" y="33.12" z="0.01" yaw="-0.0586"/>
+    <xacro:pallet name="ps_a_0_3_L2" x="36.16" y="33.12" z="1.21" yaw="-0.0586"/>
+    <xacro:pallet name="ps_a_0_4_L1" x="36.62" y="34.45" z="0.01" yaw="0.1271"/>
+    <xacro:pallet name="ps_a_0_4_L2" x="36.62" y="34.45" z="1.21" yaw="0.1271"/>
+    <xacro:pallet name="ps_a_0_5_L1" x="36.56" y="35.48" z="0.01" yaw="0.1003"/>
+    <xacro:pallet name="ps_a_0_5_L2" x="36.56" y="35.48" z="1.21" yaw="0.1003"/>
+    <xacro:pallet name="ps_a_0_6_L1" x="36.2" y="37.09" z="0.01" yaw="0.1252"/>
+    <xacro:pallet name="ps_a_0_6_L2" x="36.2" y="37.09" z="1.21" yaw="0.1252"/>
+    <xacro:pallet name="ps_a_1_0_L1" x="37.56" y="29.26" z="0.01" yaw="-0.0139"/>
+    <xacro:pallet name="ps_a_1_0_L2" x="37.56" y="29.26" z="1.21" yaw="-0.0139"/>
+    <xacro:pallet name="ps_a_1_1_L1" x="37.6" y="30.55" z="0.01" yaw="-0.0967"/>
+    <xacro:pallet name="ps_a_1_1_L2" x="37.6" y="30.55" z="1.21" yaw="-0.0967"/>
+    <xacro:pallet name="ps_a_1_2_L1" x="37.78" y="31.65" z="0.01" yaw="0.1272"/>
+    <xacro:pallet name="ps_a_1_2_L2" x="37.78" y="31.65" z="1.21" yaw="0.1272"/>
+    <xacro:pallet name="ps_a_1_2_L3" x="37.78" y="31.65" z="2.41" yaw="0.1272"/>
+    <xacro:pallet name="ps_a_1_3_L1" x="37.93" y="32.89" z="0.01" yaw="0.0627"/>
+    <xacro:pallet name="ps_a_1_3_L2" x="37.93" y="32.89" z="1.21" yaw="0.0627"/>
+    <xacro:pallet name="ps_a_1_3_L3" x="37.93" y="32.89" z="2.41" yaw="0.0627"/>
+    <xacro:pallet name="ps_a_1_4_L1" x="37.87" y="34.22" z="0.01" yaw="-0.1343"/>
+    <xacro:pallet name="ps_a_1_4_L2" x="37.87" y="34.22" z="1.21" yaw="-0.1343"/>
+    <xacro:pallet name="ps_a_1_5_L1" x="37.94" y="35.44" z="0.01" yaw="-0.1612"/>
+    <xacro:pallet name="ps_a_1_5_L2" x="37.94" y="35.44" z="1.21" yaw="-0.1612"/>
+    <xacro:pallet name="ps_a_1_5_L3" x="37.94" y="35.44" z="2.41" yaw="-0.1612"/>
+    <xacro:pallet name="ps_a_1_6_L1" x="37.75" y="36.82" z="0.01" yaw="0.1"/>
+    <xacro:pallet name="ps_a_1_6_L2" x="37.75" y="36.82" z="1.21" yaw="0.1"/>
+    <xacro:pallet name="ps_a_2_0_L1" x="38.97" y="29.34" z="0.01" yaw="-0.1342"/>
+    <xacro:pallet name="ps_a_2_0_L2" x="38.97" y="29.34" z="1.21" yaw="-0.1342"/>
+    <xacro:pallet name="ps_a_2_1_L1" x="39.2" y="30.24" z="0.01" yaw="0.0729"/>
+    <xacro:pallet name="ps_a_2_1_L2" x="39.2" y="30.24" z="1.21" yaw="0.0729"/>
+    <xacro:pallet name="ps_a_2_2_L1" x="38.75" y="31.91" z="0.01" yaw="-0.0474"/>
+    <xacro:pallet name="ps_a_2_2_L2" x="38.75" y="31.91" z="1.21" yaw="-0.0474"/>
+    <xacro:pallet name="ps_a_2_2_L3" x="38.75" y="31.91" z="2.41" yaw="-0.0474"/>
+    <xacro:pallet name="ps_a_2_3_L1" x="38.78" y="33.08" z="0.01" yaw="0.043"/>
+    <xacro:pallet name="ps_a_2_3_L2" x="38.78" y="33.08" z="1.21" yaw="0.043"/>
+    <xacro:pallet name="ps_a_2_3_L3" x="38.78" y="33.08" z="2.41" yaw="0.043"/>
+    <xacro:pallet name="ps_a_2_3_L4" x="38.78" y="33.08" z="3.61" yaw="0.043"/>
+    <xacro:pallet name="ps_a_2_4_L1" x="39.08" y="34.11" z="0.01" yaw="0.0025"/>
+    <xacro:pallet name="ps_a_2_4_L2" x="39.08" y="34.11" z="1.21" yaw="0.0025"/>
+    <xacro:pallet name="ps_a_2_4_L3" x="39.08" y="34.11" z="2.41" yaw="0.0025"/>
+    <xacro:pallet name="ps_a_2_4_L4" x="39.08" y="34.11" z="3.61" yaw="0.0025"/>
+    <xacro:pallet name="ps_a_2_5_L1" x="39.08" y="35.51" z="0.01" yaw="0.019"/>
+    <xacro:pallet name="ps_a_2_5_L2" x="39.08" y="35.51" z="1.21" yaw="0.019"/>
+    <xacro:pallet name="ps_a_2_5_L3" x="39.08" y="35.51" z="2.41" yaw="0.019"/>
+    <xacro:pallet name="ps_a_2_6_L1" x="38.85" y="36.98" z="0.01" yaw="-0.0422"/>
+    <xacro:pallet name="ps_a_2_6_L2" x="38.85" y="36.98" z="1.21" yaw="-0.0422"/>
+    <xacro:pallet name="ps_a_3_0_L1" x="40.42" y="28.94" z="0.01" yaw="0.0241"/>
+    <xacro:pallet name="ps_a_3_0_L2" x="40.42" y="28.94" z="1.21" yaw="0.0241"/>
+    <xacro:pallet name="ps_a_3_1_L1" x="40.25" y="30.57" z="0.01" yaw="-0.0744"/>
+    <xacro:pallet name="ps_a_3_1_L2" x="40.25" y="30.57" z="1.21" yaw="-0.0744"/>
+    <xacro:pallet name="ps_a_3_1_L3" x="40.25" y="30.57" z="2.41" yaw="-0.0744"/>
+    <xacro:pallet name="ps_a_3_2_L1" x="40.26" y="31.74" z="0.01" yaw="-0.0122"/>
+    <xacro:pallet name="ps_a_3_2_L2" x="40.26" y="31.74" z="1.21" yaw="-0.0122"/>
+    <xacro:pallet name="ps_a_3_2_L3" x="40.26" y="31.74" z="2.41" yaw="-0.0122"/>
+    <xacro:pallet name="ps_a_3_3_L1" x="40.27" y="32.86" z="0.01" yaw="0.1025"/>
+    <xacro:pallet name="ps_a_3_3_L2" x="40.27" y="32.86" z="1.21" yaw="0.1025"/>
+    <xacro:pallet name="ps_a_3_3_L3" x="40.27" y="32.86" z="2.41" yaw="0.1025"/>
+    <xacro:pallet name="ps_a_3_4_L1" x="40.53" y="34.42" z="0.01" yaw="-0.0755"/>
+    <xacro:pallet name="ps_a_3_4_L2" x="40.53" y="34.42" z="1.21" yaw="-0.0755"/>
+    <xacro:pallet name="ps_a_3_5_L1" x="40.38" y="35.66" z="0.01" yaw="0.1112"/>
+    <xacro:pallet name="ps_a_3_5_L2" x="40.38" y="35.66" z="1.21" yaw="0.1112"/>
+    <xacro:pallet name="ps_a_3_6_L1" x="40.43" y="36.99" z="0.01" yaw="-0.0961"/>
+    <xacro:pallet name="ps_a_3_6_L2" x="40.43" y="36.99" z="1.21" yaw="-0.0961"/>
+    <xacro:pallet name="ps_a_4_0_L1" x="41.45" y="28.86" z="0.01" yaw="-0.0891"/>
+    <xacro:pallet name="ps_a_4_0_L2" x="41.45" y="28.86" z="1.21" yaw="-0.0891"/>
+    <xacro:pallet name="ps_a_4_1_L1" x="41.59" y="30.57" z="0.01" yaw="-0.1491"/>
+    <xacro:pallet name="ps_a_4_1_L2" x="41.59" y="30.57" z="1.21" yaw="-0.1491"/>
+    <xacro:pallet name="ps_a_4_2_L1" x="41.56" y="31.76" z="0.01" yaw="-0.1067"/>
+    <xacro:pallet name="ps_a_4_2_L2" x="41.56" y="31.76" z="1.21" yaw="-0.1067"/>
+    <xacro:pallet name="ps_a_4_3_L1" x="41.7" y="33.0" z="0.01" yaw="-0.0894"/>
+    <xacro:pallet name="ps_a_4_3_L2" x="41.7" y="33.0" z="1.21" yaw="-0.0894"/>
+    <xacro:pallet name="ps_a_4_4_L1" x="41.68" y="34.05" z="0.01" yaw="0.0876"/>
+    <xacro:pallet name="ps_a_4_4_L2" x="41.68" y="34.05" z="1.21" yaw="0.0876"/>
+    <xacro:pallet name="ps_a_4_5_L1" x="41.73" y="35.4" z="0.01" yaw="-0.0261"/>
+    <xacro:pallet name="ps_a_4_5_L2" x="41.73" y="35.4" z="1.21" yaw="-0.0261"/>
+    <xacro:pallet name="ps_a_4_6_L1" x="41.44" y="37.13" z="0.01" yaw="0.0063"/>
+    <xacro:pallet name="ps_a_4_6_L2" x="41.44" y="37.13" z="1.21" yaw="0.0063"/>
+
+    <!-- Stack ps_b at (37, 42), 5x7 -->
+    <xacro:pallet name="ps_b_0_0_L1" x="36.18" y="37.97" z="0.01" yaw="0.1216"/>
+    <xacro:pallet name="ps_b_0_0_L2" x="36.18" y="37.97" z="1.21" yaw="0.1216"/>
+    <xacro:pallet name="ps_b_0_1_L1" x="36.38" y="39.55" z="0.01" yaw="0.0585"/>
+    <xacro:pallet name="ps_b_0_1_L2" x="36.38" y="39.55" z="1.21" yaw="0.0585"/>
+    <xacro:pallet name="ps_b_0_2_L1" x="36.64" y="40.75" z="0.01" yaw="0.1571"/>
+    <xacro:pallet name="ps_b_0_2_L2" x="36.64" y="40.75" z="1.21" yaw="0.1571"/>
+    <xacro:pallet name="ps_b_0_3_L1" x="36.6" y="42.06" z="0.01" yaw="0.0765"/>
+    <xacro:pallet name="ps_b_0_3_L2" x="36.6" y="42.06" z="1.21" yaw="0.0765"/>
+    <xacro:pallet name="ps_b_0_4_L1" x="36.4" y="43.47" z="0.01" yaw="0.0167"/>
+    <xacro:pallet name="ps_b_0_4_L2" x="36.4" y="43.47" z="1.21" yaw="0.0167"/>
+    <xacro:pallet name="ps_b_0_5_L1" x="36.6" y="44.72" z="0.01" yaw="-0.0088"/>
+    <xacro:pallet name="ps_b_0_5_L2" x="36.6" y="44.72" z="1.21" yaw="-0.0088"/>
+    <xacro:pallet name="ps_b_0_6_L1" x="36.28" y="45.77" z="0.01" yaw="0.0481"/>
+    <xacro:pallet name="ps_b_0_6_L2" x="36.28" y="45.77" z="1.21" yaw="0.0481"/>
+    <xacro:pallet name="ps_b_1_0_L1" x="37.83" y="38.11" z="0.01" yaw="0.0442"/>
+    <xacro:pallet name="ps_b_1_0_L2" x="37.83" y="38.11" z="1.21" yaw="0.0442"/>
+    <xacro:pallet name="ps_b_1_1_L1" x="37.59" y="39.19" z="0.01" yaw="-0.0927"/>
+    <xacro:pallet name="ps_b_1_1_L2" x="37.59" y="39.19" z="1.21" yaw="-0.0927"/>
+    <xacro:pallet name="ps_b_1_1_L3" x="37.59" y="39.19" z="2.41" yaw="-0.0927"/>
+    <xacro:pallet name="ps_b_1_2_L1" x="37.62" y="40.9" z="0.01" yaw="-0.1262"/>
+    <xacro:pallet name="ps_b_1_2_L2" x="37.62" y="40.9" z="1.21" yaw="-0.1262"/>
+    <xacro:pallet name="ps_b_1_3_L1" x="37.57" y="42.1" z="0.01" yaw="-0.1521"/>
+    <xacro:pallet name="ps_b_1_3_L2" x="37.57" y="42.1" z="1.21" yaw="-0.1521"/>
+    <xacro:pallet name="ps_b_1_4_L1" x="37.65" y="43.32" z="0.01" yaw="-0.1528"/>
+    <xacro:pallet name="ps_b_1_4_L2" x="37.65" y="43.32" z="1.21" yaw="-0.1528"/>
+    <xacro:pallet name="ps_b_1_4_L3" x="37.65" y="43.32" z="2.41" yaw="-0.1528"/>
+    <xacro:pallet name="ps_b_1_5_L1" x="37.87" y="44.54" z="0.01" yaw="0.1245"/>
+    <xacro:pallet name="ps_b_1_5_L2" x="37.87" y="44.54" z="1.21" yaw="0.1245"/>
+    <xacro:pallet name="ps_b_1_6_L1" x="37.83" y="45.84" z="0.01" yaw="-0.1725"/>
+    <xacro:pallet name="ps_b_1_6_L2" x="37.83" y="45.84" z="1.21" yaw="-0.1725"/>
+    <xacro:pallet name="ps_b_2_0_L1" x="38.93" y="38.23" z="0.01" yaw="0.1234"/>
+    <xacro:pallet name="ps_b_2_0_L2" x="38.93" y="38.23" z="1.21" yaw="0.1234"/>
+    <xacro:pallet name="ps_b_2_1_L1" x="39.23" y="39.36" z="0.01" yaw="-0.0041"/>
+    <xacro:pallet name="ps_b_2_1_L2" x="39.23" y="39.36" z="1.21" yaw="-0.0041"/>
+    <xacro:pallet name="ps_b_2_2_L1" x="38.89" y="40.69" z="0.01" yaw="-0.0572"/>
+    <xacro:pallet name="ps_b_2_2_L2" x="38.89" y="40.69" z="1.21" yaw="-0.0572"/>
+    <xacro:pallet name="ps_b_2_2_L3" x="38.89" y="40.69" z="2.41" yaw="-0.0572"/>
+    <xacro:pallet name="ps_b_2_2_L4" x="38.89" y="40.69" z="3.61" yaw="-0.0572"/>
+    <xacro:pallet name="ps_b_2_3_L1" x="39.09" y="41.95" z="0.01" yaw="0.1189"/>
+    <xacro:pallet name="ps_b_2_3_L2" x="39.09" y="41.95" z="1.21" yaw="0.1189"/>
+    <xacro:pallet name="ps_b_2_3_L3" x="39.09" y="41.95" z="2.41" yaw="0.1189"/>
+    <xacro:pallet name="ps_b_2_4_L1" x="39.21" y="43.54" z="0.01" yaw="0.142"/>
+    <xacro:pallet name="ps_b_2_4_L2" x="39.21" y="43.54" z="1.21" yaw="0.142"/>
+    <xacro:pallet name="ps_b_2_4_L3" x="39.21" y="43.54" z="2.41" yaw="0.142"/>
+    <xacro:pallet name="ps_b_2_5_L1" x="39.05" y="44.68" z="0.01" yaw="0.0498"/>
+    <xacro:pallet name="ps_b_2_5_L2" x="39.05" y="44.68" z="1.21" yaw="0.0498"/>
+    <xacro:pallet name="ps_b_2_6_L1" x="38.82" y="45.88" z="0.01" yaw="-0.157"/>
+    <xacro:pallet name="ps_b_2_6_L2" x="38.82" y="45.88" z="1.21" yaw="-0.157"/>
+    <xacro:pallet name="ps_b_3_0_L1" x="40.24" y="37.96" z="0.01" yaw="-0.0604"/>
+    <xacro:pallet name="ps_b_3_0_L2" x="40.24" y="37.96" z="1.21" yaw="-0.0604"/>
+    <xacro:pallet name="ps_b_3_1_L1" x="40.43" y="39.34" z="0.01" yaw="-0.0865"/>
+    <xacro:pallet name="ps_b_3_1_L2" x="40.43" y="39.34" z="1.21" yaw="-0.0865"/>
+    <xacro:pallet name="ps_b_3_1_L3" x="40.43" y="39.34" z="2.41" yaw="-0.0865"/>
+    <xacro:pallet name="ps_b_3_2_L1" x="40.09" y="40.46" z="0.01" yaw="0.1745"/>
+    <xacro:pallet name="ps_b_3_2_L2" x="40.09" y="40.46" z="1.21" yaw="0.1745"/>
+    <xacro:pallet name="ps_b_3_3_L1" x="40.22" y="42.08" z="0.01" yaw="0.0887"/>
+    <xacro:pallet name="ps_b_3_3_L2" x="40.22" y="42.08" z="1.21" yaw="0.0887"/>
+    <xacro:pallet name="ps_b_3_4_L1" x="40.52" y="43.15" z="0.01" yaw="0.0424"/>
+    <xacro:pallet name="ps_b_3_4_L2" x="40.52" y="43.15" z="1.21" yaw="0.0424"/>
+    <xacro:pallet name="ps_b_3_5_L1" x="40.17" y="44.59" z="0.01" yaw="0.0223"/>
+    <xacro:pallet name="ps_b_3_5_L2" x="40.17" y="44.59" z="1.21" yaw="0.0223"/>
+    <xacro:pallet name="ps_b_3_6_L1" x="40.16" y="46.0" z="0.01" yaw="0.0932"/>
+    <xacro:pallet name="ps_b_3_6_L2" x="40.16" y="46.0" z="1.21" yaw="0.0932"/>
+    <xacro:pallet name="ps_b_4_0_L1" x="41.43" y="38.15" z="0.01" yaw="0.0865"/>
+    <xacro:pallet name="ps_b_4_0_L2" x="41.43" y="38.15" z="1.21" yaw="0.0865"/>
+    <xacro:pallet name="ps_b_4_1_L1" x="41.41" y="39.56" z="0.01" yaw="0.1622"/>
+    <xacro:pallet name="ps_b_4_1_L2" x="41.41" y="39.56" z="1.21" yaw="0.1622"/>
+    <xacro:pallet name="ps_b_4_2_L1" x="41.4" y="40.46" z="0.01" yaw="-0.0656"/>
+    <xacro:pallet name="ps_b_4_2_L2" x="41.4" y="40.46" z="1.21" yaw="-0.0656"/>
+    <xacro:pallet name="ps_b_4_3_L1" x="41.69" y="42.23" z="0.01" yaw="-0.0361"/>
+    <xacro:pallet name="ps_b_4_3_L2" x="41.69" y="42.23" z="1.21" yaw="-0.0361"/>
+    <xacro:pallet name="ps_b_4_4_L1" x="41.71" y="43.09" z="0.01" yaw="0.0665"/>
+    <xacro:pallet name="ps_b_4_4_L2" x="41.71" y="43.09" z="1.21" yaw="0.0665"/>
+    <xacro:pallet name="ps_b_4_5_L1" x="41.66" y="44.4" z="0.01" yaw="0.0951"/>
+    <xacro:pallet name="ps_b_4_5_L2" x="41.66" y="44.4" z="1.21" yaw="0.0951"/>
+    <xacro:pallet name="ps_b_4_6_L1" x="41.78" y="45.95" z="0.01" yaw="-0.1323"/>
+    <xacro:pallet name="ps_b_4_6_L2" x="41.78" y="45.95" z="1.21" yaw="-0.1323"/>
+
+    <!-- Stack ps_c at (48, 33), 5x7 -->
+    <xacro:pallet name="ps_c_0_0_L1" x="47.64" y="29.24" z="0.01" yaw="-0.0533"/>
+    <xacro:pallet name="ps_c_0_0_L2" x="47.64" y="29.24" z="1.21" yaw="-0.0533"/>
+    <xacro:pallet name="ps_c_0_1_L1" x="47.36" y="30.34" z="0.01" yaw="0.0021"/>
+    <xacro:pallet name="ps_c_0_1_L2" x="47.36" y="30.34" z="1.21" yaw="0.0021"/>
+    <xacro:pallet name="ps_c_0_2_L1" x="47.32" y="31.87" z="0.01" yaw="0.1125"/>
+    <xacro:pallet name="ps_c_0_2_L2" x="47.32" y="31.87" z="1.21" yaw="0.1125"/>
+    <xacro:pallet name="ps_c_0_3_L1" x="47.2" y="33.23" z="0.01" yaw="0.0473"/>
+    <xacro:pallet name="ps_c_0_3_L2" x="47.2" y="33.23" z="1.21" yaw="0.0473"/>
+    <xacro:pallet name="ps_c_0_4_L1" x="47.56" y="34.4" z="0.01" yaw="-0.0225"/>
+    <xacro:pallet name="ps_c_0_4_L2" x="47.56" y="34.4" z="1.21" yaw="-0.0225"/>
+    <xacro:pallet name="ps_c_0_5_L1" x="47.52" y="35.83" z="0.01" yaw="-0.0803"/>
+    <xacro:pallet name="ps_c_0_5_L2" x="47.52" y="35.83" z="1.21" yaw="-0.0803"/>
+    <xacro:pallet name="ps_c_0_6_L1" x="47.55" y="36.92" z="0.01" yaw="-0.0058"/>
+    <xacro:pallet name="ps_c_0_6_L2" x="47.55" y="36.92" z="1.21" yaw="-0.0058"/>
+    <xacro:pallet name="ps_c_1_0_L1" x="48.67" y="29.22" z="0.01" yaw="-0.0808"/>
+    <xacro:pallet name="ps_c_1_0_L2" x="48.67" y="29.22" z="1.21" yaw="-0.0808"/>
+    <xacro:pallet name="ps_c_1_1_L1" x="48.88" y="30.57" z="0.01" yaw="-0.0772"/>
+    <xacro:pallet name="ps_c_1_1_L2" x="48.88" y="30.57" z="1.21" yaw="-0.0772"/>
+    <xacro:pallet name="ps_c_1_2_L1" x="48.68" y="31.83" z="0.01" yaw="-0.0571"/>
+    <xacro:pallet name="ps_c_1_2_L2" x="48.68" y="31.83" z="1.21" yaw="-0.0571"/>
+    <xacro:pallet name="ps_c_1_2_L3" x="48.68" y="31.83" z="2.41" yaw="-0.0571"/>
+    <xacro:pallet name="ps_c_1_3_L1" x="48.7" y="32.91" z="0.01" yaw="-0.1005"/>
+    <xacro:pallet name="ps_c_1_3_L2" x="48.7" y="32.91" z="1.21" yaw="-0.1005"/>
+    <xacro:pallet name="ps_c_1_3_L3" x="48.7" y="32.91" z="2.41" yaw="-0.1005"/>
+    <xacro:pallet name="ps_c_1_4_L1" x="48.85" y="34.22" z="0.01" yaw="0.0195"/>
+    <xacro:pallet name="ps_c_1_4_L2" x="48.85" y="34.22" z="1.21" yaw="0.0195"/>
+    <xacro:pallet name="ps_c_1_4_L3" x="48.85" y="34.22" z="2.41" yaw="0.0195"/>
+    <xacro:pallet name="ps_c_1_5_L1" x="48.71" y="35.45" z="0.01" yaw="0.0768"/>
+    <xacro:pallet name="ps_c_1_5_L2" x="48.71" y="35.45" z="1.21" yaw="0.0768"/>
+    <xacro:pallet name="ps_c_1_6_L1" x="48.69" y="37.03" z="0.01" yaw="0.0665"/>
+    <xacro:pallet name="ps_c_1_6_L2" x="48.69" y="37.03" z="1.21" yaw="0.0665"/>
+    <xacro:pallet name="ps_c_2_0_L1" x="50.07" y="29.1" z="0.01" yaw="0.1023"/>
+    <xacro:pallet name="ps_c_2_0_L2" x="50.07" y="29.1" z="1.21" yaw="0.1023"/>
+    <xacro:pallet name="ps_c_2_1_L1" x="49.8" y="30.26" z="0.01" yaw="-0.0676"/>
+    <xacro:pallet name="ps_c_2_1_L2" x="49.8" y="30.26" z="1.21" yaw="-0.0676"/>
+    <xacro:pallet name="ps_c_2_2_L1" x="50.04" y="31.69" z="0.01" yaw="-0.026"/>
+    <xacro:pallet name="ps_c_2_2_L2" x="50.04" y="31.69" z="1.21" yaw="-0.026"/>
+    <xacro:pallet name="ps_c_2_2_L3" x="50.04" y="31.69" z="2.41" yaw="-0.026"/>
+    <xacro:pallet name="ps_c_2_2_L4" x="50.04" y="31.69" z="3.61" yaw="-0.026"/>
+    <xacro:pallet name="ps_c_2_3_L1" x="50.12" y="32.92" z="0.01" yaw="-0.08"/>
+    <xacro:pallet name="ps_c_2_3_L2" x="50.12" y="32.92" z="1.21" yaw="-0.08"/>
+    <xacro:pallet name="ps_c_2_3_L3" x="50.12" y="32.92" z="2.41" yaw="-0.08"/>
+    <xacro:pallet name="ps_c_2_3_L4" x="50.12" y="32.92" z="3.61" yaw="-0.08"/>
+    <xacro:pallet name="ps_c_2_4_L1" x="49.88" y="34.11" z="0.01" yaw="-0.0644"/>
+    <xacro:pallet name="ps_c_2_4_L2" x="49.88" y="34.11" z="1.21" yaw="-0.0644"/>
+    <xacro:pallet name="ps_c_2_4_L3" x="49.88" y="34.11" z="2.41" yaw="-0.0644"/>
+    <xacro:pallet name="ps_c_2_5_L1" x="50.12" y="35.83" z="0.01" yaw="-0.1077"/>
+    <xacro:pallet name="ps_c_2_5_L2" x="50.12" y="35.83" z="1.21" yaw="-0.1077"/>
+    <xacro:pallet name="ps_c_2_6_L1" x="50.12" y="36.79" z="0.01" yaw="0.0313"/>
+    <xacro:pallet name="ps_c_2_6_L2" x="50.12" y="36.79" z="1.21" yaw="0.0313"/>
+    <xacro:pallet name="ps_c_3_0_L1" x="51.43" y="29.15" z="0.01" yaw="0.1677"/>
+    <xacro:pallet name="ps_c_3_0_L2" x="51.43" y="29.15" z="1.21" yaw="0.1677"/>
+    <xacro:pallet name="ps_c_3_1_L1" x="51.47" y="30.3" z="0.01" yaw="-0.1119"/>
+    <xacro:pallet name="ps_c_3_1_L2" x="51.47" y="30.3" z="1.21" yaw="-0.1119"/>
+    <xacro:pallet name="ps_c_3_1_L3" x="51.47" y="30.3" z="2.41" yaw="-0.1119"/>
+    <xacro:pallet name="ps_c_3_2_L1" x="51.06" y="31.72" z="0.01" yaw="-0.1586"/>
+    <xacro:pallet name="ps_c_3_2_L2" x="51.06" y="31.72" z="1.21" yaw="-0.1586"/>
+    <xacro:pallet name="ps_c_3_2_L3" x="51.06" y="31.72" z="2.41" yaw="-0.1586"/>
+    <xacro:pallet name="ps_c_3_3_L1" x="51.08" y="32.9" z="0.01" yaw="0.0481"/>
+    <xacro:pallet name="ps_c_3_3_L2" x="51.08" y="32.9" z="1.21" yaw="0.0481"/>
+    <xacro:pallet name="ps_c_3_4_L1" x="51.43" y="34.1" z="0.01" yaw="0.0259"/>
+    <xacro:pallet name="ps_c_3_4_L2" x="51.43" y="34.1" z="1.21" yaw="0.0259"/>
+    <xacro:pallet name="ps_c_3_5_L1" x="51.28" y="35.57" z="0.01" yaw="0.1625"/>
+    <xacro:pallet name="ps_c_3_5_L2" x="51.28" y="35.57" z="1.21" yaw="0.1625"/>
+    <xacro:pallet name="ps_c_3_6_L1" x="51.18" y="37.08" z="0.01" yaw="-0.1347"/>
+    <xacro:pallet name="ps_c_3_6_L2" x="51.18" y="37.08" z="1.21" yaw="-0.1347"/>
+    <xacro:pallet name="ps_c_4_0_L1" x="52.38" y="29.1" z="0.01" yaw="0.0269"/>
+    <xacro:pallet name="ps_c_4_0_L2" x="52.38" y="29.1" z="1.21" yaw="0.0269"/>
+    <xacro:pallet name="ps_c_4_1_L1" x="52.69" y="30.23" z="0.01" yaw="0.1086"/>
+    <xacro:pallet name="ps_c_4_1_L2" x="52.69" y="30.23" z="1.21" yaw="0.1086"/>
+    <xacro:pallet name="ps_c_4_2_L1" x="52.82" y="31.49" z="0.01" yaw="-0.0879"/>
+    <xacro:pallet name="ps_c_4_2_L2" x="52.82" y="31.49" z="1.21" yaw="-0.0879"/>
+    <xacro:pallet name="ps_c_4_3_L1" x="52.63" y="32.96" z="0.01" yaw="0.0336"/>
+    <xacro:pallet name="ps_c_4_3_L2" x="52.63" y="32.96" z="1.21" yaw="0.0336"/>
+    <xacro:pallet name="ps_c_4_4_L1" x="52.66" y="34.44" z="0.01" yaw="-0.0418"/>
+    <xacro:pallet name="ps_c_4_4_L2" x="52.66" y="34.44" z="1.21" yaw="-0.0418"/>
+    <xacro:pallet name="ps_c_4_5_L1" x="52.8" y="35.5" z="0.01" yaw="0.0309"/>
+    <xacro:pallet name="ps_c_4_5_L2" x="52.8" y="35.5" z="1.21" yaw="0.0309"/>
+    <xacro:pallet name="ps_c_4_6_L1" x="52.56" y="36.93" z="0.01" yaw="-0.1535"/>
+    <xacro:pallet name="ps_c_4_6_L2" x="52.56" y="36.93" z="1.21" yaw="-0.1535"/>
+
+    <!-- Stack ps_d at (48, 42), 5x7 -->
+    <xacro:pallet name="ps_d_0_0_L1" x="47.63" y="37.9" z="0.01" yaw="0.0917"/>
+    <xacro:pallet name="ps_d_0_0_L2" x="47.63" y="37.9" z="1.21" yaw="0.0917"/>
+    <xacro:pallet name="ps_d_0_1_L1" x="47.46" y="39.28" z="0.01" yaw="-0.1462"/>
+    <xacro:pallet name="ps_d_0_1_L2" x="47.46" y="39.28" z="1.21" yaw="-0.1462"/>
+    <xacro:pallet name="ps_d_0_2_L1" x="47.27" y="40.73" z="0.01" yaw="-0.1199"/>
+    <xacro:pallet name="ps_d_0_2_L2" x="47.27" y="40.73" z="1.21" yaw="-0.1199"/>
+    <xacro:pallet name="ps_d_0_3_L1" x="47.35" y="42.09" z="0.01" yaw="-0.0105"/>
+    <xacro:pallet name="ps_d_0_3_L2" x="47.35" y="42.09" z="1.21" yaw="-0.0105"/>
+    <xacro:pallet name="ps_d_0_4_L1" x="47.17" y="43.19" z="0.01" yaw="-0.0758"/>
+    <xacro:pallet name="ps_d_0_4_L2" x="47.17" y="43.19" z="1.21" yaw="-0.0758"/>
+    <xacro:pallet name="ps_d_0_5_L1" x="47.58" y="44.39" z="0.01" yaw="-0.0931"/>
+    <xacro:pallet name="ps_d_0_5_L2" x="47.58" y="44.39" z="1.21" yaw="-0.0931"/>
+    <xacro:pallet name="ps_d_0_6_L1" x="47.28" y="46.05" z="0.01" yaw="0.0313"/>
+    <xacro:pallet name="ps_d_0_6_L2" x="47.28" y="46.05" z="1.21" yaw="0.0313"/>
+    <xacro:pallet name="ps_d_1_0_L1" x="48.85" y="37.95" z="0.01" yaw="-0.1345"/>
+    <xacro:pallet name="ps_d_1_0_L2" x="48.85" y="37.95" z="1.21" yaw="-0.1345"/>
+    <xacro:pallet name="ps_d_1_1_L1" x="48.56" y="39.22" z="0.01" yaw="0.114"/>
+    <xacro:pallet name="ps_d_1_1_L2" x="48.56" y="39.22" z="1.21" yaw="0.114"/>
+    <xacro:pallet name="ps_d_1_1_L3" x="48.56" y="39.22" z="2.41" yaw="0.114"/>
+    <xacro:pallet name="ps_d_1_2_L1" x="48.49" y="40.53" z="0.01" yaw="0.0332"/>
+    <xacro:pallet name="ps_d_1_2_L2" x="48.49" y="40.53" z="1.21" yaw="0.0332"/>
+    <xacro:pallet name="ps_d_1_2_L3" x="48.49" y="40.53" z="2.41" yaw="0.0332"/>
+    <xacro:pallet name="ps_d_1_3_L1" x="48.86" y="42.21" z="0.01" yaw="-0.1311"/>
+    <xacro:pallet name="ps_d_1_3_L2" x="48.86" y="42.21" z="1.21" yaw="-0.1311"/>
+    <xacro:pallet name="ps_d_1_3_L3" x="48.86" y="42.21" z="2.41" yaw="-0.1311"/>
+    <xacro:pallet name="ps_d_1_4_L1" x="48.79" y="43.4" z="0.01" yaw="0.0002"/>
+    <xacro:pallet name="ps_d_1_4_L2" x="48.79" y="43.4" z="1.21" yaw="0.0002"/>
+    <xacro:pallet name="ps_d_1_4_L3" x="48.79" y="43.4" z="2.41" yaw="0.0002"/>
+    <xacro:pallet name="ps_d_1_5_L1" x="48.7" y="44.39" z="0.01" yaw="0.1359"/>
+    <xacro:pallet name="ps_d_1_5_L2" x="48.7" y="44.39" z="1.21" yaw="0.1359"/>
+    <xacro:pallet name="ps_d_1_6_L1" x="48.82" y="45.95" z="0.01" yaw="-0.1655"/>
+    <xacro:pallet name="ps_d_1_6_L2" x="48.82" y="45.95" z="1.21" yaw="-0.1655"/>
+    <xacro:pallet name="ps_d_2_0_L1" x="49.86" y="38.19" z="0.01" yaw="0.1258"/>
+    <xacro:pallet name="ps_d_2_0_L2" x="49.86" y="38.19" z="1.21" yaw="0.1258"/>
+    <xacro:pallet name="ps_d_2_1_L1" x="50.04" y="39.16" z="0.01" yaw="0.0266"/>
+    <xacro:pallet name="ps_d_2_1_L2" x="50.04" y="39.16" z="1.21" yaw="0.0266"/>
+    <xacro:pallet name="ps_d_2_1_L3" x="50.04" y="39.16" z="2.41" yaw="0.0266"/>
+    <xacro:pallet name="ps_d_2_2_L1" x="50.13" y="40.54" z="0.01" yaw="0.1452"/>
+    <xacro:pallet name="ps_d_2_2_L2" x="50.13" y="40.54" z="1.21" yaw="0.1452"/>
+    <xacro:pallet name="ps_d_2_2_L3" x="50.13" y="40.54" z="2.41" yaw="0.1452"/>
+    <xacro:pallet name="ps_d_2_2_L4" x="50.13" y="40.54" z="3.61" yaw="0.1452"/>
+    <xacro:pallet name="ps_d_2_3_L1" x="49.84" y="42.04" z="0.01" yaw="0.1637"/>
+    <xacro:pallet name="ps_d_2_3_L2" x="49.84" y="42.04" z="1.21" yaw="0.1637"/>
+    <xacro:pallet name="ps_d_2_3_L3" x="49.84" y="42.04" z="2.41" yaw="0.1637"/>
+    <xacro:pallet name="ps_d_2_3_L4" x="49.84" y="42.04" z="3.61" yaw="0.1637"/>
+    <xacro:pallet name="ps_d_2_4_L1" x="49.98" y="43.25" z="0.01" yaw="0.0594"/>
+    <xacro:pallet name="ps_d_2_4_L2" x="49.98" y="43.25" z="1.21" yaw="0.0594"/>
+    <xacro:pallet name="ps_d_2_4_L3" x="49.98" y="43.25" z="2.41" yaw="0.0594"/>
+    <xacro:pallet name="ps_d_2_4_L4" x="49.98" y="43.25" z="3.61" yaw="0.0594"/>
+    <xacro:pallet name="ps_d_2_5_L1" x="50.18" y="44.51" z="0.01" yaw="-0.0739"/>
+    <xacro:pallet name="ps_d_2_5_L2" x="50.18" y="44.51" z="1.21" yaw="-0.0739"/>
+    <xacro:pallet name="ps_d_2_5_L3" x="50.18" y="44.51" z="2.41" yaw="-0.0739"/>
+    <xacro:pallet name="ps_d_2_6_L1" x="50.22" y="46.06" z="0.01" yaw="0.0175"/>
+    <xacro:pallet name="ps_d_2_6_L2" x="50.22" y="46.06" z="1.21" yaw="0.0175"/>
+    <xacro:pallet name="ps_d_3_0_L1" x="51.28" y="38.01" z="0.01" yaw="-0.0617"/>
+    <xacro:pallet name="ps_d_3_0_L2" x="51.28" y="38.01" z="1.21" yaw="-0.0617"/>
+    <xacro:pallet name="ps_d_3_1_L1" x="51.54" y="39.35" z="0.01" yaw="0.055"/>
+    <xacro:pallet name="ps_d_3_1_L2" x="51.54" y="39.35" z="1.21" yaw="0.055"/>
+    <xacro:pallet name="ps_d_3_2_L1" x="51.32" y="40.66" z="0.01" yaw="0.0064"/>
+    <xacro:pallet name="ps_d_3_2_L2" x="51.32" y="40.66" z="1.21" yaw="0.0064"/>
+    <xacro:pallet name="ps_d_3_3_L1" x="51.36" y="42.0" z="0.01" yaw="0.0908"/>
+    <xacro:pallet name="ps_d_3_3_L2" x="51.36" y="42.0" z="1.21" yaw="0.0908"/>
+    <xacro:pallet name="ps_d_3_3_L3" x="51.36" y="42.0" z="2.41" yaw="0.0908"/>
+    <xacro:pallet name="ps_d_3_4_L1" x="51.15" y="43.32" z="0.01" yaw="-0.0216"/>
+    <xacro:pallet name="ps_d_3_4_L2" x="51.15" y="43.32" z="1.21" yaw="-0.0216"/>
+    <xacro:pallet name="ps_d_3_4_L3" x="51.15" y="43.32" z="2.41" yaw="-0.0216"/>
+    <xacro:pallet name="ps_d_3_5_L1" x="51.4" y="44.41" z="0.01" yaw="0.0732"/>
+    <xacro:pallet name="ps_d_3_5_L2" x="51.4" y="44.41" z="1.21" yaw="0.0732"/>
+    <xacro:pallet name="ps_d_3_6_L1" x="51.21" y="45.66" z="0.01" yaw="-0.0321"/>
+    <xacro:pallet name="ps_d_3_6_L2" x="51.21" y="45.66" z="1.21" yaw="-0.0321"/>
+    <xacro:pallet name="ps_d_4_0_L1" x="52.46" y="38.27" z="0.01" yaw="-0.1349"/>
+    <xacro:pallet name="ps_d_4_0_L2" x="52.46" y="38.27" z="1.21" yaw="-0.1349"/>
+    <xacro:pallet name="ps_d_4_1_L1" x="52.82" y="39.47" z="0.01" yaw="-0.1208"/>
+    <xacro:pallet name="ps_d_4_1_L2" x="52.82" y="39.47" z="1.21" yaw="-0.1208"/>
+    <xacro:pallet name="ps_d_4_2_L1" x="52.82" y="40.6" z="0.01" yaw="0.0717"/>
+    <xacro:pallet name="ps_d_4_2_L2" x="52.82" y="40.6" z="1.21" yaw="0.0717"/>
+    <xacro:pallet name="ps_d_4_3_L1" x="52.56" y="41.99" z="0.01" yaw="-0.0097"/>
+    <xacro:pallet name="ps_d_4_3_L2" x="52.56" y="41.99" z="1.21" yaw="-0.0097"/>
+    <xacro:pallet name="ps_d_4_4_L1" x="52.58" y="43.12" z="0.01" yaw="-0.108"/>
+    <xacro:pallet name="ps_d_4_4_L2" x="52.58" y="43.12" z="1.21" yaw="-0.108"/>
+    <xacro:pallet name="ps_d_4_5_L1" x="52.65" y="44.72" z="0.01" yaw="-0.1269"/>
+    <xacro:pallet name="ps_d_4_5_L2" x="52.65" y="44.72" z="1.21" yaw="-0.1269"/>
+    <xacro:pallet name="ps_d_4_6_L1" x="52.38" y="46.04" z="0.01" yaw="0.1237"/>
+    <xacro:pallet name="ps_d_4_6_L2" x="52.38" y="46.04" z="1.21" yaw="0.1237"/>
+
+    <!-- Stack ps_dock at (48, -60), 14x10 -->
+    <xacro:pallet name="ps_dock_0_0_L1" x="41.47" y="-65.71" z="0.01" yaw="-0.0813"/>
+    <xacro:pallet name="ps_dock_0_0_L2" x="41.47" y="-65.71" z="1.21" yaw="-0.0813"/>
+    <xacro:pallet name="ps_dock_0_1_L1" x="41.3" y="-64.44" z="0.01" yaw="0.1178"/>
+    <xacro:pallet name="ps_dock_0_1_L2" x="41.3" y="-64.44" z="1.21" yaw="0.1178"/>
+    <xacro:pallet name="ps_dock_0_2_L1" x="41.59" y="-63.17" z="0.01" yaw="0.1275"/>
+    <xacro:pallet name="ps_dock_0_2_L2" x="41.59" y="-63.17" z="1.21" yaw="0.1275"/>
+    <xacro:pallet name="ps_dock_0_3_L1" x="41.52" y="-61.96" z="0.01" yaw="-0.0585"/>
+    <xacro:pallet name="ps_dock_0_3_L2" x="41.52" y="-61.96" z="1.21" yaw="-0.0585"/>
+    <xacro:pallet name="ps_dock_0_4_L1" x="41.68" y="-60.71" z="0.01" yaw="0.1511"/>
+    <xacro:pallet name="ps_dock_0_4_L2" x="41.68" y="-60.71" z="1.21" yaw="0.1511"/>
+    <xacro:pallet name="ps_dock_0_5_L1" x="41.73" y="-59.11" z="0.01" yaw="-0.0912"/>
+    <xacro:pallet name="ps_dock_0_5_L2" x="41.73" y="-59.11" z="1.21" yaw="-0.0912"/>
+    <xacro:pallet name="ps_dock_0_6_L1" x="41.49" y="-57.87" z="0.01" yaw="-0.0311"/>
+    <xacro:pallet name="ps_dock_0_6_L2" x="41.49" y="-57.87" z="1.21" yaw="-0.0311"/>
+    <xacro:pallet name="ps_dock_0_7_L1" x="41.46" y="-56.76" z="0.01" yaw="0.1443"/>
+    <xacro:pallet name="ps_dock_0_7_L2" x="41.46" y="-56.76" z="1.21" yaw="0.1443"/>
+    <xacro:pallet name="ps_dock_0_8_L1" x="41.49" y="-55.21" z="0.01" yaw="0.1021"/>
+    <xacro:pallet name="ps_dock_0_8_L2" x="41.49" y="-55.21" z="1.21" yaw="0.1021"/>
+    <xacro:pallet name="ps_dock_0_9_L1" x="41.63" y="-54.32" z="0.01" yaw="0.1623"/>
+    <xacro:pallet name="ps_dock_0_9_L2" x="41.63" y="-54.32" z="1.21" yaw="0.1623"/>
+    <xacro:pallet name="ps_dock_1_0_L1" x="42.66" y="-65.62" z="0.01" yaw="-0.0586"/>
+    <xacro:pallet name="ps_dock_1_0_L2" x="42.66" y="-65.62" z="1.21" yaw="-0.0586"/>
+    <xacro:pallet name="ps_dock_1_1_L1" x="42.65" y="-64.38" z="0.01" yaw="0.0091"/>
+    <xacro:pallet name="ps_dock_1_1_L2" x="42.65" y="-64.38" z="1.21" yaw="0.0091"/>
+    <xacro:pallet name="ps_dock_1_2_L1" x="42.83" y="-63.14" z="0.01" yaw="0.1295"/>
+    <xacro:pallet name="ps_dock_1_2_L2" x="42.83" y="-63.14" z="1.21" yaw="0.1295"/>
+    <xacro:pallet name="ps_dock_1_2_L3" x="42.83" y="-63.14" z="2.41" yaw="0.1295"/>
+    <xacro:pallet name="ps_dock_1_3_L1" x="43.09" y="-62.16" z="0.01" yaw="-0.0564"/>
+    <xacro:pallet name="ps_dock_1_3_L2" x="43.09" y="-62.16" z="1.21" yaw="-0.0564"/>
+    <xacro:pallet name="ps_dock_1_3_L3" x="43.09" y="-62.16" z="2.41" yaw="-0.0564"/>
+    <xacro:pallet name="ps_dock_1_4_L1" x="42.95" y="-60.58" z="0.01" yaw="0.123"/>
+    <xacro:pallet name="ps_dock_1_4_L2" x="42.95" y="-60.58" z="1.21" yaw="0.123"/>
+    <xacro:pallet name="ps_dock_1_4_L3" x="42.95" y="-60.58" z="2.41" yaw="0.123"/>
+    <xacro:pallet name="ps_dock_1_5_L1" x="43.03" y="-59.41" z="0.01" yaw="0.0443"/>
+    <xacro:pallet name="ps_dock_1_5_L2" x="43.03" y="-59.41" z="1.21" yaw="0.0443"/>
+    <xacro:pallet name="ps_dock_1_5_L3" x="43.03" y="-59.41" z="2.41" yaw="0.0443"/>
+    <xacro:pallet name="ps_dock_1_6_L1" x="43.04" y="-58.06" z="0.01" yaw="0.041"/>
+    <xacro:pallet name="ps_dock_1_6_L2" x="43.04" y="-58.06" z="1.21" yaw="0.041"/>
+    <xacro:pallet name="ps_dock_1_7_L1" x="42.72" y="-56.66" z="0.01" yaw="0.1736"/>
+    <xacro:pallet name="ps_dock_1_7_L2" x="42.72" y="-56.66" z="1.21" yaw="0.1736"/>
+    <xacro:pallet name="ps_dock_1_7_L3" x="42.72" y="-56.66" z="2.41" yaw="0.1736"/>
+    <xacro:pallet name="ps_dock_1_8_L1" x="42.97" y="-55.48" z="0.01" yaw="0.0909"/>
+    <xacro:pallet name="ps_dock_1_8_L2" x="42.97" y="-55.48" z="1.21" yaw="0.0909"/>
+    <xacro:pallet name="ps_dock_1_9_L1" x="42.95" y="-54.35" z="0.01" yaw="-0.1165"/>
+    <xacro:pallet name="ps_dock_1_9_L2" x="42.95" y="-54.35" z="1.21" yaw="-0.1165"/>
+    <xacro:pallet name="ps_dock_2_0_L1" x="44.05" y="-66.09" z="0.01" yaw="-0.0613"/>
+    <xacro:pallet name="ps_dock_2_0_L2" x="44.05" y="-66.09" z="1.21" yaw="-0.0613"/>
+    <xacro:pallet name="ps_dock_2_1_L1" x="43.93" y="-64.62" z="0.01" yaw="-0.1237"/>
+    <xacro:pallet name="ps_dock_2_1_L2" x="43.93" y="-64.62" z="1.21" yaw="-0.1237"/>
+    <xacro:pallet name="ps_dock_2_1_L3" x="43.93" y="-64.62" z="2.41" yaw="-0.1237"/>
+    <xacro:pallet name="ps_dock_2_2_L1" x="44.17" y="-63.22" z="0.01" yaw="-0.1152"/>
+    <xacro:pallet name="ps_dock_2_2_L2" x="44.17" y="-63.22" z="1.21" yaw="-0.1152"/>
+    <xacro:pallet name="ps_dock_2_2_L3" x="44.17" y="-63.22" z="2.41" yaw="-0.1152"/>
+    <xacro:pallet name="ps_dock_2_3_L1" x="43.94" y="-61.76" z="0.01" yaw="-0.0008"/>
+    <xacro:pallet name="ps_dock_2_3_L2" x="43.94" y="-61.76" z="1.21" yaw="-0.0008"/>
+    <xacro:pallet name="ps_dock_2_3_L3" x="43.94" y="-61.76" z="2.41" yaw="-0.0008"/>
+    <xacro:pallet name="ps_dock_2_4_L1" x="44.19" y="-60.78" z="0.01" yaw="-0.0141"/>
+    <xacro:pallet name="ps_dock_2_4_L2" x="44.19" y="-60.78" z="1.21" yaw="-0.0141"/>
+    <xacro:pallet name="ps_dock_2_4_L3" x="44.19" y="-60.78" z="2.41" yaw="-0.0141"/>
+    <xacro:pallet name="ps_dock_2_4_L4" x="44.19" y="-60.78" z="3.61" yaw="-0.0141"/>
+    <xacro:pallet name="ps_dock_2_5_L1" x="44.23" y="-59.15" z="0.01" yaw="0.14"/>
+    <xacro:pallet name="ps_dock_2_5_L2" x="44.23" y="-59.15" z="1.21" yaw="0.14"/>
+    <xacro:pallet name="ps_dock_2_5_L3" x="44.23" y="-59.15" z="2.41" yaw="0.14"/>
+    <xacro:pallet name="ps_dock_2_5_L4" x="44.23" y="-59.15" z="3.61" yaw="0.14"/>
+    <xacro:pallet name="ps_dock_2_6_L1" x="44.24" y="-58.22" z="0.01" yaw="0.1554"/>
+    <xacro:pallet name="ps_dock_2_6_L2" x="44.24" y="-58.22" z="1.21" yaw="0.1554"/>
+    <xacro:pallet name="ps_dock_2_6_L3" x="44.24" y="-58.22" z="2.41" yaw="0.1554"/>
+    <xacro:pallet name="ps_dock_2_6_L4" x="44.24" y="-58.22" z="3.61" yaw="0.1554"/>
+    <xacro:pallet name="ps_dock_2_7_L1" x="44.39" y="-56.85" z="0.01" yaw="0.0664"/>
+    <xacro:pallet name="ps_dock_2_7_L2" x="44.39" y="-56.85" z="1.21" yaw="0.0664"/>
+    <xacro:pallet name="ps_dock_2_7_L3" x="44.39" y="-56.85" z="2.41" yaw="0.0664"/>
+    <xacro:pallet name="ps_dock_2_7_L4" x="44.39" y="-56.85" z="3.61" yaw="0.0664"/>
+    <xacro:pallet name="ps_dock_2_8_L1" x="44.13" y="-55.55" z="0.01" yaw="0.1233"/>
+    <xacro:pallet name="ps_dock_2_8_L2" x="44.13" y="-55.55" z="1.21" yaw="0.1233"/>
+    <xacro:pallet name="ps_dock_2_8_L3" x="44.13" y="-55.55" z="2.41" yaw="0.1233"/>
+    <xacro:pallet name="ps_dock_2_9_L1" x="43.95" y="-54.21" z="0.01" yaw="-0.0492"/>
+    <xacro:pallet name="ps_dock_2_9_L2" x="43.95" y="-54.21" z="1.21" yaw="-0.0492"/>
+    <xacro:pallet name="ps_dock_3_0_L1" x="45.35" y="-65.75" z="0.01" yaw="-0.1669"/>
+    <xacro:pallet name="ps_dock_3_0_L2" x="45.35" y="-65.75" z="1.21" yaw="-0.1669"/>
+    <xacro:pallet name="ps_dock_3_1_L1" x="45.62" y="-64.6" z="0.01" yaw="0.023"/>
+    <xacro:pallet name="ps_dock_3_1_L2" x="45.62" y="-64.6" z="1.21" yaw="0.023"/>
+    <xacro:pallet name="ps_dock_3_2_L1" x="45.54" y="-63.13" z="0.01" yaw="0.1433"/>
+    <xacro:pallet name="ps_dock_3_2_L2" x="45.54" y="-63.13" z="1.21" yaw="0.1433"/>
+    <xacro:pallet name="ps_dock_3_2_L3" x="45.54" y="-63.13" z="2.41" yaw="0.1433"/>
+    <xacro:pallet name="ps_dock_3_3_L1" x="45.57" y="-61.78" z="0.01" yaw="0.0963"/>
+    <xacro:pallet name="ps_dock_3_3_L2" x="45.57" y="-61.78" z="1.21" yaw="0.0963"/>
+    <xacro:pallet name="ps_dock_3_3_L3" x="45.57" y="-61.78" z="2.41" yaw="0.0963"/>
+    <xacro:pallet name="ps_dock_3_3_L4" x="45.57" y="-61.78" z="3.61" yaw="0.0963"/>
+    <xacro:pallet name="ps_dock_3_4_L1" x="45.32" y="-60.5" z="0.01" yaw="0.0477"/>
+    <xacro:pallet name="ps_dock_3_4_L2" x="45.32" y="-60.5" z="1.21" yaw="0.0477"/>
+    <xacro:pallet name="ps_dock_3_4_L3" x="45.32" y="-60.5" z="2.41" yaw="0.0477"/>
+    <xacro:pallet name="ps_dock_3_5_L1" x="45.51" y="-59.26" z="0.01" yaw="0.0448"/>
+    <xacro:pallet name="ps_dock_3_5_L2" x="45.51" y="-59.26" z="1.21" yaw="0.0448"/>
+    <xacro:pallet name="ps_dock_3_5_L3" x="45.51" y="-59.26" z="2.41" yaw="0.0448"/>
+    <xacro:pallet name="ps_dock_3_6_L1" x="45.65" y="-57.98" z="0.01" yaw="0.1007"/>
+    <xacro:pallet name="ps_dock_3_6_L2" x="45.65" y="-57.98" z="1.21" yaw="0.1007"/>
+    <xacro:pallet name="ps_dock_3_6_L3" x="45.65" y="-57.98" z="2.41" yaw="0.1007"/>
+    <xacro:pallet name="ps_dock_3_6_L4" x="45.65" y="-57.98" z="3.61" yaw="0.1007"/>
+    <xacro:pallet name="ps_dock_3_7_L1" x="45.22" y="-56.82" z="0.01" yaw="-0.1431"/>
+    <xacro:pallet name="ps_dock_3_7_L2" x="45.22" y="-56.82" z="1.21" yaw="-0.1431"/>
+    <xacro:pallet name="ps_dock_3_7_L3" x="45.22" y="-56.82" z="2.41" yaw="-0.1431"/>
+    <xacro:pallet name="ps_dock_3_8_L1" x="45.35" y="-55.33" z="0.01" yaw="-0.1044"/>
+    <xacro:pallet name="ps_dock_3_8_L2" x="45.35" y="-55.33" z="1.21" yaw="-0.1044"/>
+    <xacro:pallet name="ps_dock_3_9_L1" x="45.59" y="-53.96" z="0.01" yaw="-0.0468"/>
+    <xacro:pallet name="ps_dock_3_9_L2" x="45.59" y="-53.96" z="1.21" yaw="-0.0468"/>
+    <xacro:pallet name="ps_dock_4_0_L1" x="46.75" y="-65.96" z="0.01" yaw="-0.1171"/>
+    <xacro:pallet name="ps_dock_4_0_L2" x="46.75" y="-65.96" z="1.21" yaw="-0.1171"/>
+    <xacro:pallet name="ps_dock_4_1_L1" x="46.96" y="-64.33" z="0.01" yaw="0.0861"/>
+    <xacro:pallet name="ps_dock_4_1_L2" x="46.96" y="-64.33" z="1.21" yaw="0.0861"/>
+    <xacro:pallet name="ps_dock_4_1_L3" x="46.96" y="-64.33" z="2.41" yaw="0.0861"/>
+    <xacro:pallet name="ps_dock_4_2_L1" x="46.67" y="-63.44" z="0.01" yaw="-0.1254"/>
+    <xacro:pallet name="ps_dock_4_2_L2" x="46.67" y="-63.44" z="1.21" yaw="-0.1254"/>
+    <xacro:pallet name="ps_dock_4_2_L3" x="46.67" y="-63.44" z="2.41" yaw="-0.1254"/>
+    <xacro:pallet name="ps_dock_4_3_L1" x="46.98" y="-61.77" z="0.01" yaw="0.1631"/>
+    <xacro:pallet name="ps_dock_4_3_L2" x="46.98" y="-61.77" z="1.21" yaw="0.1631"/>
+    <xacro:pallet name="ps_dock_4_3_L3" x="46.98" y="-61.77" z="2.41" yaw="0.1631"/>
+    <xacro:pallet name="ps_dock_4_3_L4" x="46.98" y="-61.77" z="3.61" yaw="0.1631"/>
+    <xacro:pallet name="ps_dock_4_4_L1" x="46.9" y="-60.72" z="0.01" yaw="-0.1697"/>
+    <xacro:pallet name="ps_dock_4_4_L2" x="46.9" y="-60.72" z="1.21" yaw="-0.1697"/>
+    <xacro:pallet name="ps_dock_4_4_L3" x="46.9" y="-60.72" z="2.41" yaw="-0.1697"/>
+    <xacro:pallet name="ps_dock_4_4_L4" x="46.9" y="-60.72" z="3.61" yaw="-0.1697"/>
+    <xacro:pallet name="ps_dock_4_5_L1" x="46.77" y="-59.37" z="0.01" yaw="0.0295"/>
+    <xacro:pallet name="ps_dock_4_5_L2" x="46.77" y="-59.37" z="1.21" yaw="0.0295"/>
+    <xacro:pallet name="ps_dock_4_5_L3" x="46.77" y="-59.37" z="2.41" yaw="0.0295"/>
+    <xacro:pallet name="ps_dock_4_5_L4" x="46.77" y="-59.37" z="3.61" yaw="0.0295"/>
+    <xacro:pallet name="ps_dock_4_6_L1" x="46.91" y="-57.83" z="0.01" yaw="0.061"/>
+    <xacro:pallet name="ps_dock_4_6_L2" x="46.91" y="-57.83" z="1.21" yaw="0.061"/>
+    <xacro:pallet name="ps_dock_4_6_L3" x="46.91" y="-57.83" z="2.41" yaw="0.061"/>
+    <xacro:pallet name="ps_dock_4_7_L1" x="46.74" y="-56.69" z="0.01" yaw="0.145"/>
+    <xacro:pallet name="ps_dock_4_7_L2" x="46.74" y="-56.69" z="1.21" yaw="0.145"/>
+    <xacro:pallet name="ps_dock_4_7_L3" x="46.74" y="-56.69" z="2.41" yaw="0.145"/>
+    <xacro:pallet name="ps_dock_4_7_L4" x="46.74" y="-56.69" z="3.61" yaw="0.145"/>
+    <xacro:pallet name="ps_dock_4_8_L1" x="46.61" y="-55.67" z="0.01" yaw="0.1429"/>
+    <xacro:pallet name="ps_dock_4_8_L2" x="46.61" y="-55.67" z="1.21" yaw="0.1429"/>
+    <xacro:pallet name="ps_dock_4_8_L3" x="46.61" y="-55.67" z="2.41" yaw="0.1429"/>
+    <xacro:pallet name="ps_dock_4_9_L1" x="46.65" y="-54.2" z="0.01" yaw="-0.1257"/>
+    <xacro:pallet name="ps_dock_4_9_L2" x="46.65" y="-54.2" z="1.21" yaw="-0.1257"/>
+    <xacro:pallet name="ps_dock_5_0_L1" x="48.27" y="-65.95" z="0.01" yaw="-0.0026"/>
+    <xacro:pallet name="ps_dock_5_0_L2" x="48.27" y="-65.95" z="1.21" yaw="-0.0026"/>
+    <xacro:pallet name="ps_dock_5_1_L1" x="47.85" y="-64.36" z="0.01" yaw="-0.0389"/>
+    <xacro:pallet name="ps_dock_5_1_L2" x="47.85" y="-64.36" z="1.21" yaw="-0.0389"/>
+    <xacro:pallet name="ps_dock_5_2_L1" x="47.99" y="-63.03" z="0.01" yaw="0.0305"/>
+    <xacro:pallet name="ps_dock_5_2_L2" x="47.99" y="-63.03" z="1.21" yaw="0.0305"/>
+    <xacro:pallet name="ps_dock_5_2_L3" x="47.99" y="-63.03" z="2.41" yaw="0.0305"/>
+    <xacro:pallet name="ps_dock_5_2_L4" x="47.99" y="-63.03" z="3.61" yaw="0.0305"/>
+    <xacro:pallet name="ps_dock_5_3_L1" x="48.16" y="-61.76" z="0.01" yaw="0.1165"/>
+    <xacro:pallet name="ps_dock_5_3_L2" x="48.16" y="-61.76" z="1.21" yaw="0.1165"/>
+    <xacro:pallet name="ps_dock_5_3_L3" x="48.16" y="-61.76" z="2.41" yaw="0.1165"/>
+    <xacro:pallet name="ps_dock_5_4_L1" x="48.11" y="-60.43" z="0.01" yaw="-0.1631"/>
+    <xacro:pallet name="ps_dock_5_4_L2" x="48.11" y="-60.43" z="1.21" yaw="-0.1631"/>
+    <xacro:pallet name="ps_dock_5_4_L3" x="48.11" y="-60.43" z="2.41" yaw="-0.1631"/>
+    <xacro:pallet name="ps_dock_5_4_L4" x="48.11" y="-60.43" z="3.61" yaw="-0.1631"/>
+    <xacro:pallet name="ps_dock_5_5_L1" x="47.99" y="-59.38" z="0.01" yaw="0.1241"/>
+    <xacro:pallet name="ps_dock_5_5_L2" x="47.99" y="-59.38" z="1.21" yaw="0.1241"/>
+    <xacro:pallet name="ps_dock_5_5_L3" x="47.99" y="-59.38" z="2.41" yaw="0.1241"/>
+    <xacro:pallet name="ps_dock_5_6_L1" x="47.85" y="-57.96" z="0.01" yaw="-0.1534"/>
+    <xacro:pallet name="ps_dock_5_6_L2" x="47.85" y="-57.96" z="1.21" yaw="-0.1534"/>
+    <xacro:pallet name="ps_dock_5_6_L3" x="47.85" y="-57.96" z="2.41" yaw="-0.1534"/>
+    <xacro:pallet name="ps_dock_5_6_L4" x="47.85" y="-57.96" z="3.61" yaw="-0.1534"/>
+    <xacro:pallet name="ps_dock_5_7_L1" x="47.94" y="-56.52" z="0.01" yaw="-0.1425"/>
+    <xacro:pallet name="ps_dock_5_7_L2" x="47.94" y="-56.52" z="1.21" yaw="-0.1425"/>
+    <xacro:pallet name="ps_dock_5_7_L3" x="47.94" y="-56.52" z="2.41" yaw="-0.1425"/>
+    <xacro:pallet name="ps_dock_5_7_L4" x="47.94" y="-56.52" z="3.61" yaw="-0.1425"/>
+    <xacro:pallet name="ps_dock_5_8_L1" x="47.91" y="-55.38" z="0.01" yaw="-0.1569"/>
+    <xacro:pallet name="ps_dock_5_8_L2" x="47.91" y="-55.38" z="1.21" yaw="-0.1569"/>
+    <xacro:pallet name="ps_dock_5_9_L1" x="47.97" y="-53.91" z="0.01" yaw="0.1002"/>
+    <xacro:pallet name="ps_dock_5_9_L2" x="47.97" y="-53.91" z="1.21" yaw="0.1002"/>
+    <xacro:pallet name="ps_dock_6_0_L1" x="49.2" y="-65.69" z="0.01" yaw="0.0189"/>
+    <xacro:pallet name="ps_dock_6_0_L2" x="49.2" y="-65.69" z="1.21" yaw="0.0189"/>
+    <xacro:pallet name="ps_dock_6_1_L1" x="49.39" y="-64.39" z="0.01" yaw="-0.0598"/>
+    <xacro:pallet name="ps_dock_6_1_L2" x="49.39" y="-64.39" z="1.21" yaw="-0.0598"/>
+    <xacro:pallet name="ps_dock_6_2_L1" x="49.17" y="-63.05" z="0.01" yaw="-0.0777"/>
+    <xacro:pallet name="ps_dock_6_2_L2" x="49.17" y="-63.05" z="1.21" yaw="-0.0777"/>
+    <xacro:pallet name="ps_dock_6_2_L3" x="49.17" y="-63.05" z="2.41" yaw="-0.0777"/>
+    <xacro:pallet name="ps_dock_6_3_L1" x="49.59" y="-61.71" z="0.01" yaw="0.1042"/>
+    <xacro:pallet name="ps_dock_6_3_L2" x="49.59" y="-61.71" z="1.21" yaw="0.1042"/>
+    <xacro:pallet name="ps_dock_6_3_L3" x="49.59" y="-61.71" z="2.41" yaw="0.1042"/>
+    <xacro:pallet name="ps_dock_6_3_L4" x="49.59" y="-61.71" z="3.61" yaw="0.1042"/>
+    <xacro:pallet name="ps_dock_6_4_L1" x="49.16" y="-60.47" z="0.01" yaw="-0.1693"/>
+    <xacro:pallet name="ps_dock_6_4_L2" x="49.16" y="-60.47" z="1.21" yaw="-0.1693"/>
+    <xacro:pallet name="ps_dock_6_4_L3" x="49.16" y="-60.47" z="2.41" yaw="-0.1693"/>
+    <xacro:pallet name="ps_dock_6_5_L1" x="49.5" y="-59.48" z="0.01" yaw="-0.169"/>
+    <xacro:pallet name="ps_dock_6_5_L2" x="49.5" y="-59.48" z="1.21" yaw="-0.169"/>
+    <xacro:pallet name="ps_dock_6_5_L3" x="49.5" y="-59.48" z="2.41" yaw="-0.169"/>
+    <xacro:pallet name="ps_dock_6_5_L4" x="49.5" y="-59.48" z="3.61" yaw="-0.169"/>
+    <xacro:pallet name="ps_dock_6_6_L1" x="49.23" y="-58.24" z="0.01" yaw="0.0091"/>
+    <xacro:pallet name="ps_dock_6_6_L2" x="49.23" y="-58.24" z="1.21" yaw="0.0091"/>
+    <xacro:pallet name="ps_dock_6_6_L3" x="49.23" y="-58.24" z="2.41" yaw="0.0091"/>
+    <xacro:pallet name="ps_dock_6_6_L4" x="49.23" y="-58.24" z="3.61" yaw="0.0091"/>
+    <xacro:pallet name="ps_dock_6_7_L1" x="49.47" y="-56.76" z="0.01" yaw="0.0046"/>
+    <xacro:pallet name="ps_dock_6_7_L2" x="49.47" y="-56.76" z="1.21" yaw="0.0046"/>
+    <xacro:pallet name="ps_dock_6_7_L3" x="49.47" y="-56.76" z="2.41" yaw="0.0046"/>
+    <xacro:pallet name="ps_dock_6_7_L4" x="49.47" y="-56.76" z="3.61" yaw="0.0046"/>
+    <xacro:pallet name="ps_dock_6_8_L1" x="49.15" y="-55.45" z="0.01" yaw="0.0793"/>
+    <xacro:pallet name="ps_dock_6_8_L2" x="49.15" y="-55.45" z="1.21" yaw="0.0793"/>
+    <xacro:pallet name="ps_dock_6_9_L1" x="49.55" y="-54.07" z="0.01" yaw="-0.0692"/>
+    <xacro:pallet name="ps_dock_6_9_L2" x="49.55" y="-54.07" z="1.21" yaw="-0.0692"/>
+    <xacro:pallet name="ps_dock_7_0_L1" x="50.72" y="-66.08" z="0.01" yaw="0.174"/>
+    <xacro:pallet name="ps_dock_7_0_L2" x="50.72" y="-66.08" z="1.21" yaw="0.174"/>
+    <xacro:pallet name="ps_dock_7_1_L1" x="50.82" y="-64.59" z="0.01" yaw="-0.0034"/>
+    <xacro:pallet name="ps_dock_7_1_L2" x="50.82" y="-64.59" z="1.21" yaw="-0.0034"/>
+    <xacro:pallet name="ps_dock_7_2_L1" x="50.85" y="-63.46" z="0.01" yaw="-0.0621"/>
+    <xacro:pallet name="ps_dock_7_2_L2" x="50.85" y="-63.46" z="1.21" yaw="-0.0621"/>
+    <xacro:pallet name="ps_dock_7_2_L3" x="50.85" y="-63.46" z="2.41" yaw="-0.0621"/>
+    <xacro:pallet name="ps_dock_7_3_L1" x="50.47" y="-62.14" z="0.01" yaw="-0.0416"/>
+    <xacro:pallet name="ps_dock_7_3_L2" x="50.47" y="-62.14" z="1.21" yaw="-0.0416"/>
+    <xacro:pallet name="ps_dock_7_3_L3" x="50.47" y="-62.14" z="2.41" yaw="-0.0416"/>
+    <xacro:pallet name="ps_dock_7_3_L4" x="50.47" y="-62.14" z="3.61" yaw="-0.0416"/>
+    <xacro:pallet name="ps_dock_7_4_L1" x="50.7" y="-60.75" z="0.01" yaw="-0.1399"/>
+    <xacro:pallet name="ps_dock_7_4_L2" x="50.7" y="-60.75" z="1.21" yaw="-0.1399"/>
+    <xacro:pallet name="ps_dock_7_4_L3" x="50.7" y="-60.75" z="2.41" yaw="-0.1399"/>
+    <xacro:pallet name="ps_dock_7_4_L4" x="50.7" y="-60.75" z="3.61" yaw="-0.1399"/>
+    <xacro:pallet name="ps_dock_7_5_L1" x="50.75" y="-59.17" z="0.01" yaw="-0.0244"/>
+    <xacro:pallet name="ps_dock_7_5_L2" x="50.75" y="-59.17" z="1.21" yaw="-0.0244"/>
+    <xacro:pallet name="ps_dock_7_5_L3" x="50.75" y="-59.17" z="2.41" yaw="-0.0244"/>
+    <xacro:pallet name="ps_dock_7_6_L1" x="50.84" y="-58.09" z="0.01" yaw="-0.0353"/>
+    <xacro:pallet name="ps_dock_7_6_L2" x="50.84" y="-58.09" z="1.21" yaw="-0.0353"/>
+    <xacro:pallet name="ps_dock_7_6_L3" x="50.84" y="-58.09" z="2.41" yaw="-0.0353"/>
+    <xacro:pallet name="ps_dock_7_6_L4" x="50.84" y="-58.09" z="3.61" yaw="-0.0353"/>
+    <xacro:pallet name="ps_dock_7_7_L1" x="50.76" y="-56.84" z="0.01" yaw="0.0576"/>
+    <xacro:pallet name="ps_dock_7_7_L2" x="50.76" y="-56.84" z="1.21" yaw="0.0576"/>
+    <xacro:pallet name="ps_dock_7_7_L3" x="50.76" y="-56.84" z="2.41" yaw="0.0576"/>
+    <xacro:pallet name="ps_dock_7_7_L4" x="50.76" y="-56.84" z="3.61" yaw="0.0576"/>
+    <xacro:pallet name="ps_dock_7_8_L1" x="50.59" y="-55.62" z="0.01" yaw="-0.1511"/>
+    <xacro:pallet name="ps_dock_7_8_L2" x="50.59" y="-55.62" z="1.21" yaw="-0.1511"/>
+    <xacro:pallet name="ps_dock_7_8_L3" x="50.59" y="-55.62" z="2.41" yaw="-0.1511"/>
+    <xacro:pallet name="ps_dock_7_9_L1" x="50.82" y="-54.35" z="0.01" yaw="-0.1408"/>
+    <xacro:pallet name="ps_dock_7_9_L2" x="50.82" y="-54.35" z="1.21" yaw="-0.1408"/>
+    <xacro:pallet name="ps_dock_8_0_L1" x="52.07" y="-65.69" z="0.01" yaw="0.0197"/>
+    <xacro:pallet name="ps_dock_8_0_L2" x="52.07" y="-65.69" z="1.21" yaw="0.0197"/>
+    <xacro:pallet name="ps_dock_8_1_L1" x="51.99" y="-64.52" z="0.01" yaw="0.0593"/>
+    <xacro:pallet name="ps_dock_8_1_L2" x="51.99" y="-64.52" z="1.21" yaw="0.0593"/>
+    <xacro:pallet name="ps_dock_8_1_L3" x="51.99" y="-64.52" z="2.41" yaw="0.0593"/>
+    <xacro:pallet name="ps_dock_8_2_L1" x="51.91" y="-63.06" z="0.01" yaw="0.1285"/>
+    <xacro:pallet name="ps_dock_8_2_L2" x="51.91" y="-63.06" z="1.21" yaw="0.1285"/>
+    <xacro:pallet name="ps_dock_8_2_L3" x="51.91" y="-63.06" z="2.41" yaw="0.1285"/>
+    <xacro:pallet name="ps_dock_8_2_L4" x="51.91" y="-63.06" z="3.61" yaw="0.1285"/>
+    <xacro:pallet name="ps_dock_8_3_L1" x="52.06" y="-61.72" z="0.01" yaw="-0.0518"/>
+    <xacro:pallet name="ps_dock_8_3_L2" x="52.06" y="-61.72" z="1.21" yaw="-0.0518"/>
+    <xacro:pallet name="ps_dock_8_3_L3" x="52.06" y="-61.72" z="2.41" yaw="-0.0518"/>
+    <xacro:pallet name="ps_dock_8_3_L4" x="52.06" y="-61.72" z="3.61" yaw="-0.0518"/>
+    <xacro:pallet name="ps_dock_8_4_L1" x="51.99" y="-60.79" z="0.01" yaw="-0.0963"/>
+    <xacro:pallet name="ps_dock_8_4_L2" x="51.99" y="-60.79" z="1.21" yaw="-0.0963"/>
+    <xacro:pallet name="ps_dock_8_4_L3" x="51.99" y="-60.79" z="2.41" yaw="-0.0963"/>
+    <xacro:pallet name="ps_dock_8_4_L4" x="51.99" y="-60.79" z="3.61" yaw="-0.0963"/>
+    <xacro:pallet name="ps_dock_8_5_L1" x="51.75" y="-59.18" z="0.01" yaw="-0.1344"/>
+    <xacro:pallet name="ps_dock_8_5_L2" x="51.75" y="-59.18" z="1.21" yaw="-0.1344"/>
+    <xacro:pallet name="ps_dock_8_5_L3" x="51.75" y="-59.18" z="2.41" yaw="-0.1344"/>
+    <xacro:pallet name="ps_dock_8_5_L4" x="51.75" y="-59.18" z="3.61" yaw="-0.1344"/>
+    <xacro:pallet name="ps_dock_8_6_L1" x="51.84" y="-58.19" z="0.01" yaw="0.1205"/>
+    <xacro:pallet name="ps_dock_8_6_L2" x="51.84" y="-58.19" z="1.21" yaw="0.1205"/>
+    <xacro:pallet name="ps_dock_8_6_L3" x="51.84" y="-58.19" z="2.41" yaw="0.1205"/>
+    <xacro:pallet name="ps_dock_8_6_L4" x="51.84" y="-58.19" z="3.61" yaw="0.1205"/>
+    <xacro:pallet name="ps_dock_8_7_L1" x="52.19" y="-56.59" z="0.01" yaw="0.038"/>
+    <xacro:pallet name="ps_dock_8_7_L2" x="52.19" y="-56.59" z="1.21" yaw="0.038"/>
+    <xacro:pallet name="ps_dock_8_7_L3" x="52.19" y="-56.59" z="2.41" yaw="0.038"/>
+    <xacro:pallet name="ps_dock_8_8_L1" x="52.03" y="-55.35" z="0.01" yaw="-0.1116"/>
+    <xacro:pallet name="ps_dock_8_8_L2" x="52.03" y="-55.35" z="1.21" yaw="-0.1116"/>
+    <xacro:pallet name="ps_dock_8_9_L1" x="52.05" y="-54.25" z="0.01" yaw="-0.0559"/>
+    <xacro:pallet name="ps_dock_8_9_L2" x="52.05" y="-54.25" z="1.21" yaw="-0.0559"/>
+    <xacro:pallet name="ps_dock_9_0_L1" x="53.0" y="-65.67" z="0.01" yaw="0.0232"/>
+    <xacro:pallet name="ps_dock_9_0_L2" x="53.0" y="-65.67" z="1.21" yaw="0.0232"/>
+    <xacro:pallet name="ps_dock_9_1_L1" x="53.2" y="-64.73" z="0.01" yaw="-0.1425"/>
+    <xacro:pallet name="ps_dock_9_1_L2" x="53.2" y="-64.73" z="1.21" yaw="-0.1425"/>
+    <xacro:pallet name="ps_dock_9_2_L1" x="53.27" y="-63.31" z="0.01" yaw="-0.0555"/>
+    <xacro:pallet name="ps_dock_9_2_L2" x="53.27" y="-63.31" z="1.21" yaw="-0.0555"/>
+    <xacro:pallet name="ps_dock_9_2_L3" x="53.27" y="-63.31" z="2.41" yaw="-0.0555"/>
+    <xacro:pallet name="ps_dock_9_2_L4" x="53.27" y="-63.31" z="3.61" yaw="-0.0555"/>
+    <xacro:pallet name="ps_dock_9_3_L1" x="53.19" y="-61.84" z="0.01" yaw="0.1338"/>
+    <xacro:pallet name="ps_dock_9_3_L2" x="53.19" y="-61.84" z="1.21" yaw="0.1338"/>
+    <xacro:pallet name="ps_dock_9_3_L3" x="53.19" y="-61.84" z="2.41" yaw="0.1338"/>
+    <xacro:pallet name="ps_dock_9_4_L1" x="53.08" y="-60.52" z="0.01" yaw="0.0607"/>
+    <xacro:pallet name="ps_dock_9_4_L2" x="53.08" y="-60.52" z="1.21" yaw="0.0607"/>
+    <xacro:pallet name="ps_dock_9_4_L3" x="53.08" y="-60.52" z="2.41" yaw="0.0607"/>
+    <xacro:pallet name="ps_dock_9_5_L1" x="53.14" y="-59.27" z="0.01" yaw="0.0374"/>
+    <xacro:pallet name="ps_dock_9_5_L2" x="53.14" y="-59.27" z="1.21" yaw="0.0374"/>
+    <xacro:pallet name="ps_dock_9_5_L3" x="53.14" y="-59.27" z="2.41" yaw="0.0374"/>
+    <xacro:pallet name="ps_dock_9_5_L4" x="53.14" y="-59.27" z="3.61" yaw="0.0374"/>
+    <xacro:pallet name="ps_dock_9_6_L1" x="53.21" y="-58.19" z="0.01" yaw="-0.054"/>
+    <xacro:pallet name="ps_dock_9_6_L2" x="53.21" y="-58.19" z="1.21" yaw="-0.054"/>
+    <xacro:pallet name="ps_dock_9_6_L3" x="53.21" y="-58.19" z="2.41" yaw="-0.054"/>
+    <xacro:pallet name="ps_dock_9_7_L1" x="53.06" y="-56.66" z="0.01" yaw="0.0094"/>
+    <xacro:pallet name="ps_dock_9_7_L2" x="53.06" y="-56.66" z="1.21" yaw="0.0094"/>
+    <xacro:pallet name="ps_dock_9_7_L3" x="53.06" y="-56.66" z="2.41" yaw="0.0094"/>
+    <xacro:pallet name="ps_dock_9_7_L4" x="53.06" y="-56.66" z="3.61" yaw="0.0094"/>
+    <xacro:pallet name="ps_dock_9_8_L1" x="53.15" y="-55.59" z="0.01" yaw="-0.1718"/>
+    <xacro:pallet name="ps_dock_9_8_L2" x="53.15" y="-55.59" z="1.21" yaw="-0.1718"/>
+    <xacro:pallet name="ps_dock_9_9_L1" x="53.15" y="-54.29" z="0.01" yaw="-0.1266"/>
+    <xacro:pallet name="ps_dock_9_9_L2" x="53.15" y="-54.29" z="1.21" yaw="-0.1266"/>
+    <xacro:pallet name="ps_dock_10_0_L1" x="54.43" y="-65.94" z="0.01" yaw="-0.1718"/>
+    <xacro:pallet name="ps_dock_10_0_L2" x="54.43" y="-65.94" z="1.21" yaw="-0.1718"/>
+    <xacro:pallet name="ps_dock_10_1_L1" x="54.67" y="-64.71" z="0.01" yaw="0.0114"/>
+    <xacro:pallet name="ps_dock_10_1_L2" x="54.67" y="-64.71" z="1.21" yaw="0.0114"/>
+    <xacro:pallet name="ps_dock_10_1_L3" x="54.67" y="-64.71" z="2.41" yaw="0.0114"/>
+    <xacro:pallet name="ps_dock_10_2_L1" x="54.42" y="-63.22" z="0.01" yaw="-0.1494"/>
+    <xacro:pallet name="ps_dock_10_2_L2" x="54.42" y="-63.22" z="1.21" yaw="-0.1494"/>
+    <xacro:pallet name="ps_dock_10_2_L3" x="54.42" y="-63.22" z="2.41" yaw="-0.1494"/>
+    <xacro:pallet name="ps_dock_10_2_L4" x="54.42" y="-63.22" z="3.61" yaw="-0.1494"/>
+    <xacro:pallet name="ps_dock_10_3_L1" x="54.73" y="-62.18" z="0.01" yaw="-0.014"/>
+    <xacro:pallet name="ps_dock_10_3_L2" x="54.73" y="-62.18" z="1.21" yaw="-0.014"/>
+    <xacro:pallet name="ps_dock_10_3_L3" x="54.73" y="-62.18" z="2.41" yaw="-0.014"/>
+    <xacro:pallet name="ps_dock_10_4_L1" x="54.34" y="-60.74" z="0.01" yaw="0.0256"/>
+    <xacro:pallet name="ps_dock_10_4_L2" x="54.34" y="-60.74" z="1.21" yaw="0.0256"/>
+    <xacro:pallet name="ps_dock_10_4_L3" x="54.34" y="-60.74" z="2.41" yaw="0.0256"/>
+    <xacro:pallet name="ps_dock_10_4_L4" x="54.34" y="-60.74" z="3.61" yaw="0.0256"/>
+    <xacro:pallet name="ps_dock_10_5_L1" x="54.65" y="-59.39" z="0.01" yaw="-0.0331"/>
+    <xacro:pallet name="ps_dock_10_5_L2" x="54.65" y="-59.39" z="1.21" yaw="-0.0331"/>
+    <xacro:pallet name="ps_dock_10_5_L3" x="54.65" y="-59.39" z="2.41" yaw="-0.0331"/>
+    <xacro:pallet name="ps_dock_10_6_L1" x="54.78" y="-58.21" z="0.01" yaw="0.1159"/>
+    <xacro:pallet name="ps_dock_10_6_L2" x="54.78" y="-58.21" z="1.21" yaw="0.1159"/>
+    <xacro:pallet name="ps_dock_10_6_L3" x="54.78" y="-58.21" z="2.41" yaw="0.1159"/>
+    <xacro:pallet name="ps_dock_10_6_L4" x="54.78" y="-58.21" z="3.61" yaw="0.1159"/>
+    <xacro:pallet name="ps_dock_10_7_L1" x="54.76" y="-56.96" z="0.01" yaw="-0.0896"/>
+    <xacro:pallet name="ps_dock_10_7_L2" x="54.76" y="-56.96" z="1.21" yaw="-0.0896"/>
+    <xacro:pallet name="ps_dock_10_7_L3" x="54.76" y="-56.96" z="2.41" yaw="-0.0896"/>
+    <xacro:pallet name="ps_dock_10_8_L1" x="54.59" y="-55.44" z="0.01" yaw="0.1293"/>
+    <xacro:pallet name="ps_dock_10_8_L2" x="54.59" y="-55.44" z="1.21" yaw="0.1293"/>
+    <xacro:pallet name="ps_dock_10_8_L3" x="54.59" y="-55.44" z="2.41" yaw="0.1293"/>
+    <xacro:pallet name="ps_dock_10_9_L1" x="54.67" y="-54.29" z="0.01" yaw="0.0974"/>
+    <xacro:pallet name="ps_dock_10_9_L2" x="54.67" y="-54.29" z="1.21" yaw="0.0974"/>
+    <xacro:pallet name="ps_dock_11_0_L1" x="55.64" y="-65.78" z="0.01" yaw="0.0107"/>
+    <xacro:pallet name="ps_dock_11_0_L2" x="55.64" y="-65.78" z="1.21" yaw="0.0107"/>
+    <xacro:pallet name="ps_dock_11_1_L1" x="55.7" y="-64.41" z="0.01" yaw="0.0794"/>
+    <xacro:pallet name="ps_dock_11_1_L2" x="55.7" y="-64.41" z="1.21" yaw="0.0794"/>
+    <xacro:pallet name="ps_dock_11_1_L3" x="55.7" y="-64.41" z="2.41" yaw="0.0794"/>
+    <xacro:pallet name="ps_dock_11_2_L1" x="56.01" y="-63.09" z="0.01" yaw="-0.1386"/>
+    <xacro:pallet name="ps_dock_11_2_L2" x="56.01" y="-63.09" z="1.21" yaw="-0.1386"/>
+    <xacro:pallet name="ps_dock_11_2_L3" x="56.01" y="-63.09" z="2.41" yaw="-0.1386"/>
+    <xacro:pallet name="ps_dock_11_3_L1" x="55.73" y="-62.11" z="0.01" yaw="0.0908"/>
+    <xacro:pallet name="ps_dock_11_3_L2" x="55.73" y="-62.11" z="1.21" yaw="0.0908"/>
+    <xacro:pallet name="ps_dock_11_3_L3" x="55.73" y="-62.11" z="2.41" yaw="0.0908"/>
+    <xacro:pallet name="ps_dock_11_4_L1" x="55.93" y="-60.81" z="0.01" yaw="-0.0126"/>
+    <xacro:pallet name="ps_dock_11_4_L2" x="55.93" y="-60.81" z="1.21" yaw="-0.0126"/>
+    <xacro:pallet name="ps_dock_11_4_L3" x="55.93" y="-60.81" z="2.41" yaw="-0.0126"/>
+    <xacro:pallet name="ps_dock_11_4_L4" x="55.93" y="-60.81" z="3.61" yaw="-0.0126"/>
+    <xacro:pallet name="ps_dock_11_5_L1" x="55.88" y="-59.31" z="0.01" yaw="0.1271"/>
+    <xacro:pallet name="ps_dock_11_5_L2" x="55.88" y="-59.31" z="1.21" yaw="0.1271"/>
+    <xacro:pallet name="ps_dock_11_5_L3" x="55.88" y="-59.31" z="2.41" yaw="0.1271"/>
+    <xacro:pallet name="ps_dock_11_5_L4" x="55.88" y="-59.31" z="3.61" yaw="0.1271"/>
+    <xacro:pallet name="ps_dock_11_6_L1" x="55.91" y="-58.22" z="0.01" yaw="-0.0108"/>
+    <xacro:pallet name="ps_dock_11_6_L2" x="55.91" y="-58.22" z="1.21" yaw="-0.0108"/>
+    <xacro:pallet name="ps_dock_11_6_L3" x="55.91" y="-58.22" z="2.41" yaw="-0.0108"/>
+    <xacro:pallet name="ps_dock_11_7_L1" x="55.92" y="-56.6" z="0.01" yaw="-0.0517"/>
+    <xacro:pallet name="ps_dock_11_7_L2" x="55.92" y="-56.6" z="1.21" yaw="-0.0517"/>
+    <xacro:pallet name="ps_dock_11_7_L3" x="55.92" y="-56.6" z="2.41" yaw="-0.0517"/>
+    <xacro:pallet name="ps_dock_11_8_L1" x="55.64" y="-55.47" z="0.01" yaw="-0.1547"/>
+    <xacro:pallet name="ps_dock_11_8_L2" x="55.64" y="-55.47" z="1.21" yaw="-0.1547"/>
+    <xacro:pallet name="ps_dock_11_9_L1" x="56.02" y="-54.36" z="0.01" yaw="0.1271"/>
+    <xacro:pallet name="ps_dock_11_9_L2" x="56.02" y="-54.36" z="1.21" yaw="0.1271"/>
+    <xacro:pallet name="ps_dock_12_0_L1" x="57.33" y="-65.79" z="0.01" yaw="0.0025"/>
+    <xacro:pallet name="ps_dock_12_0_L2" x="57.33" y="-65.79" z="1.21" yaw="0.0025"/>
+    <xacro:pallet name="ps_dock_12_1_L1" x="57.13" y="-64.52" z="0.01" yaw="-0.0175"/>
+    <xacro:pallet name="ps_dock_12_1_L2" x="57.13" y="-64.52" z="1.21" yaw="-0.0175"/>
+    <xacro:pallet name="ps_dock_12_2_L1" x="57.3" y="-63.17" z="0.01" yaw="0.0367"/>
+    <xacro:pallet name="ps_dock_12_2_L2" x="57.3" y="-63.17" z="1.21" yaw="0.0367"/>
+    <xacro:pallet name="ps_dock_12_2_L3" x="57.3" y="-63.17" z="2.41" yaw="0.0367"/>
+    <xacro:pallet name="ps_dock_12_3_L1" x="57.15" y="-61.72" z="0.01" yaw="-0.1384"/>
+    <xacro:pallet name="ps_dock_12_3_L2" x="57.15" y="-61.72" z="1.21" yaw="-0.1384"/>
+    <xacro:pallet name="ps_dock_12_3_L3" x="57.15" y="-61.72" z="2.41" yaw="-0.1384"/>
+    <xacro:pallet name="ps_dock_12_4_L1" x="57.35" y="-60.73" z="0.01" yaw="0.0016"/>
+    <xacro:pallet name="ps_dock_12_4_L2" x="57.35" y="-60.73" z="1.21" yaw="0.0016"/>
+    <xacro:pallet name="ps_dock_12_5_L1" x="56.99" y="-59.48" z="0.01" yaw="0.1714"/>
+    <xacro:pallet name="ps_dock_12_5_L2" x="56.99" y="-59.48" z="1.21" yaw="0.1714"/>
+    <xacro:pallet name="ps_dock_12_5_L3" x="56.99" y="-59.48" z="2.41" yaw="0.1714"/>
+    <xacro:pallet name="ps_dock_12_6_L1" x="57.16" y="-58.0" z="0.01" yaw="-0.0444"/>
+    <xacro:pallet name="ps_dock_12_6_L2" x="57.16" y="-58.0" z="1.21" yaw="-0.0444"/>
+    <xacro:pallet name="ps_dock_12_6_L3" x="57.16" y="-58.0" z="2.41" yaw="-0.0444"/>
+    <xacro:pallet name="ps_dock_12_7_L1" x="57.04" y="-56.8" z="0.01" yaw="0.0624"/>
+    <xacro:pallet name="ps_dock_12_7_L2" x="57.04" y="-56.8" z="1.21" yaw="0.0624"/>
+    <xacro:pallet name="ps_dock_12_7_L3" x="57.04" y="-56.8" z="2.41" yaw="0.0624"/>
+    <xacro:pallet name="ps_dock_12_8_L1" x="56.93" y="-55.38" z="0.01" yaw="-0.1515"/>
+    <xacro:pallet name="ps_dock_12_8_L2" x="56.93" y="-55.38" z="1.21" yaw="-0.1515"/>
+    <xacro:pallet name="ps_dock_12_8_L3" x="56.93" y="-55.38" z="2.41" yaw="-0.1515"/>
+    <xacro:pallet name="ps_dock_12_9_L1" x="56.95" y="-54.06" z="0.01" yaw="-0.0753"/>
+    <xacro:pallet name="ps_dock_12_9_L2" x="56.95" y="-54.06" z="1.21" yaw="-0.0753"/>
+    <xacro:pallet name="ps_dock_13_0_L1" x="58.56" y="-65.77" z="0.01" yaw="0.1418"/>
+    <xacro:pallet name="ps_dock_13_0_L2" x="58.56" y="-65.77" z="1.21" yaw="0.1418"/>
+    <xacro:pallet name="ps_dock_13_1_L1" x="58.64" y="-64.63" z="0.01" yaw="0.0289"/>
+    <xacro:pallet name="ps_dock_13_1_L2" x="58.64" y="-64.63" z="1.21" yaw="0.0289"/>
+    <xacro:pallet name="ps_dock_13_2_L1" x="58.27" y="-63.33" z="0.01" yaw="0.1633"/>
+    <xacro:pallet name="ps_dock_13_2_L2" x="58.27" y="-63.33" z="1.21" yaw="0.1633"/>
+    <xacro:pallet name="ps_dock_13_3_L1" x="58.55" y="-62.0" z="0.01" yaw="0.0332"/>
+    <xacro:pallet name="ps_dock_13_3_L2" x="58.55" y="-62.0" z="1.21" yaw="0.0332"/>
+    <xacro:pallet name="ps_dock_13_4_L1" x="58.67" y="-60.75" z="0.01" yaw="-0.043"/>
+    <xacro:pallet name="ps_dock_13_4_L2" x="58.67" y="-60.75" z="1.21" yaw="-0.043"/>
+    <xacro:pallet name="ps_dock_13_5_L1" x="58.6" y="-59.19" z="0.01" yaw="0.0594"/>
+    <xacro:pallet name="ps_dock_13_5_L2" x="58.6" y="-59.19" z="1.21" yaw="0.0594"/>
+    <xacro:pallet name="ps_dock_13_6_L1" x="58.61" y="-57.93" z="0.01" yaw="0.0647"/>
+    <xacro:pallet name="ps_dock_13_6_L2" x="58.61" y="-57.93" z="1.21" yaw="0.0647"/>
+    <xacro:pallet name="ps_dock_13_7_L1" x="58.46" y="-56.68" z="0.01" yaw="-0.0267"/>
+    <xacro:pallet name="ps_dock_13_7_L2" x="58.46" y="-56.68" z="1.21" yaw="-0.0267"/>
+    <xacro:pallet name="ps_dock_13_8_L1" x="58.38" y="-55.52" z="0.01" yaw="-0.1116"/>
+    <xacro:pallet name="ps_dock_13_8_L2" x="58.38" y="-55.52" z="1.21" yaw="-0.1116"/>
+    <xacro:pallet name="ps_dock_13_9_L1" x="58.31" y="-53.93" z="0.01" yaw="-0.0048"/>
+    <xacro:pallet name="ps_dock_13_9_L2" x="58.31" y="-53.93" z="1.21" yaw="-0.0048"/>
+
+    <!-- Block-stack pallets: 718 models -->
+
+    <!-- ============================================================ -->
+    <!-- AISLE OBSTACLES (overturned pallets + people in Zone A)        -->
+    <!-- ============================================================ -->
+
+    <!-- Aisle 1: overturned pallets blocking aisle + 3 people -->
+    <xacro:overturned_pallet name="spill1_a" x="28.0" y="-34.4" yaw="0.3"/>
+    <xacro:overturned_pallet name="spill1_b" x="29.8" y="-34.25" yaw="-0.5"/>
+
+    <xacro:person name="spill1_p1" x="28.3" y="-33.6" yaw="-1.57"/>
+    <xacro:person name="spill1_p2" x="31.5" y="-34.199999999999996" yaw="3.14"/>
+    <xacro:person name="spill1_p3" x="28.9" y="-35.3" yaw="1.57"/>
+
+    <!-- Aisle 2: overturned pallets + person and forklift -->
+    <xacro:overturned_pallet name="spill2_a" x="-28.0" y="-14.8" yaw="-0.2"/>
+    <xacro:overturned_pallet name="spill2_b" x="-26.4" y="-14.9" yaw="0.45"/>
+    <xacro:forklift name="spill2_forklift" x="-25.6955" y="-10.5044" yaw="3.0"/>
+    <xacro:person name="spill2_p1" x="-24.5" y="-14.200000000000001" yaw="3.14"/>
+
+    <!-- Charging station -->
+    <xacro:charging_station name="charging_station_1" x="63.7013" y="35.9283" yaw="0"/>
+
+  </world>
+</sdf>
