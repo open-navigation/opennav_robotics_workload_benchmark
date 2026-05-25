@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>opennav_benchmark_autonomy</name>
+  <name>opennav_benchmark_application</name>
   <version>0.1.0</version>
-  <description>OpenNav Benchmark Autonomy: maps, annotations, and autonomy scripts</description>
+  <description>OpenNav Benchmark Application: maps, annotations, and autonomy scripts</description>
   <maintainer email="steve@opennav.org">Steve Macenski</maintainer>
   <license>Apache-2.0</license>
 

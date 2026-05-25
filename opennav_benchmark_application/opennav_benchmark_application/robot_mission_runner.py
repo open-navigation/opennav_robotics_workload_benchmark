@@ -47,9 +47,9 @@ class RobotMissionRunner(Node):
         self.navigator = BasicNavigator()
 
         # Load annotations from installed package share
-        autonomy_pkg = get_package_share_directory('opennav_benchmark_autonomy')
+        application_pkg = get_package_share_directory('opennav_benchmark_application')
         annotations_file = os.path.join(
-            autonomy_pkg, 'annotations', 'warehouse_waypoints.yaml')
+            application_pkg, 'annotations', 'warehouse_waypoints.yaml')
         self.dispatcher = TaskDispatcher(annotations_file, self)
 
         print('Sending initial pose...')

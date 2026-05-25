@@ -11,7 +11,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     nav2_pkg = get_package_share_directory('opennav_benchmark_nav2')
     nav2_bringup_pkg = get_package_share_directory('nav2_bringup')
-    autonomy_pkg = get_package_share_directory('opennav_benchmark_autonomy')
+    application_pkg = get_package_share_directory('opennav_benchmark_application')
 
     default_params = os.path.join(nav2_pkg, 'config', 'nav2_params.yaml')
 
@@ -26,7 +26,7 @@ def generate_launch_description():
             'slam', default_value='False',
             description='Whether to run SLAM'),
         DeclareLaunchArgument(
-            'map', default_value=os.path.join(autonomy_pkg, 'maps', 'benchmark_warehouse.yaml'),
+            'map', default_value=os.path.join(application_pkg, 'maps', 'benchmark_warehouse.yaml'),
             description='Full path to map yaml file to load'),
         DeclareLaunchArgument(
             'use_sim_time', default_value='true',

@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'opennav_benchmark_autonomy'
+package_name = 'opennav_benchmark_application'
 
 setup(
     name=package_name,
@@ -20,13 +20,13 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'robot_mission_runner = opennav_benchmark_autonomy.robot_mission_runner:main',
+            'robot_mission_runner = opennav_benchmark_application.robot_mission_runner:main',
         ],
     },
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='Steve Macenski',
     maintainer_email='steve@opennav.org',
-    description='OpenNav Benchmark Autonomy: maps, annotations, and autonomy scripts',
+    description='OpenNav Benchmark Application: maps, annotations, and autonomy scripts',
     license='Apache-2.0',
 )
