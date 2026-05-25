@@ -8,6 +8,10 @@ set -euo pipefail
 AUTONOMY_IMAGE="${AUTONOMY_IMAGE:-opennav_benchmark/robotic_amr_workload:jazzy}"
 VLM_IMAGE="${VLM_IMAGE:-}"
 METRICS_SCRIPT="${METRICS_SCRIPT:-}"
+HARDWARE_LOAD_SCRIPT="${HARDWARE_LOAD_SCRIPT:-}"
+NUM_LIDAR_3D="${NUM_LIDAR_3D:-3}"
+NUM_LIDAR_2D="${NUM_LIDAR_2D:-2}"
+NUM_RGBD_CAMERAS="${NUM_RGBD_CAMERAS:-3}"
 
 BENCHMARK_DURATION_SEC="${BENCHMARK_DURATION_SEC:-180}"
 STARTUP_WAIT_SEC="${STARTUP_WAIT_SEC:-10}"
@@ -26,6 +30,7 @@ VLM_NAME="opennav_vlm_${RUN_TIMESTAMP}"
 AUTONOMY_LAUNCHED=0
 VLM_LAUNCHED=0
 METRICS_PID=""
+HARDWARE_LOAD_PID=""
 CLEANED_UP=0
 
 log() {
@@ -57,6 +62,21 @@ cleanup() {
         if kill -0 "${METRICS_PID}" 2>/dev/null; then
             log "Metrics process did not exit; sending SIGKILL"
             kill -KILL "${METRICS_PID}" 2>/dev/null || true
+        fi
+    fi
+
+    if [[ -n "${HARDWARE_LOAD_PID}" ]] && kill -0 "${HARDWARE_LOAD_PID}" 2>/dev/null; then
+        log "Stopping hardware load simulation (pid ${HARDWARE_LOAD_PID})"
+        kill -TERM "${HARDWARE_LOAD_PID}" 2>/dev/null || true
+        for _ in 1 2 3 4 5; do
+            if ! kill -0 "${HARDWARE_LOAD_PID}" 2>/dev/null; then
+                break
+            fi
+            sleep 1
+        done
+        if kill -0 "${HARDWARE_LOAD_PID}" 2>/dev/null; then
+            log "Hardware load process did not exit; sending SIGKILL"
+            kill -KILL "${HARDWARE_LOAD_PID}" 2>/dev/null || true
         fi
     fi
 
@@ -135,6 +155,8 @@ log "  RUN_DIR=${RUN_DIR}"
 log "  AUTONOMY_IMAGE=${AUTONOMY_IMAGE}"
 log "  VLM_IMAGE=${VLM_IMAGE:-<disabled>}"
 log "  METRICS_SCRIPT=${METRICS_SCRIPT:-<disabled>}"
+log "  HARDWARE_LOAD_SCRIPT=${HARDWARE_LOAD_SCRIPT:-<disabled>}"
+log "  NUM_LIDAR_3D=${NUM_LIDAR_3D}, NUM_LIDAR_2D=${NUM_LIDAR_2D}, NUM_RGBD_CAMERAS=${NUM_RGBD_CAMERAS}"
 log "  BENCHMARK_DURATION_SEC=${BENCHMARK_DURATION_SEC}"
 
 # -----------------------------------------------------------------------------
@@ -220,6 +242,25 @@ if [[ -n "${METRICS_SCRIPT}" ]]; then
         > "${RUN_DIR}/metrics.stdout" 2>&1 &
     METRICS_PID=$!
     log "Metrics capture pid: ${METRICS_PID}"
+fi
+
+# -----------------------------------------------------------------------------
+# Start hardware load simulation (optional)
+# -----------------------------------------------------------------------------
+
+if [[ -n "${HARDWARE_LOAD_SCRIPT}" ]]; then
+    if [[ ! -x "${HARDWARE_LOAD_SCRIPT}" ]]; then
+        log "ERROR: HARDWARE_LOAD_SCRIPT='${HARDWARE_LOAD_SCRIPT}' is not executable"
+        exit 1
+    fi
+    log "Starting hardware load simulation: ${HARDWARE_LOAD_SCRIPT}"
+    "${HARDWARE_LOAD_SCRIPT}" \
+        --lidar-3d "${NUM_LIDAR_3D}" \
+        --lidar-2d "${NUM_LIDAR_2D}" \
+        --rgbd-cameras "${NUM_RGBD_CAMERAS}" \
+        > "${RUN_DIR}/simulated_hardware_load.stdout" 2>&1 &
+    HARDWARE_LOAD_PID=$!
+    log "Hardware load simulation pid: ${HARDWARE_LOAD_PID}"
 fi
 
 # -----------------------------------------------------------------------------

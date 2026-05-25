@@ -1,0 +1,72 @@
+<!--
+  This Behavior Tree replans the global path periodically at 1 Hz with VLM-based
+  hazard detection. Before each replan, it queries a VLM to check for ground hazards
+  and crowded areas. If detected, it marks the area in front of the robot as lethal
+  in the costmap, causing the controller to stop and the planner to route around.
+  It also has recovery actions specific to planning / control as well as general system issues.
+-->
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <RecoveryNode number_of_retries="6" name="NavigateRecovery">
+      <PipelineSequence name="NavigateWithReplanning">
+        <ControllerSelector selected_controller="{selected_controller}" default_controller="FollowPath" topic_name="controller_selector"/>
+        <PlannerSelector selected_planner="{selected_planner}" default_planner="GridBased" topic_name="planner_selector"/>
+        <RateController hz="1.0">
+          <Sequence>
+            <!-- VLM ground hazard check -->
+            <ForceSuccess>
+              <Sequence name="GroundHazardCheck">
+                <QueryBool prompt="Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no."
+                           value="{ground_hazard}"/>
+                <CheckBool value="{ground_hazard}"/>
+                <MarkLethalAhead distance="1.5" width="1.2"/>
+              </Sequence>
+            </ForceSuccess>
+            <!-- VLM crowd check -->
+            <ForceSuccess>
+              <Sequence name="CrowdCheck">
+                <QueryBool prompt="Is this space crowded by people or working machinery? If so, respond only yes. Otherwise respond no."
+                           value="{crowd_detected}"/>
+                <CheckBool value="{crowd_detected}"/>
+                <MarkLethalAhead distance="2.0" width="2.0"/>
+              </Sequence>
+            </ForceSuccess>
+            <!-- Compute path (routes around any newly marked lethal areas) -->
+            <RecoveryNode number_of_retries="1" name="ComputePathToPose">
+              <ComputePathToPose goal="{goal}" path="{path}" planner_id="{selected_planner}" error_code_id="{compute_path_error_code}"/>
+              <Sequence>
+                <WouldAPlannerRecoveryHelp error_code="{compute_path_error_code}"/>
+                <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>
+              </Sequence>
+            </RecoveryNode>
+          </Sequence>
+        </RateController>
+        <RecoveryNode number_of_retries="1" name="FollowPath">
+          <FollowPath path="{path}" controller_id="{selected_controller}" error_code_id="{follow_path_error_code}"/>
+          <Sequence>
+            <WouldAControllerRecoveryHelp error_code="{follow_path_error_code}"/>
+            <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
+          </Sequence>
+        </RecoveryNode>
+      </PipelineSequence>
+      <Sequence>
+        <Fallback>
+          <WouldAControllerRecoveryHelp error_code="{follow_path_error_code}"/>
+          <WouldAPlannerRecoveryHelp error_code="{compute_path_error_code}"/>
+        </Fallback>
+        <ReactiveFallback name="RecoveryFallback">
+          <GoalUpdated/>
+          <RoundRobin name="RecoveryActions">
+            <Sequence name="ClearingActions">
+              <ClearEntireCostmap name="ClearLocalCostmap-Subtree" service_name="local_costmap/clear_entirely_local_costmap"/>
+              <ClearEntireCostmap name="ClearGlobalCostmap-Subtree" service_name="global_costmap/clear_entirely_global_costmap"/>
+            </Sequence>
+            <Spin spin_dist="1.57" error_code_id="{spin_error_code}"/>
+            <Wait wait_duration="5.0"/>
+            <BackUp backup_dist="0.30" backup_speed="0.15" error_code_id="{backup_code_id}"/>
+          </RoundRobin>
+        </ReactiveFallback>
+      </Sequence>
+    </RecoveryNode>
+  </BehaviorTree>
+</root>
