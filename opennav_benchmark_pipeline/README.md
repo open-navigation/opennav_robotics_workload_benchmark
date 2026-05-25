@@ -1,6 +1,6 @@
 # opennav_benchmark_pipeline
 
-Orchestrates a benchmark experiment across one or two Docker containers (an autonomy / AMR workload and an optional AI workload) plus an optional host-side system-metrics capture script to measure performance and resouce utilization.
+Orchestrates a benchmark experiment across one or two Docker containers (an autonomy / AMR workload and an optional AI workload) plus an optional host-side system-metrics capture script to measure performance and resource utilization.
 
 ## Host prerequisites
 
@@ -39,7 +39,7 @@ docker build -t opennav_benchmark/robotic_amr_simulation:jazzy \
   -f opennav_benchmark_pipeline/docker/robotic_amr_simulation/Dockerfile .
 ```
 
-The orchestrator (`run_benchmark.sh`) only launches the autonomy and VLM containers; the simulator is started separately so it can be run on another machine to avoid adding load to the benchmark host.
+The orchestrator (`run_benchmark.sh`) only launches the autonomy and VLM containers; the simulator is started separately so it can be run on another machine or cloud server to avoid adding load to the benchmark host.
 
 ```bash
 ./opennav_benchmark_pipeline/run_simulation.sh

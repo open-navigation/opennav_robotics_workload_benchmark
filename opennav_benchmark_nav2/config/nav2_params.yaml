@@ -40,7 +40,7 @@ amcl:
     robot_model_type: "nav2_amcl::DifferentialMotionModel"
     save_pose_rate: 0.5
     sigma_hit: 0.2
-    tf_broadcast: true
+    tf_broadcast: false  # For benchmarking, use simulation's positioning to remove error vector from computational load measurements of actual interest
     transform_tolerance: 1.0
     update_min_a: 0.2
     update_min_d: 0.25
@@ -96,7 +96,7 @@ controller_server:
     # MPPI allows the vehicle to have dynamic behavior, track paths accurately, and get out 
     # of confined or challenging situations by itself.
     FollowPath:
-      plugin: "nav2_mppi_controller::MPPIController" #TODO tune, maybe more samples? Higher speed for sure tuning
+      plugin: "nav2_mppi_controller::MPPIController"
       time_steps: 56
       model_dt: 0.05
       batch_size: 2000
@@ -196,11 +196,13 @@ planner_server:
       max_on_approach_iterations: 1000
       max_planning_time: 8.0
       motion_model_for_search: "REEDS_SHEPP"
+      allow_primitive_interpolation: true
       angle_quantization_bins: 72
       analytic_expansion_ratio: 3.5
       analytic_expansion_max_length: 3.0
       analytic_expansion_max_cost: 200.0
       analytic_expansion_max_cost_override: false
+      use_quadratic_cost_penalty: false # TODO try?
       minimum_turning_radius: 0.75
       reverse_penalty: 2.0
       change_penalty: 0.0

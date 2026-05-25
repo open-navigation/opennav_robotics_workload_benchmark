@@ -5,6 +5,7 @@ import tempfile
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.conditions import IfCondition
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
@@ -21,6 +22,7 @@ def launch_setup(context):
     y_str = LaunchConfiguration('y_pose').perform(context)
     z_str = LaunchConfiguration('z_pose').perform(context)
     yaw_str = LaunchConfiguration('yaw').perform(context)
+    use_gt_loc = LaunchConfiguration('use_ground_truth_localization')
 
     # Robot state publisher (URDF for TF)
     robot_urdf_xacro = os.path.join(robot_pkg, 'urdf', 'benchmark_robot.urdf.xacro')
@@ -107,6 +109,17 @@ def launch_setup(context):
         output='screen'
     )
 
+    # Static map->odom TF from spawn pose (perfect localization with zero wheel slip)
+    map_to_odom_static_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='map_to_odom_static_tf',
+        arguments=['--x', x_str, '--y', y_str, '--z', '0',
+                   '--roll', '0', '--pitch', '0', '--yaw', yaw_str,
+                   '--frame-id', 'map', '--child-frame-id', 'odom'],
+        condition=IfCondition(use_gt_loc),
+    )
+
     return [
         robot_state_publisher,
         spawn_robot,
@@ -117,6 +130,7 @@ def launch_setup(context):
         camera_front_right_depth_bridge,
         camera_rear_image_bridge,
         camera_rear_depth_bridge,
+        map_to_odom_static_tf,
     ]
 
 
@@ -134,6 +148,9 @@ def generate_launch_description():
     declare_y_pose = DeclareLaunchArgument('y_pose', default_value='35.9279')
     declare_z_pose = DeclareLaunchArgument('z_pose', default_value='0.1')
     declare_yaw = DeclareLaunchArgument('yaw', default_value='3.151')
+    declare_use_gt_loc = DeclareLaunchArgument(
+        'use_ground_truth_localization', default_value='true',
+        description='Use static map->odom TF from spawn pose instead of AMCL')
 
     return LaunchDescription([
         declare_robot_name,
@@ -143,5 +160,6 @@ def generate_launch_description():
         declare_y_pose,
         declare_z_pose,
         declare_yaw,
+        declare_use_gt_loc,
         OpaqueFunction(function=launch_setup),
     ])
