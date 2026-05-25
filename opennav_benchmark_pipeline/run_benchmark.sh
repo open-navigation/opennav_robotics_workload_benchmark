@@ -11,10 +11,9 @@ METRICS_SCRIPT="${METRICS_SCRIPT:-}"
 
 BENCHMARK_DURATION_SEC="${BENCHMARK_DURATION_SEC:-180}"
 STARTUP_WAIT_SEC="${STARTUP_WAIT_SEC:-10}"
-STATUS_LOG_INTERVAL_SEC="${STATUS_LOG_INTERVAL_SEC:-30}"
 SHUTDOWN_GRACE_SEC="${SHUTDOWN_GRACE_SEC:-15}"
-
 LOG_PARENT_DIR="${LOG_PARENT_DIR:-./opennav_benchmark_logs}"
+STATUS_LOG_INTERVAL_SEC=30
 
 # =============================================================================
 # Internal methods and general data
