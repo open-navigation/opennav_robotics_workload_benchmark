@@ -6,6 +6,8 @@
 
     <!-- Physics -->
     <physics name="tpe" type="tpe">
+      <max_step_size>0.010</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
       <engine>
         <filename>gz-physics-tpe-plugin</filename>
       </engine>

@@ -298,6 +298,8 @@ def write_header(s: SDFWriter):
     s.w('')
     s.w('    <!-- Physics -->')
     s.w('    <physics name="tpe" type="tpe">')
+    s.w('      <max_step_size>0.010</max_step_size>')
+    s.w('      <real_time_factor>1.0</real_time_factor>')
     s.w('      <engine>')
     s.w('        <filename>gz-physics-tpe-plugin</filename>')
     s.w('      </engine>')
