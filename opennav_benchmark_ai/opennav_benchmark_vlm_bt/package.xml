@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>opennav_benchmark_vlm_bt</name>
+  <version>0.1.0</version>
+  <description>BT.CPP behavior tree nodes for interacting with the OpenNav Benchmark VLM action servers.</description>
+  <maintainer email="steve@opennav.org">Steve Macenski</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
+  <depend>sensor_msgs</depend>
+  <depend>behaviortree_cpp</depend>
+  <depend>nav2_behavior_tree</depend>
+  <depend>nav2_util</depend>
+  <depend>opennav_benchmark_vlm_msgs</depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
