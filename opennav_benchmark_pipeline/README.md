@@ -65,7 +65,63 @@ To switch to HIL:
 3. Rebuild the image on **both** machines (same Dockerfile and xml on each).
 4. Confirm the `sysctl` bump (above) is applied on **both** machines.
 
-## Run
+## Build the simulation image
+
+The `robotic_amr_simulation/` image bundles `opennav_benchmark_sim` + `opennav_benchmark_robot`, installs Gazebo Harmonic via `ros-jazzy-ros-gz*`, and on container start launches `simulation_simplified.launch.py` with `headless:=false` — the box-primitive warehouse world (`benchmark_warehouse_simplified.sdf.xacro`) plus the Gazebo GUI client and RViz. The simplified world replaces every mesh-based shelf/pallet/person/forklift with appropriately sized boxes so the scene runs real-time; the heavy mesh-based world (`benchmark_warehouse.sdf.xacro`) is still installed in the image if you want to launch it manually.
+
+Build context is the **repo root**, same as the autonomy image:
+
+```bash
+cd /path/to/opennav_robotics_workload_benchmark
+docker build -t opennav_benchmark/robotic_amr_simulation:jazzy \
+  -f opennav_benchmark_pipeline/docker/robotic_amr_simulation/Dockerfile .
+```
+
+The image bakes in the same `cyclonedds_localhost.xml` as the autonomy image (loopback discovery), so on a single host the two containers find each other automatically when both run with `--net=host`. Switching to HIL follows the identical recipe from the "Localhost vs HIL DDS config" section — edit the xml in `docker/robotic_amr_simulation/` and rebuild.
+
+## Run the simulation
+
+The orchestrator (`run_benchmark.sh`) only launches the autonomy and VLM containers; the simulator is started separately so you can keep the sim running across multiple benchmark runs (it takes a few seconds to come up). Start it once, then run the orchestrator as many times as you want against the same sim.
+
+The image renders a Gazebo GUI plus RViz, so X11 forwarding is required. The sim runs **attached** (not detached) so its stdout/stderr is visible in your terminal and Ctrl+C tears it down cleanly. Open a dedicated terminal for it; in another terminal you run the benchmark orchestrator.
+
+```bash
+./opennav_benchmark_pipeline/run_simulation.sh
+```
+
+`run_simulation.sh` is a thin wrapper around `docker run` that sets the network/X11/IPC/`--init` flags. Override the image with `SIM_IMAGE=...`, override the container name with `SIM_NAME=...`, or append a custom CMD after the script name (passed through to docker):
+
+```bash
+# Heavy mesh-based world (slow):
+./opennav_benchmark_pipeline/run_simulation.sh \
+  ros2 launch opennav_benchmark_sim simulation.launch.py headless:=false
+
+# Headless (no GUI, no RViz host requirements):
+./opennav_benchmark_pipeline/run_simulation.sh \
+  ros2 launch opennav_benchmark_sim simulation_simplified.launch.py headless:=true use_rviz:=false
+```
+
+The Gazebo GUI and RViz windows should appear within ~10–15 s. **Hit `Ctrl+C` in this terminal to stop the sim** — that sends SIGINT to `ros2 launch` which runs the graceful shutdown path, and `--rm` deletes the container on exit. If a stuck process keeps it alive, hit Ctrl+C again or open another terminal and run `docker kill opennav_sim`.
+
+## Run the workload directly
+
+For ad-hoc runs (no benchmark timing, no metrics capture, no automated teardown) you can launch the autonomy/workload container by hand. Open a second terminal alongside the simulation:
+
+```bash
+docker run --rm -it --init \
+  --name opennav_workload \
+  --net=host --ipc=host --privileged \
+  --shm-size=2g \
+  --env "DISPLAY=${DISPLAY}" \
+  --env "QT_X11_NO_MITSHM=1" \
+  --volume "${XAUTHORITY:-$HOME/.Xauthority}:/root/.Xauthority:ro" \
+  --volume "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+  opennav_benchmark/robotic_amr_workload:jazzy
+```
+
+The image's `CMD` runs `benchmark_application.launch.py` (mission runner + Nav2 + VLM). Hit `Ctrl+C` to stop; `--rm` deletes the container on exit. To capture ROS logs, add `--volume "$(pwd)/opennav_benchmark_logs/manual:/root/.ros/log"` before the image name.
+
+## Run the benchmark
 
 Run from the **repo root** so the relative log dir lands somewhere predictable:
 
