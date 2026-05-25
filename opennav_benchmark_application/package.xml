@@ -6,7 +6,11 @@
   <maintainer email="steve@opennav.org">Steve Macenski</maintainer>
   <license>Apache-2.0</license>
 
-  <buildtool_depend>ament_python</buildtool_depend>
+  <exec_depend>opennav_benchmark_nav2</exec_depend>
+  <exec_depend>opennav_benchmark_vlm</exec_depend>
+  <exec_depend>nav2_simple_commander</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>rclpy</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

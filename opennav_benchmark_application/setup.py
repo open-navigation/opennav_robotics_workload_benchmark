@@ -17,6 +17,9 @@ setup(
         ('share/' + package_name + '/annotations', [
             'annotations/warehouse_waypoints.yaml',
         ]),
+        ('share/' + package_name + '/launch', [
+            'launch/benchmark_application.launch.py',
+        ]),
     ],
     entry_points={
         'console_scripts': [

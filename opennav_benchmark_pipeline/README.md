@@ -9,13 +9,19 @@ opennav_benchmark_pipeline/
 ├── README.md
 ├── run_benchmark.sh                  # the orchestrator
 └── docker/
-    └── robotic_amr_workload/
-        ├── Dockerfile                # ros:jazzy + Nav2 + TB4 loopback sim (placeholder workload)
-        ├── cyclonedds_localhost.xml  # Cyclone DDS bound to loopback — single-machine default (host shares lo with containers via --net=host)
-        └── cyclonedds_hil.xml        # Cyclone DDS bound to a LAN subnet — for HIL (sim on machine A, autonomy on machine B)
+    ├── robotic_amr_workload/
+    │   ├── Dockerfile                # builds & launches the application workspace (mission runner + Nav2 + VLM)
+    │   ├── entrypoint.sh             # sources /opt/ros/jazzy + the workspace overlay before exec'ing CMD
+    │   ├── cyclonedds_localhost.xml  # Cyclone DDS bound to loopback — single-machine default (host shares lo with containers via --net=host)
+    │   └── cyclonedds_hil.xml        # Cyclone DDS bound to a LAN subnet — for HIL (sim on machine A, autonomy on machine B)
+    └── robotic_amr_simulation/
+        ├── Dockerfile                # builds & launches the lightweight simplified Gazebo world (box-primitive warehouse) with GUI
+        ├── entrypoint.sh             # sources /opt/ros/jazzy + the workspace overlay before exec'ing CMD
+        ├── cyclonedds_localhost.xml  # same loopback DDS config — pairs the sim with a workload container on the same host
+        └── cyclonedds_hil.xml        # LAN DDS config — sim on machine A, autonomy on machine B
 ```
 
-The `robotic_amr_workload/` Dockerfile is a placeholder that brings up the Nav2 TurtleBot 4 loopback simulator on container start. Replace its `CMD` (and apt deps) when the real AMR workload is defined. The orchestrator is workload-agnostic — it never passes a command, it just runs the image.
+The `robotic_amr_workload/` Dockerfile bundles the application workspace, resolves its dependencies via `rosdep`, builds it with `colcon`, and launches `opennav_benchmark_application/benchmark_application.launch.py` on container start (mission runner + Nav2 + VLM). The orchestrator is workload-agnostic — it never passes a command, it just runs whatever the image's `CMD` defines.
 
 ## Host prerequisites
 
@@ -30,17 +36,19 @@ To persist across reboots, drop those two lines (as `net.core.rmem_max=…`) int
 
 **For HIL setups, the same `sysctl` bump must be applied on every machine** participating in the DDS domain, not only the one running `run_benchmark.sh`.
 
-## Build the test image
+## Build the autonomy image
 
-Run from the **repo root** (`opennav_robotics_workload_benchmark/`) so the build-context path resolves correctly:
+The image bundles the application workspace (`opennav_benchmark_application`, `opennav_benchmark_nav2`, `opennav_benchmark_robot`, `opennav_benchmark_vlm`, `opennav_benchmark_vlm_msgs`), resolves their ROS / system dependencies with `rosdep`, builds with `colcon`, and launches `benchmark_application.launch.py` on container start.
+
+The **build context must be the repo root** so the Dockerfile can COPY the package directories. Run from `opennav_robotics_workload_benchmark/`:
 
 ```bash
 cd /path/to/opennav_robotics_workload_benchmark
 docker build -t opennav_benchmark/robotic_amr_workload:jazzy \
-  opennav_benchmark_pipeline/docker/robotic_amr_workload
+  -f opennav_benchmark_pipeline/docker/robotic_amr_workload/Dockerfile .
 ```
 
-(Equivalently, you can `cd opennav_benchmark_pipeline/docker/robotic_amr_workload && docker build -t opennav_benchmark/robotic_amr_workload:jazzy .` — the context path just needs to point at the directory containing the `Dockerfile` and the cyclonedds xml files.)
+The trailing `.` is the build context (the repo root). Rebuild any time you change source under one of the bundled packages, or change the Cyclone DDS config.
 
 The orchestrator mounts `$XAUTHORITY` and `/tmp/.X11-unix` into the container, which is usually enough for RViz to appear on the host. If it doesn't, run `xhost +local:root` once per session to allow local root clients.
 
