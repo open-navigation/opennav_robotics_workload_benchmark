@@ -37,8 +37,6 @@ COPY opennav_benchmark_pipeline/docker/robotic_amr_simulation/cyclonedds_localho
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 ENV CYCLONEDDS_URI=file:///opt/opennav/cyclonedds.xml
 
-# Gazebo Harmonic resource paths picked up by the bundled launch scripts via
-# AppendEnvironmentVariable, but set a sane fallback for ad-hoc gz invocations.
 ENV GZ_SIM_RESOURCE_PATH=/root/ws/install/opennav_benchmark_sim/share/opennav_benchmark_sim/worlds:/root/ws/install/opennav_benchmark_sim/share/opennav_benchmark_sim/models:/root/ws/install/opennav_benchmark_robot/share
 
 COPY opennav_benchmark_pipeline/docker/robotic_amr_simulation/entrypoint.sh /ros_entrypoint.sh

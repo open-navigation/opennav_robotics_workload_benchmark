@@ -3,10 +3,13 @@ FROM ros:jazzy-ros-base
 RUN apt-get update && apt-get install -y --no-install-recommends \
       python3-colcon-common-extensions \
       python3-rosdep \
+      python3-pip \
       build-essential \
       ros-jazzy-rmw-cyclonedds-cpp \
       ros-jazzy-rviz2 \
  && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --break-system-packages --no-cache-dir openai
 
 WORKDIR /root/ws
 COPY opennav_benchmark_application/                    src/opennav_benchmark_application/
