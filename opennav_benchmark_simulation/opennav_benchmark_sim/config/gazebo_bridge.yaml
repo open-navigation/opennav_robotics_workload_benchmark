@@ -73,6 +73,19 @@
   gz_type_name: "gz.msgs.PointCloudPacked"
   direction: GZ_TO_ROS
 
+# Front Camera (image only, between 2D lidars)
+- ros_topic_name: "camera_front/image"
+  gz_topic_name: "/camera_front/image"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "gz.msgs.Image"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "camera_front/camera_info"
+  gz_topic_name: "/camera_front/image/camera_info"
+  ros_type_name: "sensor_msgs/msg/CameraInfo"
+  gz_type_name: "gz.msgs.CameraInfo"
+  direction: GZ_TO_ROS
+
 # Camera Info (rgbd_camera publishes on <topic>/camera_info)
 - ros_topic_name: "camera_front_left/camera_info"
   gz_topic_name: "/camera_front_left/camera_info"

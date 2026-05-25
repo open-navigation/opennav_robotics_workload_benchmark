@@ -8,7 +8,7 @@
     request_timeout: 30.0
     max_retries: 3
     executor_threads: 1
-    default_image_topic: "/camera/rgb/image"
+    default_image_topic: "/camera_front/image"
     max_image_age: 1.0
     system_prompt: |
       You are the perception assistant for a mobile robot operating in an active warehouse, observing through the robot's onboard camera. Answer questions about the scene from the robot's point of view: what is present, what is happening, and what might affect the robot's ability to operate safely or make progress.
