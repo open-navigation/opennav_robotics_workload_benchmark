@@ -1,33 +1,25 @@
 # Open Navigation's Robotics Workload Benchmark
 
-This is a robotics and AI workload benchmark to compare various hardware platforms using realistically complex, data intensive, representative applications. Many benchmarks exist from both hardware vendors and community members, but nearly all focus on evaluating a particular component or algorithm in isolation. Often times, multiple of these algorithms need to be run together which may interact negatively when composed into a full system due to sharing of limited CPU or accelerated computing resources (GPU, NPU, FPGA, etc). Other times, benchmarks that may consider a robotics system use trivialized workloads from basic simulation environments and sensor data sources which don't provide particularly insightful results for companies and industrial integrators. 
+This is a robotics and AI workload benchmark to compare various hardware platforms using realistically complex, data intensive, representative applications. Many benchmarks exist from both hardware vendors and community members, but nearly all focus on evaluating a particular component or algorithm in isolation. Often times, multiple of these algorithms need to be run together which may interact negatively when composed into a full system due to sharing of limited CPU or conflicts accessing accelerated computing resources (GPU, NPU, FPGA, etc). Other times, benchmarks that may consider a robotics system use trivialized workloads from basic simulation environments and sensor data sources which don't provide particularly insightful results for companies and industrial integrators.
 
-This project aims to fill the gap by providing a reproducable, independent benchmark for comparing and evaluating compute solutions for Robotics or Physical AI applications in all of their complexity. For this benchmark, we use Nav2 autonomously navigating a forklift material handling robot within a 200,000 sqft (18,600 m2) industrial warehouse environment to move pallets from shipping/receiving to shelving units, processing multiple 3D lidars, 2D safety lidars, RGBD cameras, and internal sensors. This workload is representative of dozens of companies and tends of thousands of robotics deployed today in production environments.
+This project aims to fill the gap by providing a reproducable, independent benchmark for comparing and evaluating compute solutions for Robotics or Physical AI applications in all of their complexity. We aim to understand the performance of each hardware solution not by individual benchmarks, but as a wholistic comparison of the workload which is actually going to happen in production. For this benchmark, we use Nav2 to autonomously navigate a forklift material handling robot within a 200,000 sqft (18,600 m2) industrial warehouse environment with its advanced, built-in planning, control, behavior modeling, and perception. It will move pallets from shipping/receiving to shelving units while processing multiple 3D lidars, 2D safety lidars, RGBD cameras, and internal sensors. This workload is representative of dozens of companies and tens of thousands of robotics deployed today in production environments.
 
-The benchmark also includes an (optional) Edge AI workload. We use Gemma 4.0, a popular Visual-Language Model (VLM), to exercise the platforms' GPUs during the benchmark session and integrate it into navigation for scene understanding and semantic context in the navigation behavior. We chose a LLM/VLM as robotics-targeted embedded platforms are being built with LLM/VLMs in mind & there is much interest in integrating them into robotics products. However, this could be easily replaced with another AI/GPU workload(s) (object detection, segmentation, RL, VLA, etc) simply by changing the AI workload Dockerfile. VLMs are extremely intensive so we feel they make a good benchmark case to fully leverage the capabilities of modern platforms.
+The benchmark also includes an (optional) Edge AI workload. We use Gemma 4.0, a popular Visual-Language Model (VLM), to exercise the platforms' GPUs during the benchmark session. We integrate it into navigation for scene understanding and semantic context using the navigation behavior tree, which impact navigation decision making and algorithm selection. However, this could be easily replaced with another AI/GPU workload(s) (object detection, segmentation, RL, VLA, etc) simply by changing the AI workload Dockerfile. VLMs are extremely intensive with much current interest and robotics-targeted embedded platforms are being built with LLM/VLMs in mind, so we feel they make a good benchmark case to fully leverage the capabilities of modern platforms.
 
-We compare both system metrics as well as important performance analysis of the autonomous navigation and AI workload performance on each platform.
+This benchmark compares both system metrics as well as important performance analysis of the autonomous navigation and AI workload performance. It provides instructions and tools to run the pipeline yourself for a compute platform to validate the results or extend easily to include a new platform. We also provide results for commonly used platforms today - namely the NVIDIA Jetson Orin, Jetson Thor, and AMD X100 Strix Halo with analysis on each platform below. 
 
-TODO video/gif of the robot / data / environment
+[![Benchmark Demo](docs/benchmark_demo.gif)](https://www.youtube.com/watch?v=j5NtcGJvQyM)
 
 ⚠️ Need ROS 2, Nav2 help or support? Contact Open Navigation! ⚠️
 
 
 # Platforms Evaluated
 
-To add additional platforms, open a PR with your results and platform description!
+The [Jetson AGX Orin](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/) is NVIDIA's established embedded AI platform widely adopted in robotics which require edge AI such as detection, segmentation, and reinforcement learning. The Orin is the current workhorse of many production robotics deployments.
 
-## NVIDIA Jetson AGX Orin
+The [Jetson Thor](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-thor/) is NVIDIA's next-generation embedded AI module built on the Blackwell GPU architecture. Thor is designed as the next platform for physical AI and advanced robotics applications and enables edge AI such as LLM/VLM and foundation models.
 
-The [Jetson AGX Orin](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/) is NVIDIA's established embedded AI platform widely adopted in robotics. It features 12 Arm Cortex-A78AE CPU cores at up to 2.2 GHz paired with a 2048-core Ampere GPU and 64 Tensor Cores. The module provides up to 275 INT8 TOPS (sparse) of AI performance, with two NVDLA 2.0 accelerators contributing roughly 40% of that total. It includes 64GB of unified LPDDR5 memory with 204.8 GB/s bandwidth across a 256-bit bus. Power is configurable from 15W to 60W (MAXN mode). The Orin is the current workhorse of many production robotics deployments and serves as our baseline platform.
-
-## NVIDIA Jetson Thor
-
-The [Jetson Thor](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-thor/) is NVIDIA's next-generation embedded AI module built on the Blackwell GPU architecture. It pairs 14 Arm Neoverse V3AE CPU cores at up to 2.6 GHz with 2560 CUDA cores and 96 fifth-generation Tensor Cores. Thor delivers up to 2070 FP4 TFLOPS (sparse) and over 1000 INT8 TOPS, representing a 7.5x AI performance increase over the AGX Orin. It includes 128GB of LPDDR5X memory at 4266 MHz with 273 GB/s bandwidth. Power is configurable from 40W to 130W. Thor is designed as the next platform for physical AI and advanced robotics applications.
-
-## AMD X100 (Strix Halo)
-
-The [Ryzen AI Max+ 395](https://www.amd.com/en/products/processors/laptop/ryzen/ai-300-series/amd-ryzen-ai-max-plus-395.html) is AMD's flagship APU targeting AI and edge workloads. It features 16 Zen 5 CPU cores (32 threads) boosting up to 5.1 GHz with 64MB L3 cache, paired with a 40 compute unit RDNA 3.5 integrated GPU delivering 59.4 FP16 TFLOPS and a dedicated XDNA 2 NPU providing 50 INT8 TOPS. It supports up to 128GB of unified LPDDR5X-8000 memory with 256 GB/s bandwidth, and AMD's Variable Graphics Memory technology allows up to 96GB to be allocated as VRAM. The configurable TDP ranges from 45W to 120W. The Strix Halo represents a compelling x86-based alternative to the Jetson ecosystem for robotics, offering strong CPU performance and a large unified memory pool for LLM/VLM workloads. Built on TSMC's 4nm process.
+The [AMD X100 (Strix Halo)](https://www.amd.com/en/products/processors/desktops/ryzen/ryzen-ai-halo.html) is AMD's flagship targeting AI and robotics edge workloads. Strix Halo represents an x86-based alternative to the Jetson ecosystem, offering strong CPU performance with unified memory for LLM/VLM workloads.
 
 | Feature | Jetson AGX Orin | Jetson Thor | X100 / Strix Halo |
 |---|---|---|---|
@@ -42,52 +34,69 @@ The [Ryzen AI Max+ 395](https://www.amd.com/en/products/processors/laptop/ryzen/
 
 # Architecture
 
+The benchmark consists of a developer computer networked to the hardware platform being evaluated as the HIL computer.
+The developer computer will run a simulation engine in a provided docker container to simulate a large scale warehouse environment and the robot's sensors.
+This is run on another machine to isolate potential effects from resource scheduling the simulation on utilization metrics. 
+DDS is configured to only operate on the wired ethernet interface to minimize the impacts due to discover traffic or other interference. 
+
+TODO diagram
+
+The compute platform being benchmarked will then run a benchmark script which will launch the AMR autonomy and (optional) AI workloads, along with a light weight script which will measure system metrics like CPU, memory, and GPU utilization.
+To simulate the affects of hardware driver interfaces on the compute landscape, an additional script will run to simulate the load from sensor drivers on the platform.
+The CPU load on each is determined by measuring the real-world average utilization metrics running Realsense D435 and Ouster OS-1 drivers on each platform. 
+Other sensors such as the Orbecc Gemini 355 and Hesai XT32 are measured to be similar.
+
+All logs from the workflows and system metrics capture are saved in `opennav_benchmark_logs` for later analysis.
+`opennav_benchmark_analysis` provides automated tools to visualize and extract key metrics from a single platform's run or compare and contrast multiple platforms at once.
+
 
 # Simulation
 
+The simulation is set up as a representatively complex and data intensive workload of a modern robotics application. It simulates a full 200,000 sqft industrial warehouse facility with loading docks, block stacking, long aisles, and blocked aisles due to simulated accident scenes. Larger simulations are absolutely possible, however we chose to limit it to what can be run on laptop processors from the last ~3 years to make this more accessible. For higher quality simulation and/or expanding the world size, see the `opennav_benchmark_pipeline` README for more instructions.
 
-(larger possible, but wanted to make sure could run realtime on reasonably modern laptops for more accessible reproduction... and 200k sqft is still pretty good)
+![Gazebo simulation](docs/gazebo.png)
+
+The robot simulated is an autonomous differential-drive forklift platform holding a pallet in its forks containing:
+* 3x 3D LIDARs (10 Hz, 30m range, 32 beams @ 512 resolution)
+* 3x RGBD cameras (10 Hz, 320x240 resolution)
+* 2x 2D Safety LIDARs (30 Hz, 25m range)
+* 1x RGB camera (5 Hz, 640x480 resolution)
+* 1x IMU (100 Hz)
+
+The robot has a maximum speed of 2 m/s.
+
+![Rviz data](docs/rviz2.png)
 
 
 # Robotic & AI Workloads
 
-# Results
+A mission dispatcher will send the forklift from its charging dock to pick up a pallet either in the block stack or loading dock area and drop it at a shelf in the long-term storage racks. The BT Navigator accepts these missions and executes the configurable beahvior tree describing the navigation behavior to perform. This will repeat indefinitely for the duration of the benchmark run, except every 200 pick-and-place missions the robot will return to the charging dock and dock before continuing. A 10 second wait is enacted while picking or placing to simulate downtime due to picking or placing the pallet. 
 
-# Reproduction
+Nav2 will perform autonomous navigation path planning using the kinematically feasible Hybrid-A* planning algorithm across the warehouse-sized space. This uses the full footprint of the vehicle to do SE2 collision checking to ensure collision free and drivable paths for non-circular vehicles. It also uses the MPPI controller, an optimization based controller which can both accurately track paths, align with precise goal positions, as well as dynamically adjust off the path to provide more margin from obstacles or perform complex maneuvers in confined environments.
+
+The robotic AMR workload will then process 9/10 of the sensors above. The RGB camera is neglected and is used by the AI workload only. The 3D lidars are processed by the Spatio-Temporal Voxel Layer, the standard solution for 3D lidars which maintains a spatio-temporal representation of the environment clearing using frustum modeling. The 2D lidars and RGBD cameras are processed by the obstacle and voxel layers, respectively, which use raycasting to clear out free space.
+
+In addition, Nav2 performs velocity smoothing and collision monitoring using the controller's outputs to ensure dynamic feasibility and collision-free navigation with raw sensor data as a psuedo-safety layer. Localization is provided by odometry from the simulation as well as AMCL particle filtering.
+
+The AI workload exposes a VLM server which is regularly queried by the behavior tree to provide scene understanding or contextual information to impact decision making and algorithm settings or selection. While VLMs could be leveraged in a number of ways in an application, the frequent queries to the VLM provide a regularized workload for benchmark measurements which is advantageous for a fair and consistent result. Other applications of VLMs would call them irregularly as-needed. 
+
+The VLM server subscribes to the RGB camera topic mounted on the chassis of the robot in a strategic location with good visibility of the scene in the primary direction of travel. Queries are then set to it in the behavior tree to understand context about the scene, such as detecting unusual obstacles, crowds, and hazards to successful task completion. If any such hazards are found, the robot is directed down another route to the goal. If humans are detected in the scene, the maximum velocity is reduced.
 
 
+# Results and Comparison
 
-
-
-
-
- We do so to understand the performance of a robotics compute solution not just in individual benchmark tests about particular programs or algorithms but as a full, complex, and realistically laid out robotics product.
-
-We provide the instructions and tooling to run a pipeline on a compute platform to capture system and workload metrics to benchmark and compare many common compute platforms. We principly do Jetson Orin, Jetson Thor, and AMD Ryzen AI Max+ 395 (Strix Halo, X100) as a viable competitor to the Jetsons for robotics applications. 
-
-The robotics workload is a autonomous forklift robot with 3x 3D lidars, 2x 2D safety lidars, 3x depth cameras, as well as IMU. We'll show an image of this robot clearly with the data here. We then run this with Nav2 to autonomously navigate a 200,000 sqft (18.600 m2) with planning, control, perception, and autonomy behavior. We use the recent VLM model Gemma 4.0 to provide scene understanding and semantic context to the scene in the navigation behavior tree to impact navigation decisions and algorithm selection. This is a realistic system run on real warehouse logistics, material handling, and forklift style robots in production today. 
-
-The readme will contain a video of the simulation running for the benchmark, rgraphics and analysis of the results for teh platforms, and include high level instructions (and point to the pipeline readme for more details). Also a diagram of the solution architecture.
-
+TODO graphs, high-level metircs, and log-based analysis 
 
 
 
+# Independent Reproduction, Extension to New Platforms
 
+See the instructions in the `opennav_benchmark_pipeline` for building and running the benchmark.
+The pipeline provides Dockerfiles for the simulation, AMR Robot workload, and AI workloads which can be run to reproduce the benchmark.
 
+If you wish to add your own platform, simply:
+* Update the `hardware_platforms.py` to capture the system metrics for your particular platform 
+* Update `detect_platform()` to add the new platform to the detection schema
+* Provide an appropriate `HARDWARE_PROFILES` which corresponds to your sensor driver load on the platform for each representative sensor
 
-
-
-
-
-
-# TODO Title
-
-Description, intent, what it does
-Diagram
-Video of it running in simulation
-
-Gif of the robot / data
-
-Metrics analysis / graphs
-
-Reproduction
+If you end up doing so, consider opening a PR with your modifications and provide the data & analysis for your platform so others can learn from it!

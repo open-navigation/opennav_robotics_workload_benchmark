@@ -34,7 +34,7 @@ from nav2_simple_commander.robot_navigator import TaskResult
 
 from .task_dispatcher import TaskDispatcher
 
-MISSIONS_PER_CHARGE = 1000
+MISSIONS_PER_CHARGE = 200
 CHARGE_WAIT_SECONDS = 10
 MAX_RETRIES = 3
 
