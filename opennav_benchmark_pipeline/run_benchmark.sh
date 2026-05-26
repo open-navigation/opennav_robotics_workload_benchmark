@@ -5,9 +5,11 @@ set -euo pipefail
 # Benchmark parameters
 # =============================================================================
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 AUTONOMY_IMAGE="${AUTONOMY_IMAGE:-opennav_benchmark/robotic_amr_workload:jazzy}"
 VLM_IMAGE="${VLM_IMAGE:-}"
-METRICS_SCRIPT="${METRICS_SCRIPT:-}"
+METRICS_SCRIPT="${METRICS_SCRIPT:-${SCRIPT_DIR}/scripts/capture_system_metrics.py}"
 HARDWARE_LOAD_SCRIPT="${HARDWARE_LOAD_SCRIPT:-}"
 NUM_LIDAR_3D="${NUM_LIDAR_3D:-3}"
 NUM_LIDAR_2D="${NUM_LIDAR_2D:-2}"
