@@ -176,6 +176,14 @@ class AmdGpuMetrics(GpuMetrics):
         if mem_clock is not None:
             metrics['gpu_mem_clock_mhz'] = mem_clock
 
+        # Memory controller utilization and bandwidth
+        mem_busy_path = os.path.join(self._dev, 'mem_busy_percent')
+        mem_busy = self._read_sysfs(mem_busy_path) if os.path.exists(mem_busy_path) else None
+        if mem_busy is not None:
+            metrics['mem_busy_percent'] = mem_busy
+            # Ryzen AI Max+ 395: LPDDR5X-7500 with 256-bit bus = ~120 GB/s theoretical max
+            metrics['mem_bandwidth_gbps'] = round((mem_busy / 100.0) * 120.0, 2)
+
         # NPU (XDNA) - best effort
         npu_metrics = self._read_npu()
         metrics.update(npu_metrics)
@@ -211,6 +219,8 @@ class AmdGpuMetrics(GpuMetrics):
             return metrics
         # Try to read NPU status if available
         status_path = os.path.join(accel_path, 'device', 'npu_busy_percent')
+        if not os.path.exists(status_path):
+            return metrics
         val = self._read_sysfs(status_path)
         if val is not None:
             metrics['npu_util'] = val
@@ -226,8 +236,10 @@ class JetsonGpuMetrics(GpuMetrics):
 
         # GPU load path - varies by Jetson generation and JetPack version
         # Orin (tegra234): /sys/devices/platform/17000000.ga10b/load
-        # Thor (tegra264): may use similar platform paths
+        # Thor (tegra264): discrete GPU over PCIe, no sysfs load file;
+        #                   fall back to nvidia-smi
         self._gpu_load_path = None
+        self._nvml_handle = None
         load_candidates = glob.glob('/sys/devices/platform/17000000.ga10b/load')
         load_candidates += glob.glob('/sys/devices/platform/*.gpu/load')
         load_candidates += glob.glob('/sys/devices/gpu.0/load')
@@ -235,6 +247,13 @@ class JetsonGpuMetrics(GpuMetrics):
             if os.path.exists(candidate):
                 self._gpu_load_path = candidate
                 break
+        if not self._gpu_load_path:
+            try:
+                import pynvml
+                pynvml.nvmlInit()
+                self._nvml_handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+            except Exception:
+                pass
 
         # GPU frequency path
         # Orin: /sys/devices/platform/17000000.ga10b/devfreq/17000000.ga10b/cur_freq
@@ -277,8 +296,43 @@ class JetsonGpuMetrics(GpuMetrics):
                 self._emc_freq_path = candidate
                 break
 
+        # EMC utilization (memory controller activity)
+        self._emc_util_path = None
+        emc_util_candidates = [
+            '/sys/kernel/actmon_avg_activity/mc_all',
+            '/sys/devices/platform/actmon_avg_activity/mc_all',
+        ]
+        emc_util_candidates += glob.glob(
+            '/sys/devices/platform/*/actmon_avg_activity/mc_all')
+        for candidate in emc_util_candidates:
+            if os.path.exists(candidate):
+                self._emc_util_path = candidate
+                break
+
+        # Theoretical max memory bandwidth by platform
+        self._mem_bw_max_gbps = 204.8 if variant == 'jetson_orin' else 273.0
+
+    def _query_nvml(self):
+        """Query GPU utilization via NVML (fallback for Thor)."""
+        metrics = {}
+        if not self._nvml_handle:
+            return metrics
+        try:
+            import pynvml
+            util = pynvml.nvmlDeviceGetUtilizationRates(self._nvml_handle)
+            metrics['gpu_util'] = float(util.gpu)
+            metrics['gpu_mem_util'] = float(util.memory)
+        except Exception:
+            pass
+        return metrics
+
     def _find_power_paths(self):
-        """Find INA3221 or other power monitoring sysfs paths."""
+        """Find INA3221 or other power monitoring sysfs paths.
+
+        Returns a dict of {label: path} for power*_input files,
+        or a list of (label, voltage_path, current_path) tuples if
+        only voltage/current are available (e.g. Orin INA3221).
+        """
         power_paths = {}
 
         # Try hwmon-based power readings (common on newer Jetson BSPs)
@@ -315,16 +369,50 @@ class JetsonGpuMetrics(GpuMetrics):
                     pass
                 power_paths[label] = power_file
 
+        # Fallback: compute power from voltage (in*_input) x current (curr*_input)
+        # Some INA3221 drivers (e.g. Orin) don't expose power*_input directly
+        if not power_paths:
+            self._power_vi_pairs = []
+            for hwmon_dir in sorted(glob.glob('/sys/class/hwmon/hwmon*')):
+                name_path = os.path.join(hwmon_dir, 'name')
+                try:
+                    with open(name_path, 'r') as f:
+                        name = f.read().strip()
+                except (OSError, ValueError):
+                    continue
+                if 'ina' not in name.lower():
+                    continue
+                # INA3221 has 3 channels: in1/curr1, in2/curr2, in3/curr3
+                for ch in range(1, 4):
+                    v_path = os.path.join(hwmon_dir, f'in{ch}_input')
+                    i_path = os.path.join(hwmon_dir, f'curr{ch}_input')
+                    label_path = os.path.join(hwmon_dir, f'in{ch}_label')
+                    if not (os.path.exists(v_path) and os.path.exists(i_path)):
+                        continue
+                    label = 'unknown'
+                    try:
+                        with open(label_path, 'r') as f:
+                            label = f.read().strip()
+                    except (OSError, ValueError):
+                        pass
+                    if label == 'unknown':
+                        continue
+                    self._power_vi_pairs.append((label, v_path, i_path))
+
         return power_paths
 
     def collect(self):
         metrics = {}
 
-        # GPU utilization (value is 0-1000, divide by 10 for percentage)
+        # GPU utilization
+        # Orin: sysfs load file (value is 0-1000, divide by 10 for percentage)
+        # Thor: nvidia-smi fallback (discrete GPU has no sysfs load file)
         if self._gpu_load_path:
             val = self._read_sysfs(self._gpu_load_path)
             if val is not None:
                 metrics['gpu_util'] = round(val / 10.0, 1)
+        elif self._nvml_handle:
+            metrics.update(self._query_nvml())
 
         # GPU frequency (in Hz, convert to MHz)
         # Thor has dual clock domains (gpc + nvd), report all found
@@ -347,15 +435,29 @@ class JetsonGpuMetrics(GpuMetrics):
         # Power readings
         total_power_mw = 0
         has_power = False
-        for label, path in self._power_paths.items():
-            val = self._read_sysfs(path)
-            if val is not None:
-                key = f'power_{label.lower().replace(" ", "_")}_mw'
-                metrics[key] = val
-                # Sum for total if this looks like a main rail
-                if any(kw in label.lower() for kw in ['total', 'vdd', 'sys']):
-                    total_power_mw += val
-                    has_power = True
+        if self._power_paths:
+            # Direct power*_input files (e.g. Thor)
+            for label, path in self._power_paths.items():
+                val = self._read_sysfs(path)
+                if val is not None:
+                    key = f'power_{label.lower().replace(" ", "_")}_mw'
+                    metrics[key] = val
+                    if any(kw in label.lower() for kw in ['total', 'vdd', 'sys', 'vin']):
+                        total_power_mw += val
+                        has_power = True
+        elif hasattr(self, '_power_vi_pairs') and self._power_vi_pairs:
+            # Compute power from voltage x current (e.g. Orin INA3221)
+            # Voltage in mV, current in mA -> power in mW = (mV * mA) / 1000
+            for label, v_path, i_path in self._power_vi_pairs:
+                voltage = self._read_sysfs(v_path)
+                current = self._read_sysfs(i_path)
+                if voltage is not None and current is not None:
+                    power_mw = round(voltage * current / 1000.0, 1)
+                    key = f'power_{label.lower().replace(" ", "_")}_mw'
+                    metrics[key] = power_mw
+                    if any(kw in label.lower() for kw in ['total', 'vdd', 'sys', 'vin']):
+                        total_power_mw += power_mw
+                        has_power = True
         if has_power:
             metrics['board_power_w'] = round(total_power_mw / 1000.0, 2)
 
@@ -364,6 +466,16 @@ class JetsonGpuMetrics(GpuMetrics):
             val = self._read_sysfs(self._emc_freq_path)
             if val is not None:
                 metrics['emc_freq_mhz'] = round(val / 1_000_000, 1)
+
+        # Memory controller utilization and estimated bandwidth
+        if self._emc_util_path:
+            val = self._read_sysfs(self._emc_util_path)
+            if val is not None:
+                # Value is 0-1000, divide by 10 for percentage
+                mem_busy = round(val / 10.0, 1)
+                metrics['mem_busy_percent'] = mem_busy
+                metrics['mem_bandwidth_gbps'] = round(
+                    (mem_busy / 100.0) * self._mem_bw_max_gbps, 2)
 
         return metrics
 

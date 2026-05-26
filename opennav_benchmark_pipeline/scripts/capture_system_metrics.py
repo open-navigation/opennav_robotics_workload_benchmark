@@ -54,7 +54,10 @@ def collect_common_metrics():
         metrics['cpu_freq_mhz'] = round(freq.current, 1)
 
     # Memory
-    metrics['ram_percent'] = psutil.virtual_memory().percent
+    vm = psutil.virtual_memory()
+    metrics['ram_percent'] = vm.percent
+    metrics['ram_used_mb'] = round(vm.used / (1024 * 1024), 1)
+    metrics['ram_total_mb'] = round(vm.total / (1024 * 1024), 1)
     metrics['swap_percent'] = psutil.swap_memory().percent
 
     # Disk
@@ -106,6 +109,22 @@ def collect_common_metrics():
                         metrics['cpu_temp'] = entries[0].current
                         break
     except (AttributeError, RuntimeError):
+        pass
+
+    # Override: prefer cpu-thermal zone when available (e.g. Jetson)
+    # psutil may find an external board sensor instead of the SoC thermal zone
+    try:
+        import glob as _glob
+        for tz_type in sorted(_glob.glob('/sys/class/thermal/thermal_zone*/type')):
+            with open(tz_type, 'r') as f:
+                if f.read().strip() == 'cpu-thermal':
+                    temp_path = os.path.join(
+                        os.path.dirname(tz_type), 'temp')
+                    with open(temp_path, 'r') as f2:
+                        metrics['cpu_temp'] = round(
+                            int(f2.read().strip()) / 1000.0, 1)
+                    break
+    except (OSError, ValueError):
         pass
 
     return metrics
