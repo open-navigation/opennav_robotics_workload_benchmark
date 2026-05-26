@@ -11,7 +11,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     nav2_pkg = get_package_share_directory('opennav_benchmark_nav2')
     nav2_bringup_pkg = get_package_share_directory('nav2_bringup')
-    application_pkg = get_package_share_directory('opennav_benchmark_application')
+    application_pkg = get_package_share_directory('opennav_benchmark_mission_dispatcher')
 
     default_params = os.path.join(nav2_pkg, 'config', 'nav2_params.yaml')
 

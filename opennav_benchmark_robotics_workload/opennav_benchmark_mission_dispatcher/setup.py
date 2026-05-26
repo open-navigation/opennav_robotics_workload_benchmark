@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'opennav_benchmark_application'
+package_name = 'opennav_benchmark_mission_dispatcher'
 
 setup(
     name=package_name,
@@ -23,7 +23,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'robot_mission_runner = opennav_benchmark_application.robot_mission_runner:main',
+            'robot_mission_runner = opennav_benchmark_mission_dispatcher.robot_mission_runner:main',
         ],
     },
     install_requires=['setuptools'],

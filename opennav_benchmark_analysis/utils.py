@@ -32,6 +32,9 @@ CUMULATIVE_METRICS = ['disk_read_mb', 'disk_write_mb', 'net_sent_mb', 'net_recv_
 METRIC_LABELS = {
     'cpu_total': 'CPU Total (%)',
     'cpu_freq_mhz': 'CPU Frequency (MHz)',
+    'cpu_freq_ghz': 'CPU Frequency (GHz)',
+    'peak_core_util': 'Peak Core Utilization (%)',
+    'mean_core_util': 'Mean Core Utilization (%)',
     'ram_percent': 'RAM Usage (%)',
     'ram_used_mb': 'RAM Used (MB)',
     'ram_total_mb': 'RAM Total (MB)',
@@ -127,9 +130,15 @@ def load_run(filepath):
         if mb_col in df.columns:
             df[gb_col] = (df[mb_col] / 1024).round(2)
 
-    # Compute percentage of active cores (>5% utilization)
+    # CPU frequency in GHz
+    if 'cpu_freq_mhz' in df.columns:
+        df['cpu_freq_ghz'] = (df['cpu_freq_mhz'] / 1000).round(3)
+
+    # Per-core derived metrics
     core_cols = [c for c in df.columns if c.startswith('cpu_core_')]
     if core_cols:
+        df['peak_core_util'] = df[core_cols].max(axis=1)
+        df['mean_core_util'] = df[core_cols].mean(axis=1).round(1)
         active = (df[core_cols] > 5.0).sum(axis=1)
         df['cores_active_percent'] = (active / len(core_cols) * 100).round(1)
 

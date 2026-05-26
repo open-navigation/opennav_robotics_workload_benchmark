@@ -47,7 +47,7 @@ class RobotMissionRunner(Node):
         self.navigator = BasicNavigator()
 
         # Load annotations from installed package share
-        application_pkg = get_package_share_directory('opennav_benchmark_application')
+        application_pkg = get_package_share_directory('opennav_benchmark_mission_dispatcher')
         annotations_file = os.path.join(
             application_pkg, 'annotations', 'warehouse_waypoints.yaml')
         self.dispatcher = TaskDispatcher(annotations_file, self)

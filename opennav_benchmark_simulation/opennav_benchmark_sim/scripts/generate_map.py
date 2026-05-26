@@ -14,7 +14,7 @@ Usage:
     ros2 launch opennav_benchmark_sim simulation.launch.py headless:=true
 
     # 2. Generate the map from the running sim:
-    python3 generate_map.py --output-dir ../../opennav_benchmark_nav2/map/
+    python3 generate_map.py --output-dir ../../opennav_benchmark_robotics_workload/opennav_benchmark_nav2/map/
 
     # Or with custom settings:
     python3 generate_map.py --output-dir /path/to/map --resolution 0.05 --slice-height 0.2

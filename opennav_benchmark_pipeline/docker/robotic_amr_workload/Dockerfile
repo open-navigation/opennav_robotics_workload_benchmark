@@ -14,12 +14,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip3 install --break-system-packages --no-cache-dir openai
 
 WORKDIR /root/ws
-COPY opennav_benchmark_application/                    src/opennav_benchmark_application/
-COPY opennav_benchmark_nav2/                           src/opennav_benchmark_nav2/
+COPY opennav_benchmark_robotics_workload/opennav_benchmark_mission_dispatcher/  src/opennav_benchmark_mission_dispatcher/
+COPY opennav_benchmark_robotics_workload/opennav_benchmark_nav2/         src/opennav_benchmark_nav2/
 COPY opennav_benchmark_simulation/opennav_benchmark_robot/  src/opennav_benchmark_robot/
-COPY opennav_benchmark_ai/opennav_benchmark_vlm/       src/opennav_benchmark_vlm/
-COPY opennav_benchmark_ai/opennav_benchmark_vlm_msgs/  src/opennav_benchmark_vlm_msgs/
-COPY opennav_benchmark_ai/opennav_benchmark_vlm_bt/    src/opennav_benchmark_vlm_bt/
+COPY opennav_benchmark_ai_workload/opennav_benchmark_vlm/       src/opennav_benchmark_vlm/
+COPY opennav_benchmark_ai_workload/opennav_benchmark_vlm_msgs/  src/opennav_benchmark_vlm_msgs/
+COPY opennav_benchmark_ai_workload/opennav_benchmark_vlm_bt/    src/opennav_benchmark_vlm_bt/
 
 RUN apt-get update \
  && rosdep update --rosdistro jazzy \
@@ -38,4 +38,4 @@ ENV CYCLONEDDS_URI=file:///opt/opennav/cyclonedds.xml
 
 COPY opennav_benchmark_pipeline/docker/robotic_amr_workload/entrypoint.sh /ros_entrypoint.sh
 RUN chmod +x /ros_entrypoint.sh
-CMD ["ros2", "launch", "opennav_benchmark_application", "benchmark_application.launch.py"]
+CMD ["ros2", "launch", "opennav_benchmark_mission_dispatcher", "benchmark_application.launch.py"]

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>opennav_benchmark_application</name>
+  <name>opennav_benchmark_mission_dispatcher</name>
   <version>0.1.0</version>
   <description>OpenNav Benchmark Application: maps, annotations, and autonomy scripts</description>
   <maintainer email="steve@opennav.org">Steve Macenski</maintainer>

@@ -399,6 +399,164 @@ def build_efficiency_table(platforms):
     return table_df.to_html(index=False, classes='stats-table')
 
 
+def plot_cpu_frequency_comparison(platforms):
+    """Overlaid CPU frequency time-series — shows x86 clock speed advantage."""
+    return plot_timeseries_comparison(
+        platforms, 'cpu_freq_mhz',
+        'CPU Frequency Comparison', 'CPU Frequency (MHz)',
+    )
+
+
+def plot_peak_core_loading(platforms):
+    """Worst-case (max) and mean per-core utilization over time per platform."""
+    fig = make_subplots(
+        rows=2, cols=1, shared_xaxes=True,
+        subplot_titles=(
+            'Peak (Hottest) Core Utilization Over Time',
+            'Mean Core Utilization Over Time',
+        ),
+        vertical_spacing=0.12,
+    )
+
+    for key, (meta, df) in platforms.items():
+        if 'peak_core_util' in df.columns:
+            fig.add_trace(go.Scatter(
+                x=df['elapsed_sec'], y=df['peak_core_util'],
+                mode='lines', name=f'{PLATFORM_ARG_LABELS[key]} Peak',
+                line=dict(color=PLATFORM_COLORS[key], width=2),
+            ), row=1, col=1)
+        if 'mean_core_util' in df.columns:
+            fig.add_trace(go.Scatter(
+                x=df['elapsed_sec'], y=df['mean_core_util'],
+                mode='lines', name=f'{PLATFORM_ARG_LABELS[key]} Mean',
+                line=dict(color=PLATFORM_COLORS[key], width=2, dash='dash'),
+            ), row=2, col=1)
+
+    fig.update_yaxes(title_text='Core Utilization (%)', range=[0, 105], row=1, col=1)
+    fig.update_yaxes(title_text='Core Utilization (%)', range=[0, 105], row=2, col=1)
+    fig.update_xaxes(title_text='Elapsed Time (s)', row=2, col=1)
+    fig.update_layout(
+        title='Peak vs Mean Core Loading — Real-Time Bottleneck Analysis',
+        template='plotly',
+        height=600,
+    )
+    return fig
+
+
+def plot_absolute_compute_headroom(platforms):
+    """Absolute available compute in GHz-cores: accounts for both core count and clock speed."""
+
+    def hex_to_rgba(hex_color, alpha):
+        h = hex_color.lstrip('#')
+        r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+        return f'rgba({r},{g},{b},{alpha})'
+
+    fig = go.Figure()
+
+    headroom_values = {}
+    for key, (meta, df) in platforms.items():
+        label = PLATFORM_ARG_LABELS[key]
+        color = PLATFORM_COLORS[key]
+        avail_color = hex_to_rgba(color, 0.25)
+
+        core_cols = [c for c in df.columns if c.startswith('cpu_core_')]
+        num_cores = len(core_cols) if core_cols else 1
+        cpu_mean = df['cpu_total'].mean() if 'cpu_total' in df.columns else 0
+        freq_ghz = df['cpu_freq_ghz'].mean() if 'cpu_freq_ghz' in df.columns else 1.0
+
+        total_ghz_cores = num_cores * freq_ghz
+        used_ghz_cores = (cpu_mean / 100.0) * total_ghz_cores
+        avail_ghz_cores = total_ghz_cores - used_ghz_cores
+        headroom_values[key] = avail_ghz_cores
+
+        fig.add_trace(go.Bar(
+            x=[label], y=[used_ghz_cores],
+            marker_color=color,
+            text=[f'{used_ghz_cores:.1f} GHz-cores'],
+            textposition='inside',
+            name='Workload Used',
+            showlegend=(key == list(platforms.keys())[0]),
+            legendgroup='used',
+        ))
+        fig.add_trace(go.Bar(
+            x=[label], y=[avail_ghz_cores],
+            marker_color=avail_color,
+            text=[f'{avail_ghz_cores:.1f} GHz-cores free'],
+            textposition='inside',
+            name='Available for Other Tasks',
+            showlegend=(key == list(platforms.keys())[0]),
+            legendgroup='available',
+        ))
+
+    # Add multiplier annotations comparing to the platform with least headroom
+    if len(headroom_values) >= 2:
+        min_val = min(headroom_values.values())
+        if min_val > 0:
+            annotations = []
+            for key, val in headroom_values.items():
+                if val > min_val:
+                    multiplier = val / min_val
+                    annotations.append(dict(
+                        x=PLATFORM_ARG_LABELS[key],
+                        y=sum(v for k, (m, d) in platforms.items()
+                              if k == key
+                              for v in [len([c for c in d.columns if c.startswith('cpu_core_')]) *
+                                        (d['cpu_freq_ghz'].mean() if 'cpu_freq_ghz' in d.columns else 1.0)]),
+                        text=f'{multiplier:.1f}x more headroom',
+                        showarrow=False,
+                        yshift=15,
+                        font=dict(size=12, color='#333'),
+                    ))
+            fig.update_layout(annotations=annotations)
+
+    fig.update_layout(
+        barmode='stack',
+        title='Absolute Compute Headroom (GHz-cores) — Clock Speed x Free Cores',
+        template='plotly',
+        yaxis_title='GHz-cores',
+        height=500,
+    )
+    return fig
+
+
+def plot_core_utilization_percentiles(platforms):
+    """Grouped bar chart of per-core utilization percentiles (p50, p95, p99) per platform."""
+    percentiles = [('p50', 0.50), ('p95', 0.95), ('p99', 0.99)]
+
+    fig = go.Figure()
+
+    for key, (meta, df) in platforms.items():
+        core_cols = [c for c in df.columns if c.startswith('cpu_core_')]
+        if not core_cols:
+            continue
+        all_core_values = df[core_cols].values.flatten()
+
+        pct_values = []
+        pct_labels = []
+        for label, q in percentiles:
+            val = np.percentile(all_core_values, q * 100)
+            pct_values.append(val)
+            pct_labels.append(label)
+
+        fig.add_trace(go.Bar(
+            x=pct_labels, y=pct_values,
+            name=PLATFORM_ARG_LABELS[key],
+            marker_color=PLATFORM_COLORS[key],
+            text=[f'{v:.1f}%' for v in pct_values],
+            textposition='outside',
+        ))
+
+    fig.update_layout(
+        title='Per-Core Utilization Percentiles — How Close to Saturation?',
+        barmode='group',
+        template='plotly',
+        yaxis_title='Core Utilization (%)',
+        yaxis=dict(range=[0, 105]),
+        height=500,
+    )
+    return fig
+
+
 def plot_summary_bars(platforms):
     """Grouped bar charts comparing mean values of key metrics."""
     key_metrics = [
@@ -526,8 +684,12 @@ def main():
     # Generate comparison plots
     plot_funcs = [
         ('Resource Headroom', plot_resource_headroom),
+        ('Absolute Compute Headroom', plot_absolute_compute_headroom),
         ('CPU Comparison', plot_cpu_comparison),
+        ('CPU Frequency', plot_cpu_frequency_comparison),
+        ('Peak Core Loading', plot_peak_core_loading),
         ('CPU Core Histogram', plot_cpu_core_histogram),
+        ('Core Utilization Percentiles', plot_core_utilization_percentiles),
         ('GPU Comparison', plot_gpu_comparison),
         ('GPU Utilization Distribution', plot_gpu_util_distribution),
         ('GPU Memory', plot_gpu_memory),

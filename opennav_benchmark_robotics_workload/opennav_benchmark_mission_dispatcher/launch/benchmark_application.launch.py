@@ -38,7 +38,7 @@ def generate_launch_description():
         ),
 
         Node(
-            package='opennav_benchmark_application',
+            package='opennav_benchmark_mission_dispatcher',
             executable='robot_mission_runner',
             name='robot_mission_runner',
             output='screen',
