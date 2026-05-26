@@ -1,0 +1,290 @@
+#!/usr/bin/env python3
+
+# Copyright 2026 Open Navigation LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Shared utilities for benchmark analysis: data loading, statistics, and plotting."""
+
+import json
+import os
+
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+import plotly.io as pio
+
+
+# Metrics that are cumulative counters (need delta/rate computation)
+CUMULATIVE_METRICS = ['disk_read_mb', 'disk_write_mb', 'net_sent_mb', 'net_recv_mb']
+
+# Friendly display names for metrics
+METRIC_LABELS = {
+    'cpu_total': 'CPU Total (%)',
+    'cpu_freq_mhz': 'CPU Frequency (MHz)',
+    'ram_percent': 'RAM Usage (%)',
+    'ram_used_mb': 'RAM Used (MB)',
+    'ram_total_mb': 'RAM Total (MB)',
+    'ram_used_gb': 'RAM Used (GB)',
+    'ram_total_gb': 'RAM Total (GB)',
+    'swap_percent': 'Swap Usage (%)',
+    'disk_percent': 'Disk Usage (%)',
+    'disk_read_rate_mbps': 'Disk Read (MB/s)',
+    'disk_write_rate_mbps': 'Disk Write (MB/s)',
+    'net_sent_rate_mbps': 'Net Sent (MB/s)',
+    'net_recv_rate_mbps': 'Net Recv (MB/s)',
+    'net_errors': 'Network Errors',
+    'load_1m': 'Load Average (1m)',
+    'load_5m': 'Load Average (5m)',
+    'load_15m': 'Load Average (15m)',
+    'process_count': 'Process Count',
+    'cpu_temp': 'CPU Temperature (°C)',
+    'gpu_util': 'GPU Utilization (%)',
+    'gpu_mem_used_mb': 'GPU Memory Used (MB)',
+    'gpu_mem_total_mb': 'GPU Memory Total (MB)',
+    'gpu_clock_mhz': 'GPU Clock (MHz)',
+    'gpu_mem_clock_mhz': 'GPU Memory Clock (MHz)',
+    'gpu_temp': 'GPU Temperature (°C)',
+    'gpu_power_w': 'GPU Power (W)',
+    'vcn_util': 'VCN Utilization (%)',
+    'board_power_w': 'Board Power (W)',
+    'emc_freq_mhz': 'EMC Frequency (MHz)',
+    'mem_busy_percent': 'Memory Bus Utilization (%)',
+    'mem_bandwidth_gbps': 'Memory Bandwidth (GB/s)',
+    'npu_util': 'NPU Utilization (%)',
+    'cores_active_percent': 'Active Cores (%)',
+}
+
+# Platform display names
+PLATFORM_LABELS = {
+    'amd_ryzenai_maxplus_395': 'AMD Ryzen AI Max+ 395',
+    'jetson_orin': 'NVIDIA Jetson Orin',
+    'jetson_thor': 'NVIDIA Jetson Thor',
+}
+
+
+def load_run(filepath):
+    """Load a benchmark JSON file and return metadata dict and pandas DataFrame.
+
+    Returns:
+        tuple: (metadata_dict, DataFrame) where metadata contains platform, start_time,
+               duration_sec, actual_samples; DataFrame has elapsed_sec index and all
+               metrics including computed rate columns.
+    """
+    with open(filepath, 'r') as f:
+        data = json.load(f)
+
+    metadata = {
+        'platform': data['platform'],
+        'platform_label': PLATFORM_LABELS.get(data['platform'], data['platform']),
+        'start_time': data.get('start_time'),
+        'end_time': data.get('end_time'),
+        'duration_sec': data.get('duration_sec'),
+        'actual_samples': data.get('actual_samples', len(data['samples'])),
+        'filepath': filepath,
+    }
+
+    samples = data['samples']
+    if not samples:
+        return metadata, pd.DataFrame()
+
+    # Expand cpu_cores array into individual columns
+    rows = []
+    for s in samples:
+        row = {k: v for k, v in s.items() if k != 'cpu_cores'}
+        cores = s.get('cpu_cores', [])
+        for i, val in enumerate(cores):
+            row[f'cpu_core_{i}'] = val
+        row['num_cores'] = len(cores)
+        rows.append(row)
+
+    df = pd.DataFrame(rows)
+
+    # Compute elapsed time from first sample
+    if 'timestamp' in df.columns:
+        df['elapsed_sec'] = df['timestamp'] - df['timestamp'].iloc[0]
+
+    # Compute rates from cumulative counters (MB/s)
+    for col in CUMULATIVE_METRICS:
+        if col in df.columns:
+            rate_col = col.replace('_mb', '_rate_mbps')
+            df[rate_col] = df[col].diff().clip(lower=0)
+            # First value is NaN from diff, fill with 0
+            df[rate_col] = df[rate_col].fillna(0)
+
+    # Compute GB columns from MB if present
+    for mb_col, gb_col in [('ram_used_mb', 'ram_used_gb'), ('ram_total_mb', 'ram_total_gb')]:
+        if mb_col in df.columns:
+            df[gb_col] = (df[mb_col] / 1024).round(2)
+
+    # Compute percentage of active cores (>5% utilization)
+    core_cols = [c for c in df.columns if c.startswith('cpu_core_')]
+    if core_cols:
+        active = (df[core_cols] > 5.0).sum(axis=1)
+        df['cores_active_percent'] = (active / len(core_cols) * 100).round(1)
+
+    return metadata, df
+
+
+def compute_stats(df, columns=None):
+    """Compute summary statistics for specified columns (or all numeric columns).
+
+    Returns:
+        DataFrame with rows=metrics, columns=[mean, std, min, max, p50, p95, p99].
+    """
+    if columns is None:
+        # Exclude internal/index columns
+        exclude = {'timestamp', 'elapsed_sec', 'num_cores'}
+        columns = [c for c in df.select_dtypes(include='number').columns
+                    if c not in exclude]
+
+    stats = {}
+    for col in columns:
+        if col not in df.columns:
+            continue
+        series = df[col].dropna()
+        if series.empty:
+            continue
+        stats[col] = {
+            'mean': round(series.mean(), 2),
+            'std': round(series.std(), 2),
+            'min': round(series.min(), 2),
+            'max': round(series.max(), 2),
+            'p50': round(series.quantile(0.50), 2),
+            'p95': round(series.quantile(0.95), 2),
+            'p99': round(series.quantile(0.99), 2),
+        }
+
+    stats_df = pd.DataFrame(stats).T
+    stats_df.index.name = 'metric'
+    # Add friendly names
+    stats_df['label'] = stats_df.index.map(
+        lambda x: METRIC_LABELS.get(x, x))
+    return stats_df
+
+
+def save_plot(fig, output_dir, name, width=1200, height=600):
+    """Save a Plotly figure as both PNG and return it for HTML embedding.
+
+    Args:
+        fig: Plotly Figure object
+        output_dir: Directory to save PNG files
+        name: Base filename (without extension)
+        width: Image width in pixels
+        height: Image height in pixels
+
+    Returns:
+        The figure object (for HTML embedding)
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    png_path = os.path.join(output_dir, f'{name}.png')
+    try:
+        pio.write_image(fig, png_path, width=width, height=height, scale=2)
+    except Exception as e:
+        print(f'Warning: could not write PNG {png_path}: {e}')
+    return fig
+
+
+def build_html_report(figures, stats_html, title, output_path):
+    """Build a self-contained HTML report with all plots and a stats table.
+
+    Args:
+        figures: List of (name, Plotly Figure) tuples
+        stats_html: HTML string for the statistics table
+        title: Report title
+        output_path: Path to write the HTML file
+    """
+    os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
+
+    plot_divs = []
+    for name, fig in figures:
+        div = pio.to_html(fig, full_html=False, include_plotlyjs=False)
+        plot_divs.append(f'<div class="plot-section"><h2>{name}</h2>{div}</div>')
+
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{title}</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fafafa;
+            color: #333;
+        }}
+        h1 {{
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 10px;
+        }}
+        h2 {{
+            color: #1976D2;
+            margin-top: 30px;
+        }}
+        .plot-section {{
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }}
+        table {{
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+        }}
+        th, td {{
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: right;
+        }}
+        th {{
+            background: #2196F3;
+            color: white;
+            text-align: center;
+        }}
+        td:first-child, th:first-child {{
+            text-align: left;
+        }}
+        tr:nth-child(even) {{
+            background: #f9f9f9;
+        }}
+        .metadata {{
+            background: #e3f2fd;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }}
+    </style>
+</head>
+<body>
+    <h1>{title}</h1>
+    {''.join(plot_divs)}
+    <div class="plot-section">
+        <h2>Summary Statistics</h2>
+        {stats_html}
+    </div>
+</body>
+</html>"""
+
+    with open(output_path, 'w') as f:
+        f.write(html)
+    print(f'HTML report written to: {output_path}')
+
+
+def get_metric_label(metric):
+    """Get a human-readable label for a metric name."""
+    return METRIC_LABELS.get(metric, metric)
