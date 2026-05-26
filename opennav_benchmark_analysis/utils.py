@@ -64,6 +64,7 @@ METRIC_LABELS = {
     'emc_freq_mhz': 'EMC Frequency (MHz)',
     'mem_busy_percent': 'Memory Bus Utilization (%)',
     'mem_bandwidth_gbps': 'Memory Bandwidth (GB/s)',
+    'gpu_effective_throughput': 'GPU Effective Throughput (GHz)',
     'npu_util': 'NPU Utilization (%)',
     'cores_active_percent': 'Active Cores (%)',
 }
@@ -133,6 +134,10 @@ def load_run(filepath):
     # CPU frequency in GHz
     if 'cpu_freq_mhz' in df.columns:
         df['cpu_freq_ghz'] = (df['cpu_freq_mhz'] / 1000).round(3)
+
+    # GPU effective throughput (utilization * clock speed)
+    if 'gpu_util' in df.columns and 'gpu_clock_mhz' in df.columns:
+        df['gpu_effective_throughput'] = (df['gpu_util'] * df['gpu_clock_mhz'] / 1000).round(2)
 
     # Per-core derived metrics
     core_cols = [c for c in df.columns if c.startswith('cpu_core_')]

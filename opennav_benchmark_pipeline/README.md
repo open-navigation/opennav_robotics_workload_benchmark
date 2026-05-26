@@ -25,8 +25,8 @@ Change to what is appropriate for your situation in the Dockerfiles.
 |---|---|---|
 | `AUTONOMY_IMAGE` | `opennav_benchmark/robotic_amr_workload:jazzy` | Autonomy workload image. |
 | `VLM_IMAGE` | `""` | If non-empty, also launches a VLM container from this image. |
-| `METRICS_SCRIPT` | `""` | If non-empty, runs this executable on the host during the benchmark. |
-| `BENCHMARK_DURATION_SEC` | `180` | How long to hold the benchmark before tearing down. |
+| `METRICS_SCRIPT` | `"capture_system_metrics.py"` | If non-empty, runs this executable on the host during the benchmark. |
+| `BENCHMARK_DURATION_SEC` | `1800` | How long to hold the benchmark before tearing down. |
 | `STARTUP_WAIT_SEC` | `20` | Seconds to wait after launching containers before starting to record metrics. |
 | `SHUTDOWN_GRACE_SEC` | `15` | SIGTERM grace period before `docker stop` escalates to SIGKILL. |
 | `LOG_PARENT_DIR` | `./opennav_benchmark_logs` | Where the logs are created. |
@@ -94,4 +94,4 @@ To capture ROS logs, add `--volume "$(pwd)/opennav_benchmark_logs/manual:/root/.
 
 ## Output
 
-Each run produces logs from the benchmark autonomy workload / VLM / metrics in the directory `opennav_benchmark_logs/run_<unix_ts>`. This can be used to analyze the captured metrics, AI output, and autonomy logs.
+Each run produces logs from the benchmark autonomy workload / VLM / metrics in the directory `opennav_benchmark_logs/run_<unix_ts>`. This can be used to analyze the captured metrics, AI output, and autonomy logs (such as with the `opennav_benchmark_analysis` directory).

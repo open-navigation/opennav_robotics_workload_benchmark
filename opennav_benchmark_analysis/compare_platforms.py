@@ -557,6 +557,355 @@ def plot_core_utilization_percentiles(platforms):
     return fig
 
 
+def plot_gpu_clock_comparison(platforms):
+    """Overlaid GPU clock speed time-series."""
+    return plot_timeseries_comparison(
+        platforms, 'gpu_clock_mhz',
+        'GPU Clock Speed Comparison', 'GPU Clock (MHz)',
+    )
+
+
+def plot_gpu_memory_headroom(platforms):
+    """GPU/VRAM memory headroom with system memory context for unified architectures."""
+
+    def hex_to_rgba(hex_color, alpha):
+        h = hex_color.lstrip('#')
+        r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+        return f'rgba({r},{g},{b},{alpha})'
+
+    fig = make_subplots(
+        rows=1, cols=2,
+        subplot_titles=('GPU/VRAM Memory', 'System RAM Available to GPU'),
+        horizontal_spacing=0.10,
+    )
+
+    for key, (meta, df) in platforms.items():
+        label = PLATFORM_ARG_LABELS[key]
+        color = PLATFORM_COLORS[key]
+        avail_color = hex_to_rgba(color, 0.25)
+
+        # VRAM
+        if 'gpu_mem_used_mb' in df.columns and 'gpu_mem_total_mb' in df.columns:
+            vram_used = df['gpu_mem_used_mb'].mean()
+            vram_total = df['gpu_mem_total_mb'].mean()
+            vram_free = vram_total - vram_used
+            vram_pct = vram_used / vram_total * 100 if vram_total > 0 else 0
+            fig.add_trace(go.Bar(
+                x=[label], y=[vram_used / 1024],
+                marker_color=color,
+                text=[f'{vram_used / 1024:.1f} GB ({vram_pct:.0f}%)'],
+                textposition='inside',
+                showlegend=False,
+            ), row=1, col=1)
+            fig.add_trace(go.Bar(
+                x=[label], y=[vram_free / 1024],
+                marker_color=avail_color,
+                text=[f'{vram_free / 1024:.1f} GB free'],
+                textposition='inside',
+                showlegend=False,
+            ), row=1, col=1)
+
+        # System RAM (relevant for unified memory — AMD can use full system RAM for GPU)
+        if 'ram_used_mb' in df.columns and 'ram_total_mb' in df.columns:
+            ram_total = df['ram_total_mb'].mean()
+            ram_used = df['ram_used_mb'].mean()
+            ram_free = ram_total - ram_used
+        elif 'ram_percent' in df.columns:
+            # Estimate from percentage (no absolute values in older logs)
+            ram_pct = df['ram_percent'].mean()
+            ram_total = 0
+            ram_used = 0
+            ram_free = 0
+        else:
+            continue
+
+        if ram_total > 0:
+            fig.add_trace(go.Bar(
+                x=[label], y=[ram_used / 1024],
+                marker_color=color,
+                text=[f'{ram_used / 1024:.1f} GB used'],
+                textposition='inside',
+                showlegend=False,
+            ), row=1, col=2)
+            fig.add_trace(go.Bar(
+                x=[label], y=[ram_free / 1024],
+                marker_color=avail_color,
+                text=[f'{ram_free / 1024:.1f} GB free'],
+                textposition='inside',
+                showlegend=False,
+            ), row=1, col=2)
+
+    fig.update_layout(
+        barmode='stack',
+        title='GPU Memory Headroom — VRAM + System RAM (Unified Memory Advantage)',
+        template='plotly',
+        height=500,
+        showlegend=False,
+    )
+    fig.update_yaxes(title_text='Memory (GB)', row=1, col=1)
+    fig.update_yaxes(title_text='Memory (GB)', row=1, col=2)
+    return fig
+
+
+def plot_performance_per_watt(platforms):
+    """Efficiency metrics: available GHz-cores per watt and GPU utilization per watt."""
+    fig = make_subplots(
+        rows=1, cols=2,
+        subplot_titles=(
+            'Available Compute Per Watt (GHz-cores/W)',
+            'GPU Utilization Per Watt (%/W)',
+        ),
+        horizontal_spacing=0.10,
+    )
+
+    for key, (meta, df) in platforms.items():
+        label = PLATFORM_ARG_LABELS[key]
+        color = PLATFORM_COLORS[key]
+
+        # Get power draw
+        power_col = None
+        for col in ['gpu_power_w', 'board_power_w']:
+            if col in df.columns:
+                power_col = col
+                break
+        if power_col is None:
+            continue
+        mean_power = df[power_col].mean()
+        if mean_power <= 0:
+            continue
+
+        # Available GHz-cores per watt
+        core_cols = [c for c in df.columns if c.startswith('cpu_core_')]
+        num_cores = len(core_cols) if core_cols else 1
+        cpu_mean = df['cpu_total'].mean() if 'cpu_total' in df.columns else 0
+        freq_ghz = df['cpu_freq_ghz'].mean() if 'cpu_freq_ghz' in df.columns else 1.0
+        avail_ghz_cores = (1 - cpu_mean / 100) * num_cores * freq_ghz
+        ghz_per_watt = avail_ghz_cores / mean_power
+
+        fig.add_trace(go.Bar(
+            x=[label], y=[ghz_per_watt],
+            marker_color=color,
+            text=[f'{ghz_per_watt:.2f}'],
+            textposition='outside',
+            showlegend=False,
+        ), row=1, col=1)
+
+        # GPU utilization per watt
+        if 'gpu_util' in df.columns:
+            gpu_mean = df['gpu_util'].mean()
+            gpu_per_watt = gpu_mean / mean_power
+            fig.add_trace(go.Bar(
+                x=[label], y=[gpu_per_watt],
+                marker_color=color,
+                text=[f'{gpu_per_watt:.2f}'],
+                textposition='outside',
+                showlegend=False,
+            ), row=1, col=2)
+
+    fig.update_layout(
+        title='Performance Per Watt — Efficiency Comparison',
+        template='plotly',
+        height=500,
+        showlegend=False,
+    )
+    fig.update_yaxes(title_text='GHz-cores / W', row=1, col=1)
+    fig.update_yaxes(title_text='GPU % / W', row=1, col=2)
+    return fig
+
+
+def plot_platform_balance_radar(platforms):
+    """Radar/spider chart showing overall platform balance across key dimensions."""
+    # Define dimensions and how to compute normalized 0-1 scores (higher = better)
+    dimensions = [
+        'CPU Headroom',
+        'GPU Capability',
+        'VRAM Headroom',
+        'Clock Speed',
+        'Power Efficiency',
+        'Thermal Headroom',
+    ]
+
+    fig = go.Figure()
+
+    # First pass: compute raw values for normalization
+    raw_values = {}
+    for key, (meta, df) in platforms.items():
+        vals = {}
+        # CPU Headroom: 100 - cpu_total (higher = more room)
+        vals['CPU Headroom'] = 100 - df['cpu_total'].mean() if 'cpu_total' in df.columns else 0
+
+        # GPU Capability: gpu_util mean (shows it's handling the workload)
+        vals['GPU Capability'] = df['gpu_util'].mean() if 'gpu_util' in df.columns else 0
+
+        # VRAM Headroom: % free
+        if 'gpu_mem_used_mb' in df.columns and 'gpu_mem_total_mb' in df.columns:
+            vram_total = df['gpu_mem_total_mb'].mean()
+            vram_used = df['gpu_mem_used_mb'].mean()
+            vals['VRAM Headroom'] = ((vram_total - vram_used) / vram_total * 100) if vram_total > 0 else 0
+        else:
+            vals['VRAM Headroom'] = 0
+
+        # Clock Speed: mean freq in GHz
+        vals['Clock Speed'] = df['cpu_freq_ghz'].mean() if 'cpu_freq_ghz' in df.columns else 0
+
+        # Power Efficiency: available GHz-cores per watt
+        power_col = next((c for c in ['gpu_power_w', 'board_power_w'] if c in df.columns), None)
+        if power_col and 'cpu_total' in df.columns:
+            core_cols = [c for c in df.columns if c.startswith('cpu_core_')]
+            num_cores = len(core_cols) if core_cols else 1
+            freq = df['cpu_freq_ghz'].mean() if 'cpu_freq_ghz' in df.columns else 1.0
+            avail = (1 - df['cpu_total'].mean() / 100) * num_cores * freq
+            power = df[power_col].mean()
+            vals['Power Efficiency'] = avail / power if power > 0 else 0
+        else:
+            vals['Power Efficiency'] = 0
+
+        # Thermal Headroom: assume Tmax ~100°C, headroom = 100 - actual
+        cpu_temp = df['cpu_temp'].mean() if 'cpu_temp' in df.columns else 50
+        gpu_temp = df['gpu_temp'].mean() if 'gpu_temp' in df.columns else 50
+        vals['Thermal Headroom'] = 100 - max(cpu_temp, gpu_temp)
+
+        raw_values[key] = vals
+
+    # Normalize each dimension to 0-1 across platforms
+    for key, vals in raw_values.items():
+        normalized = []
+        for dim in dimensions:
+            all_vals = [raw_values[k][dim] for k in raw_values]
+            max_val = max(all_vals) if max(all_vals) > 0 else 1
+            normalized.append(vals[dim] / max_val)
+
+        fig.add_trace(go.Scatterpolar(
+            r=normalized + [normalized[0]],  # close the polygon
+            theta=dimensions + [dimensions[0]],
+            fill='toself',
+            name=PLATFORM_ARG_LABELS[key],
+            line=dict(color=PLATFORM_COLORS[key], width=2),
+            opacity=0.6,
+        ))
+
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(visible=True, range=[0, 1.1]),
+        ),
+        title='Platform Balance — Overall Capability Comparison',
+        template='plotly',
+        height=600,
+    )
+    return fig
+
+
+def plot_single_thread_headroom(platforms):
+    """Available single-thread performance headroom per platform."""
+    fig = go.Figure()
+
+    for key, (meta, df) in platforms.items():
+        label = PLATFORM_ARG_LABELS[key]
+        color = PLATFORM_COLORS[key]
+
+        core_cols = [c for c in df.columns if c.startswith('cpu_core_')]
+        if not core_cols or 'cpu_freq_ghz' not in df.columns:
+            continue
+
+        # p99 of per-core utilization = worst-case single-core loading
+        all_core_values = df[core_cols].values.flatten()
+        p99_util = np.percentile(all_core_values, 99)
+        mean_freq = df['cpu_freq_ghz'].mean()
+
+        # Available single-thread GHz = (100 - p99_util)% of clock speed
+        avail_ghz = (100 - p99_util) / 100.0 * mean_freq
+
+        fig.add_trace(go.Bar(
+            x=[label], y=[avail_ghz],
+            marker_color=color,
+            text=[f'{avail_ghz:.2f} GHz\n(p99 core: {p99_util:.0f}% @ {mean_freq:.1f} GHz)'],
+            textposition='outside',
+            showlegend=False,
+        ))
+
+    fig.update_layout(
+        title='Single-Thread Headroom — Can You Run Real-Time Control?',
+        yaxis_title='Available Single-Thread Performance (GHz)',
+        template='plotly',
+        height=500,
+        showlegend=False,
+    )
+    return fig
+
+
+def plot_gpu_effective_throughput(platforms):
+    """GPU effective throughput: utilization * clock speed, showing actual GPU work."""
+    return plot_timeseries_comparison(
+        platforms, 'gpu_effective_throughput',
+        'GPU Effective Throughput — Utilization x Clock Speed',
+        'Effective Throughput (GHz)',
+    )
+
+
+def plot_realtime_stability(platforms):
+    """Per-core utilization variability — lower = more predictable for real-time."""
+    categories = ['Std Dev (%)', 'Coeff. of Variation']
+
+    fig = go.Figure()
+
+    for key, (meta, df) in platforms.items():
+        core_cols = [c for c in df.columns if c.startswith('cpu_core_')]
+        if not core_cols:
+            continue
+        all_core_values = df[core_cols].values.flatten()
+        std = np.std(all_core_values)
+        mean = np.mean(all_core_values)
+        cv = (std / mean * 100) if mean > 0 else 0
+
+        fig.add_trace(go.Bar(
+            x=categories,
+            y=[std, cv],
+            name=PLATFORM_ARG_LABELS[key],
+            marker_color=PLATFORM_COLORS[key],
+            text=[f'{std:.1f}', f'{cv:.1f}%'],
+            textposition='outside',
+        ))
+
+    fig.update_layout(
+        title='Real-Time Stability — Per-Core Utilization Variability (Lower = Better)',
+        barmode='group',
+        template='plotly',
+        yaxis_title='Value',
+        height=500,
+    )
+    return fig
+
+
+def plot_thermal_runway(platforms):
+    """Thermal margin to throttle point (100°C) for CPU and GPU."""
+    categories = ['CPU Thermal Margin', 'GPU Thermal Margin']
+    T_THROTTLE = 100.0
+
+    fig = go.Figure()
+
+    for key, (meta, df) in platforms.items():
+        cpu_margin = T_THROTTLE - df['cpu_temp'].mean() if 'cpu_temp' in df.columns else 0
+        gpu_margin = T_THROTTLE - df['gpu_temp'].mean() if 'gpu_temp' in df.columns else 0
+
+        fig.add_trace(go.Bar(
+            x=categories,
+            y=[cpu_margin, gpu_margin],
+            name=PLATFORM_ARG_LABELS[key],
+            marker_color=PLATFORM_COLORS[key],
+            text=[f'{cpu_margin:.1f}°C', f'{gpu_margin:.1f}°C'],
+            textposition='outside',
+        ))
+
+    fig.update_layout(
+        title='Thermal Runway — Margin to Throttle Point (100°C)',
+        barmode='group',
+        template='plotly',
+        yaxis_title='Margin (°C)',
+        height=500,
+    )
+    return fig
+
+
 def plot_summary_bars(platforms):
     """Grouped bar charts comparing mean values of key metrics."""
     key_metrics = [
@@ -683,18 +1032,26 @@ def main():
 
     # Generate comparison plots
     plot_funcs = [
+        ('Platform Balance Radar', plot_platform_balance_radar),
         ('Resource Headroom', plot_resource_headroom),
         ('Absolute Compute Headroom', plot_absolute_compute_headroom),
+        ('Single-Thread Headroom', plot_single_thread_headroom),
         ('CPU Comparison', plot_cpu_comparison),
         ('CPU Frequency', plot_cpu_frequency_comparison),
         ('Peak Core Loading', plot_peak_core_loading),
         ('CPU Core Histogram', plot_cpu_core_histogram),
         ('Core Utilization Percentiles', plot_core_utilization_percentiles),
+        ('Real-Time Stability', plot_realtime_stability),
         ('GPU Comparison', plot_gpu_comparison),
+        ('GPU Clock Speed', plot_gpu_clock_comparison),
+        ('GPU Effective Throughput', plot_gpu_effective_throughput),
         ('GPU Utilization Distribution', plot_gpu_util_distribution),
         ('GPU Memory', plot_gpu_memory),
+        ('GPU Memory Headroom', plot_gpu_memory_headroom),
+        ('Performance Per Watt', plot_performance_per_watt),
         ('Power Comparison', plot_power_comparison),
         ('Thermal Comparison', plot_thermal_comparison),
+        ('Thermal Runway', plot_thermal_runway),
         ('Memory Bandwidth', plot_memory_bandwidth_comparison),
         ('RAM Comparison', plot_ram_comparison),
         ('Summary Bar Charts', plot_summary_bars),
