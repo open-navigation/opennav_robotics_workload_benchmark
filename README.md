@@ -1,19 +1,23 @@
 # Open Navigation's Robotics Workload Benchmark
 
-This is a robotics and AI workload benchmark to compare various hardware platforms using realistically complex, data intensive, representative applications. Many benchmarks exist from both hardware vendors and community members, but nearly all focus on evaluating a particular component or algorithm in isolation. Often times, multiple of these algorithms need to be run together which may interact negatively when composed into a full system due to sharing of limited CPU or conflicts accessing accelerated computing resources (GPU, NPU, FPGA, etc). Other times, benchmarks that may consider a robotics system use trivialized workloads from basic simulation environments and sensor data sources which don't provide particularly insightful results for companies and industrial integrators.
+This is a robotics and AI workload benchmark to compare various hardware platforms using realistically complex, data intensive, representative applications. Many benchmarks exist from both hardware vendors and community members, but nearly all focus on evaluating a particular component or algorithm in isolation. Often times, multiple of these algorithms need to be run together which may interact negatively when composed into a full system due to sharing of limited CPU or conflicts accessing accelerated computing resources (GPU, NPU, FPGA, etc).
 
-This project aims to fill the gap by providing a reproducable, independent benchmark for comparing and evaluating compute solutions for Robotics or Physical AI applications in all of their complexity. We aim to understand the performance of each hardware solution not by individual benchmarks, but as a wholistic comparison of the workload which is actually going to happen in production. For this benchmark, we use Nav2 to autonomously navigate a forklift material handling robot within a 200,000 sqft (18,600 m2) industrial warehouse environment with its advanced, built-in planning, control, behavior modeling, and perception. It will move pallets from shipping/receiving to shelving units while processing multiple 3D lidars, 2D safety lidars, RGBD cameras, and internal sensors. This workload is representative of dozens of companies and tens of thousands of robotics deployed today in production environments.
+This project aims to fill the gap by providing a reproducable, independent benchmark for comparing and evaluating compute solutions for Robotics or Physical AI applications in all of their complexity. For this benchmark, we use Nav2 to autonomously navigate a forklift material handling robot within a 200,000 sqft (18,600 m2) industrial warehouse environment with its advanced, built-in planning, control, behavior modeling, and perception. It will move pallets from shipping/receiving to shelving units while processing multiple 3D lidars, 2D safety lidars, RGBD cameras, and internal sensors. This workload is representative of dozens of companies and tens of thousands of robotics deployed today in production environments.
 
-The benchmark also includes an (optional) Edge AI workload. We use Gemma 4.0, a popular Visual-Language Model (VLM), to exercise the platforms' GPUs during the benchmark session. We integrate it into navigation for scene understanding and semantic context using the navigation behavior tree, which impact navigation decision making and algorithm selection. However, this could be easily replaced with another AI/GPU workload(s) (object detection, segmentation, RL, VLA, etc) simply by changing the AI workload Dockerfile. VLMs are extremely intensive with much current interest and robotics-targeted embedded platforms are being built with LLM/VLMs in mind, so we feel they make a good benchmark case to fully leverage the capabilities of modern platforms.
+The benchmark also includes an (optional) Edge AI workload. We use Gemma 4.0, a popular Visual-Language Model (VLM), to exercise the platforms' GPUs during the benchmark. We integrate it scene understanding in the navigation behavior tree, which impact navigation decision making. VLMs are extremely intensive with much current interest and robotics-targeted embedded platforms are being built with LLM/VLMs in mind, so we feel they make a good benchmark case to fully leverage the capabilities of modern platforms.
 
 This benchmark compares both system metrics as well as important performance analysis of the autonomous navigation and AI workload performance. It provides instructions and tools to run the pipeline yourself for a compute platform to validate the results or extend easily to include a new platform. We also provide results for commonly used platforms today - namely the NVIDIA Jetson Orin, Jetson Thor, and AMD X100 Strix Halo with analysis on each platform below. 
 
-[![Benchmark Demo](docs/benchmark_demo.gif)](https://www.youtube.com/watch?v=j5NtcGJvQyM)
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=j5NtcGJvQyM">
+    <img src="docs/benchmark_demo.gif" alt="Benchmark Demo"/>
+  </a>
+</p>
 
 ⚠️ Need ROS 2, Nav2 help or support? Contact Open Navigation! ⚠️
 
 
-# Platforms Evaluated
+## Platforms Evaluated
 
 The [Jetson AGX Orin](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/) is NVIDIA's established embedded AI platform widely adopted in robotics which require edge AI such as detection, segmentation, and reinforcement learning. The Orin is the current workhorse of many production robotics deployments.
 
@@ -32,7 +36,7 @@ The [AMD X100 (Strix Halo)](https://www.amd.com/en/products/processors/desktops/
 | **Power (TDP)** | 15–60 W | 40–130 W | 45–120 W |
 
 
-# Architecture
+## Architecture
 
 The benchmark consists of a developer computer networked to the hardware platform being evaluated as the HIL computer.
 The developer computer will run a simulation engine in a provided docker container to simulate a large scale warehouse environment and the robot's sensors.
@@ -50,7 +54,7 @@ All logs from the workflows and system metrics capture are saved in `opennav_ben
 `opennav_benchmark_analysis` provides automated tools to visualize and extract key metrics from a single platform's run or compare and contrast multiple platforms at once.
 
 
-# Simulation
+## Simulation
 
 The simulation is set up as a representatively complex and data intensive workload of a modern robotics application. It simulates a full 200,000 sqft industrial warehouse facility with loading docks, block stacking, long aisles, and blocked aisles due to simulated accident scenes. Larger simulations are absolutely possible, however we chose to limit it to what can be run on laptop processors from the last ~3 years to make this more accessible. For higher quality simulation and/or expanding the world size, see the `opennav_benchmark_pipeline` README for more instructions.
 
@@ -68,7 +72,7 @@ The robot has a maximum speed of 2 m/s.
 ![Rviz data](docs/rviz2.png)
 
 
-# Robotic & AI Workloads
+## Robotic & AI Workloads
 
 A mission dispatcher will send the forklift from its charging dock to pick up a pallet either in the block stack or loading dock area and drop it at a shelf in the long-term storage racks. The BT Navigator accepts these missions and executes the configurable beahvior tree describing the navigation behavior to perform. This will repeat indefinitely for the duration of the benchmark run, except every 200 pick-and-place missions the robot will return to the charging dock and dock before continuing. A 10 second wait is enacted while picking or placing to simulate downtime due to picking or placing the pallet. 
 
@@ -83,13 +87,13 @@ The AI workload exposes a VLM server which is regularly queried by the behavior 
 The VLM server subscribes to the RGB camera topic mounted on the chassis of the robot in a strategic location with good visibility of the scene in the primary direction of travel. Queries are then set to it in the behavior tree to understand context about the scene, such as detecting unusual obstacles, crowds, and hazards to successful task completion. If any such hazards are found, the robot is directed down another route to the goal. If humans are detected in the scene, the maximum velocity is reduced.
 
 
-# Results and Comparison
+## Results and Comparison
 
 TODO graphs, high-level metircs, and log-based analysis 
 
 
 
-# Independent Reproduction, Extension to New Platforms
+## Independent Reproduction, Extension to New Platforms
 
 See the instructions in the `opennav_benchmark_pipeline` for building and running the benchmark.
 The pipeline provides Dockerfiles for the simulation, AMR Robot workload, and AI workloads which can be run to reproduce the benchmark.
