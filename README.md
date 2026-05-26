@@ -63,6 +63,13 @@ graph LR
         bench --- drivers["Simulated Sensor<br/>Driver Load"]
         bench --- metrics["System Metrics<br/>CPU | Memory | GPU"]
     end
+
+    classDef blueNode fill:#4FC3F7,stroke:#4A4A4A,stroke-width:2px,color:#fff
+    classDef greyNode fill:#4A4A4A,stroke:#333,stroke-width:2px,color:#fff
+    class sim,sensors,amr,ai,drivers,metrics blueNode
+    class bench greyNode
+    style dev fill:#E0F4FD,stroke:#4A4A4A,stroke-width:2px,color:#4A4A4A
+    style hil fill:#E0F4FD,stroke:#4A4A4A,stroke-width:2px,color:#4A4A4A
 ```
 
 The compute platform being benchmarked will then run a benchmark script which will launch the AMR autonomy and (optional) AI workloads, along with a light weight script which will measure system metrics like CPU, memory, and GPU utilization.
