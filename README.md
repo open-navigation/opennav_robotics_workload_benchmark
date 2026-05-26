@@ -45,7 +45,25 @@ The developer computer will run a simulation engine in a provided docker contain
 This is run on another machine to isolate potential effects from resource scheduling the simulation on utilization metrics. 
 DDS is configured to only operate on the wired ethernet interface to minimize the impacts due to discover traffic or other interference. 
 
-TODO diagram
+```mermaid
+graph LR
+    subgraph dev["Developer Computer"]
+        direction TB
+        sim["Gazebo Simulation<br/>(Docker Container)"]
+        sim --- sensors["Simulated Sensors<br/>3x 3D LiDAR | 3x RGBD<br/>2x 2D LiDAR | IMU | RGB"]
+    end
+
+    dev <-->|"Wired Ethernet<br/>(DDS)"| hil
+
+    subgraph hil["HIL Compute Platform Under Test"]
+        direction TB
+        bench["Benchmark Script"]
+        bench --- amr["AMR Autonomy<br/>(Nav2 Docker)"]
+        bench --- ai["AI Workload<br/>(VLM Docker)"]
+        bench --- drivers["Simulated Sensor<br/>Driver Load"]
+        bench --- metrics["System Metrics<br/>CPU | Memory | GPU"]
+    end
+```
 
 The compute platform being benchmarked will then run a benchmark script which will launch the AMR autonomy and (optional) AI workloads, along with a light weight script which will measure system metrics like CPU, memory, and GPU utilization.
 To simulate the affects of hardware driver interfaces on the compute landscape, an additional script will run to simulate the load from sensor drivers on the platform.
@@ -60,7 +78,9 @@ All logs from the workflows and system metrics capture are saved in `opennav_ben
 
 The simulation is set up as a representatively complex and data intensive workload of a modern robotics application. It simulates a full 200,000 sqft industrial warehouse facility with loading docks, block stacking, long aisles, and blocked aisles due to simulated accident scenes. Larger simulations are absolutely possible, however we chose to limit it to what can be run on laptop processors from the last ~3 years to make this more accessible. For higher quality simulation and/or expanding the world size, see the `opennav_benchmark_pipeline` README for more instructions.
 
-<img src="docs/gazebo.png" alt="Gazebo simulation" width="600"/>
+<p align="center">
+  <img src="docs/gazebo.png" alt="Gazebo simulation" width="600"/>
+</p>
 
 The robot simulated is an autonomous differential-drive forklift platform holding a pallet in its forks containing:
 * 3x 3D LIDARs (10 Hz, 30m range, 32 beams @ 512 resolution)
@@ -71,7 +91,9 @@ The robot simulated is an autonomous differential-drive forklift platform holdin
 
 The robot has a maximum speed of 2 m/s.
 
-<img src="docs/rviz2.png" alt="Rviz data" width="600"/>
+<p align="center">
+  <img src="docs/rviz2.png" alt="Rviz data" width="600"/>
+</p>
 
 
 
