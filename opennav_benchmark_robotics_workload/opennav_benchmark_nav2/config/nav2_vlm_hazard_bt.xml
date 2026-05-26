@@ -25,10 +25,18 @@
             <!-- VLM crowd check -->
             <ForceSuccess>
               <Sequence name="CrowdCheck">
-                <QueryBool prompt="Is this space crowded by people or working machinery? If so, respond only yes. Otherwise respond no."
+                <QueryBool prompt="Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no."
                            value="{crowd_detected}"/>
                 <CheckBool value="{crowd_detected}"/>
                 <MarkLethalAhead distance="2.0" width="2.0"/>
+              </Sequence>
+            </ForceSuccess>
+            <!-- VLM people detection -> temporary speed limit -->
+            <ForceSuccess>
+              <Sequence name="PeopleSpeedCheck">
+                <QueryBool prompt="Are there any people visible in this scene? If so, respond only yes. Otherwise respond no."
+                           value="{people_detected}"/>
+                <SetTempSpeedLimit speed_limit="50.0" duration="5.0" is_active="{people_detected}"/>
               </Sequence>
             </ForceSuccess>
             <!-- Compute path (routes around any newly marked lethal areas) -->

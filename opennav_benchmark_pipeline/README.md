@@ -67,6 +67,8 @@ docker build -t opennav_benchmark/robotic_amr_workload:jazzy \
   -f opennav_benchmark_pipeline/docker/robotic_amr_workload/Dockerfile .
 ```
 
+This builds the project's AMR workload, processing the multitude of sensor data, planning, control, autonomy and the mission task dispatcher as if running with physical hardware. The navigation setup can be found in `opennav_benchmark_nav` and the autonomy application in `opennav_benchmark_mission_dispatcher`
+
 Run the following command:
 
 ```bash
@@ -74,7 +76,7 @@ cd /path/to/opennav_robotics_workload_benchmark
 ./opennav_benchmark_pipeline/run_benchmark.sh
 ```
 
-The script writes its output to `opennav_benchmark_logs/run_<unix_ts>/`.
+Each run produces logs from the benchmark autonomy workload / VLM / metrics in the directory `opennav_benchmark_logs/run_<unix_ts>`. This can be used to analyze the captured metrics, AI output, and autonomy logs (such as with the `opennav_benchmark_analysis` directory).
 
 For ad-hoc runs, you can launch the autonomy workload container by hand. Open a second terminal alongside the simulation:
 
@@ -92,6 +94,30 @@ docker run --rm -it --init \
 
 To capture ROS logs, add `--volume "$(pwd)/opennav_benchmark_logs/manual:/root/.ros/log"` before the image name.
 
-## Output
+## Running the analysis
 
-Each run produces logs from the benchmark autonomy workload / VLM / metrics in the directory `opennav_benchmark_logs/run_<unix_ts>`. This can be used to analyze the captured metrics, AI output, and autonomy logs (such as with the `opennav_benchmark_analysis` directory).
+To analyze a single benchmark run, pass its `system_metrics_<timestamp>.json` file to the single-run script:
+
+```bash
+cd /path/to/opennav_robotics_workload_benchmark
+python opennav_benchmark_analysis/analyze_single_run.py \
+  opennav_benchmark_logs/run_<unix_ts>/system_metrics.json \
+  --output-dir ./output
+```
+
+This generates interactive Plotly charts (CPU, GPU, RAM, thermals, I/O, etc.) and an HTML report under `output/run_<unix_ts>/report.html`.
+
+### Cross-platform comparison (all 3 platforms)
+
+To compare benchmark results across the AMD Ryzen AI Max+, NVIDIA Jetson Orin, and NVIDIA Jetson Thor platforms, provide each platform's metrics file:
+
+```bash
+cd /path/to/opennav_robotics_workload_benchmark
+python opennav_benchmark_analysis/compare_platforms.py \
+  --amd  opennav_benchmark_logs/run_<amd_ts>/system_metrics.json \
+  --orin opennav_benchmark_logs/run_<orin_ts>/system_metrics.json \
+  --thor opennav_benchmark_logs/run_<thor_ts>/system_metrics.json \
+  --output-dir ./output
+```
+
+This generates side-by-side comparison charts (resource headroom, compute efficiency, thermals, power-per-watt, radar plots, etc.) and an HTML report at `output/comparison/report.html`.

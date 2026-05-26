@@ -71,6 +71,7 @@ bt_navigator:
       - vlm_query_string_action_bt_node
       - vlm_check_bool_bt_node
       - vlm_mark_lethal_ahead_bt_node
+      - vlm_set_temp_speed_limit_bt_node
     error_code_names:
       - compute_path_error_code
       - follow_path_error_code

@@ -8,6 +8,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(behaviortree_cpp REQUIRED)
 find_package(nav2_behavior_tree REQUIRED)
 find_package(nav2_util REQUIRED)
+find_package(nav2_msgs REQUIRED)
 find_package(opennav_benchmark_vlm_msgs REQUIRED)
 
 set(dependencies
@@ -16,6 +17,7 @@ set(dependencies
   sensor_msgs
   behaviortree_cpp
   nav2_behavior_tree
+  nav2_msgs
   nav2_util
   opennav_benchmark_vlm_msgs
 )
@@ -39,6 +41,9 @@ list(APPEND plugin_libs vlm_check_bool_bt_node)
 # Utility plugins
 add_library(vlm_mark_lethal_ahead_bt_node SHARED src/mark_lethal_ahead.cpp)
 list(APPEND plugin_libs vlm_mark_lethal_ahead_bt_node)
+
+add_library(vlm_set_temp_speed_limit_bt_node SHARED src/set_temp_speed_limit.cpp)
+list(APPEND plugin_libs vlm_set_temp_speed_limit_bt_node)
 
 # Cancel plugins
 add_library(vlm_cancel_query_bool_bt_node SHARED src/cancel_query_bool.cpp)
