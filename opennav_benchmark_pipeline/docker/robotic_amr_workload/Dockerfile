@@ -1,5 +1,7 @@
 FROM ros:jazzy-ros-base
 
+ENV PYTHONUNBUFFERED=1
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
       python3-colcon-common-extensions \
       python3-rosdep \

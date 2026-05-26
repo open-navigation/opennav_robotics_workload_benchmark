@@ -30,7 +30,7 @@ from visualization_msgs.msg import MarkerArray
 from .waypoint_visualizer import create_waypoint_markers
 
 PICK_ZONES = ['zone_pickups']
-DROP_ZONES = ['zone_a', 'zone_bw', 'zone_be', 'zone_c', 'zone_d']
+DROP_ZONES = ['zone_a', 'zone_bw', 'zone_d']  # zone_be & zone_d excluded, human/AMR pickers area not forklift
 
 
 class TaskDispatcher:

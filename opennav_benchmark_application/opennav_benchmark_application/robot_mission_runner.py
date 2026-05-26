@@ -52,16 +52,16 @@ class RobotMissionRunner(Node):
             application_pkg, 'annotations', 'warehouse_waypoints.yaml')
         self.dispatcher = TaskDispatcher(annotations_file, self)
 
-        print('Sending initial pose...')
+        self.get_logger().info('Sending initial pose...')
         self.setInitialPose()
-        print('Waiting for Nav2 to become active...')
+        self.get_logger().info('Waiting for Nav2 to become active...')
         self.waitUntilActive()
-        print('Nav2 up, picking benchmark node started!')
+        self.get_logger().info('Nav2 up, picking benchmark node started!')
 
     def waitUntilActive(self):
         """Block until the navigation system is up and running."""
         self.navigator._waitForNodeToActivate('bt_navigator')
-        print('Nav2 is ready for use!')
+        self.get_logger().info('Nav2 is ready for use!')
 
     def setInitialPose(self):
         """Publish the initial pose of the robot at the dock."""
@@ -113,15 +113,15 @@ class RobotMissionRunner(Node):
                     pos = feedback.current_pose.pose.position
                     nav_time = feedback.navigation_time
                     eta = feedback.estimated_time_remaining
-                    print(
-                        f'  Pose: ({pos.x:.2f}, {pos.y:.2f}), '
+                    self.get_logger().info(
+                        f'Pose: ({pos.x:.2f}, {pos.y:.2f}), '
                         f'Elapsed: {nav_time.sec}s, '
                         f'ETA: {eta.sec}s, '
                         f'Dist remaining: {feedback.distance_remaining:.2f}m')
             time.sleep(0.1)
 
         result = self.navigator.getResult()
-        print(f'  Navigation result: {result.name}')
+        self.get_logger().info(f'Navigation result: {result.name}')
         return result == TaskResult.SUCCEEDED
 
     def navigateWithRetries(self, wp, label):
@@ -133,10 +133,10 @@ class RobotMissionRunner(Node):
         :return: True if navigation succeeded, False if all retries exhausted.
         """
         for attempt in range(1, MAX_RETRIES + 1):
-            print(f'  {label}, attempt {attempt}/{MAX_RETRIES}...')
+            self.get_logger().info(f'{label}, attempt {attempt}/{MAX_RETRIES}...')
             if self.navigateToWaypoint(wp):
                 return True
-            print(f'  {label} attempt {attempt} failed.')
+            self.get_logger().warn(f'{label} attempt {attempt} failed.')
         return False
 
     def runMission(self):
@@ -149,7 +149,7 @@ class RobotMissionRunner(Node):
         """
         pick_wp = self.dispatcher.get_next_pick()
         drop_wp = self.dispatcher.get_next_drop()
-        print(f'Picking from {pick_wp}, dropping at {drop_wp}...')
+        self.get_logger().info(f'Picking from {pick_wp}, dropping at {drop_wp}...')
 
         # Navigate to pick location, simulate picking (10s)
         if not self.navigateWithRetries(pick_wp, 'Navigating to pick'):
@@ -164,7 +164,7 @@ class RobotMissionRunner(Node):
 
     def chargeCycle(self):
         """Dock, wait for simulated charge, then undock."""
-        print(f'Docking for charge cycle ({CHARGE_WAIT_SECONDS}s)...')
+        self.get_logger().info(f'Docking for charge cycle ({CHARGE_WAIT_SECONDS}s)...')
         self.navigator.dockRobotByID('home_dock', nav_to_dock=True)
         while not self.navigator.isTaskComplete() and rclpy.ok():
             time.sleep(0.1)
@@ -175,7 +175,7 @@ class RobotMissionRunner(Node):
         while not self.navigator.isTaskComplete() and rclpy.ok():
             time.sleep(0.1)
 
-        print('Charge cycle complete, resuming missions.')
+        self.get_logger().info('Charge cycle complete, resuming missions.')
 
     def run(self):
         """Run pick-and-place missions continuously."""
@@ -192,12 +192,13 @@ class RobotMissionRunner(Node):
         while rclpy.ok():
             mission_count += 1
             if not self.runMission():
-                print(f'Mission {mission_count} failed after retries, '
-                      'returning to dock for charge cycle.')
+                self.get_logger().warn(
+                    f'Mission {mission_count} failed after retries, '
+                    'returning to dock for charge cycle.')
                 self.chargeCycle()
                 continue
 
-            print(f'Mission {mission_count} completed.')
+            self.get_logger().info(f'Mission {mission_count} completed.')
             if mission_count % MISSIONS_PER_CHARGE == 0:
                 self.chargeCycle()
 

@@ -110,8 +110,8 @@ controller_server:
       ax_max: 3.0
       ax_min: -3.0
       az_max: 3.5
-      vx_std: 0.2  # TODO SPEED: Explore more 0.4-0.5
-      wz_std: 0.4  # TODO SPEED: Explore more 0.5
+      vx_std: 0.4
+      wz_std: 0.5
       vx_max: 2.0
       vx_min: -2.0
       wz_max: 1.9
@@ -174,7 +174,7 @@ controller_server:
         enabled: true
         cost_power: 1
         cost_weight: 5.0 
-        offset_from_furthest: 5 # TODO SPEED: Explore more
+        offset_from_furthest: 15
         threshold_to_consider: 1.4
       PathAngleCritic:
         enabled: true
@@ -209,7 +209,7 @@ planner_server:
       analytic_expansion_max_length: 3.0
       analytic_expansion_max_cost: 200.0
       analytic_expansion_max_cost_override: false
-      use_quadratic_cost_penalty: false # TODO try?
+      use_quadratic_cost_penalty: false
       minimum_turning_radius: 0.75
       reverse_penalty: 2.0
       change_penalty: 0.0
