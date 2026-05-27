@@ -1,0 +1,24 @@
+
+Write up in Github-flavored Markdown format an install guide for getting llama.cpp running on NVIDIA Jetson platforms. 
+This needs to be concise but detailed as necessary. 
+I just want the step-by-step instructions with Headlines where appropriate. 
+I will add my own narrative and comments where I think necessary. 
+I've attached an install guide I just wrote for the AMD Ryzen platform, use that as a style-guide. 
+
+I'll need similar but separate guides for the Jetson Orin AGX 64G and Jetson Thor 5000. 
+For OS install, we'll be using the NVIDIA SDK Manager, installing via the USB Debug/Flashing port. 
+
+Highlight the need to have an additional NVME or SSD on the Orin because of the small size of the onboard EMMC storage. 
+
+Reference these links:
+Install Jetpack using NVIDIA SDKManager:
+https://docs.nvidia.com/sdk-manager/install-with-sdkm-jetson/index.html#step-03-installation
+Install NVIDIA Container Toolkit:
+https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/index.html
+Provision NVME storage for Jetson Orin: 
+https://www.jetson-ai-lab.com/tutorials/ssd-docker-setup/
+
+Installing & Running LLM Models on Different Jetson Platforms:
+https://www.jetson-ai-lab.com/models/
+
+This will probably take a few iterations, so let's get started. 

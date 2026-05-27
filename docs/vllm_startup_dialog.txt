@@ -1,0 +1,85 @@
+(EngineCore pid=123) INFO 05-25 23:59:06 [gpu_model_runner.py:4735] Starting to load model nvidia/Gemma-4-31B-IT-NVFP4...
+(EngineCore pid=123) INFO 05-25 23:59:06 [vllm.py:790] Asynchronous scheduling is enabled.
+(EngineCore pid=123) INFO 05-25 23:59:06 [compilation.py:290] Enabled custom fusions: act_quant
+(EngineCore pid=123) INFO 05-25 23:59:06 [cuda.py:274] Using AttentionBackendEnum.TRITON_ATTN backend.
+(EngineCore pid=123) INFO 05-25 23:59:06 [nvfp4_utils.py:85] Using NvFp4LinearBackend.FLASHINFER_CUTLASS for NVFP4 GEMM
+(EngineCore pid=123) INFO 05-25 23:59:06 [cuda.py:274] Using AttentionBackendEnum.TRITON_ATTN backend.
+model.safetensors.index.json: 175kB [00:00, 196MB/s]
+
+
+
+
+(EngineCore pid=123) INFO 05-26 00:32:23 [weight_utils.py:581] Time spent downloading weights for nvidia/Gemma-4-31B-IT-NVFP4: 1993.384204 seconds
+Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:05<00:16,  5.52s/it]
+Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:11<00:11,  5.82s/it]
+Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:17<00:05,  5.92s/it]
+Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:19<00:00,  4.48s/it]
+Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:19<00:00,  4.97s/it]
+(EngineCore pid=123) 
+(EngineCore pid=123) INFO 05-26 00:32:43 [default_loader.py:384] Loading weights took 20.06 seconds
+(EngineCore pid=123) WARNING 05-26 00:32:44 [kv_cache.py:94] Checkpoint does not provide a q scaling factor. Setting it to k_scale. This only matters for FP8 Attention backends (flash-attn or flashinfer).
+(EngineCore pid=123) WARNING 05-26 00:32:44 [kv_cache.py:108] Using KV cache scaling factor 1.0 for fp8_e4m3. If this is unintended, verify that k/v_scale scaling factors are properly set in the checkpoint.
+(EngineCore pid=123) INFO 05-26 00:32:44 [gpu_model_runner.py:4820] Model loading took 31.04 GiB memory and 2017.720676 seconds
+(EngineCore pid=123) INFO 05-26 00:32:45 [gpu_model_runner.py:5753] Encoder cache will be initialized with a budget of 2496 tokens, and profiled with 1 video items of the maximum feature size.
+(EngineCore pid=123) INFO 05-26 00:33:19 [backends.py:1051] Using cache directory: /root/.cache/vllm/torch_compile_cache/76a50f446a/rank_0_0/backbone for vLLM's torch.compile
+(EngineCore pid=123) INFO 05-26 00:33:19 [backends.py:1111] Dynamo bytecode transform time: 16.56 s
+(EngineCore pid=123) [rank0]:W0526 00:33:21.460000 123 torch/_inductor/utils.py:1679] Not enough SMs to use max_autotune_gemm mode
+(EngineCore pid=123) INFO 05-26 00:33:33 [backends.py:372] Cache the graph of compile range (1, 2048) for later use
+(EngineCore pid=123) INFO 05-26 00:34:03 [backends.py:390] Compiling a graph for compile range (1, 2048) takes 42.89 s
+(EngineCore pid=123) INFO 05-26 00:34:07 [decorators.py:640] saved AOT compiled function to /root/.cache/vllm/torch_compile_cache/torch_aot_compile/ffe48dbede4899d3ac3333b640e6f1582c61b4be5d494143ed6d3420e34b4a11/rank_0_0/model
+(EngineCore pid=123) INFO 05-26 00:34:07 [monitor.py:48] torch.compile took 64.74 s in total
+(EngineCore pid=123) INFO 05-26 00:34:10 [monitor.py:76] Initial profiling/warmup run took 2.20 s
+(EngineCore pid=123) INFO 05-26 00:34:18 [kv_cache_utils.py:829] Overriding num_gpu_blocks=0 with num_gpu_blocks_override=512
+(EngineCore pid=123) INFO 05-26 00:34:18 [gpu_model_runner.py:5876] Profiling CUDA graph memory: PIECEWISE=51 (largest=512), FULL=35 (largest=256)
+(EngineCore pid=123) INFO 05-26 00:34:25 [gpu_model_runner.py:5955] Estimated CUDA graph memory: 6.12 GiB total
+(EngineCore pid=123) INFO 05-26 00:34:25 [gpu_model_runner.py:5955] Estimated CUDA graph memory: 6.12 GiB total
+(EngineCore pid=123) INFO 05-26 00:34:26 [gpu_worker.py:436] Available KV cache memory: 60.77 GiB
+(EngineCore pid=123) INFO 05-26 00:34:26 [gpu_worker.py:470] In v0.19, CUDA graph memory profiling will be enabled by default (VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=1), which more accurately accounts for CUDA graph memory during KV cache allocation. To try it now, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=1 and increase --gpu-memory-utilization from 0.8000 to 0.8498 to maintain the same effective KV cache size.
+(EngineCore pid=123) INFO 05-26 00:34:26 [kv_cache_utils.py:1319] GPU KV cache size: 132,736 tokens
+(EngineCore pid=123) INFO 05-26 00:34:26 [kv_cache_utils.py:1324] Maximum concurrency for 262,144 tokens per request: 5.44x
+(EngineCore pid=123) 2026-05-26 00:34:32,977 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore pid=123) 2026-05-26 00:34:46,067 - INFO - autotuner.py:268 - flashinfer.jit: [Autotuner]: Autotuning process ends
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|█████████████| 51/51 [00:14<00:00,  3.43it/s]
+Capturing CUDA graphs (decode, FULL): 100%|████████████████████████████████| 35/35 [00:14<00:00,  2.49it/s]
+(EngineCore pid=123) INFO 05-26 00:35:16 [gpu_model_runner.py:6046] Graph capturing finished in 30 secs, took 0.92 GiB
+(EngineCore pid=123) INFO 05-26 00:35:16 [gpu_worker.py:597] CUDA graph pool memory: 0.92 GiB (actual), 6.12 GiB (estimated), difference: 5.2 GiB (563.3%).
+(EngineCore pid=123) INFO 05-26 00:35:16 [core.py:283] init engine (profile, create kv cache, warmup model) took 151.69 seconds
+(APIServer pid=1) INFO 05-26 00:35:17 [api_server.py:590] Supported tasks: ['generate']
+(APIServer pid=1) INFO 05-26 00:35:17 [parser_manager.py:202] "auto" tool choice has been enabled.
+(APIServer pid=1) WARNING 05-26 00:35:17 [model.py:1435] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'temperature': 1.0, 'top_k': 64, 'top_p': 0.95}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`.
+(APIServer pid=1) INFO 05-26 00:35:23 [hf.py:314] Detected the chat template content format to be 'openai'. You can set `--chat-template-content-format` to override this.
+(APIServer pid=1) INFO 05-26 00:35:39 [base.py:231] Multi-modal warmup completed in 16.393s
+(APIServer pid=1) INFO 05-26 00:35:40 [api_server.py:594] Starting vLLM server on http://0.0.0.0:8000
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:37] Available routes are:
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /openapi.json, Methods: HEAD, GET
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /docs, Methods: HEAD, GET
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /docs/oauth2-redirect, Methods: HEAD, GET
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /redoc, Methods: HEAD, GET
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /tokenize, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /detokenize, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /load, Methods: GET
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /version, Methods: GET
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /health, Methods: GET
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /metrics, Methods: GET
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /v1/models, Methods: GET
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /ping, Methods: GET
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /ping, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /invocations, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /v1/chat/completions, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /v1/chat/completions/batch, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /v1/responses, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /v1/responses/{response_id}, Methods: GET
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /v1/responses/{response_id}/cancel, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /v1/completions, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /v1/messages, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /v1/messages/count_tokens, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /inference/v1/generate, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /scale_elastic_ep, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /is_scaling_elastic_ep, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /v1/chat/completions/render, Methods: POST
+(APIServer pid=1) INFO 05-26 00:35:40 [launcher.py:46] Route: /v1/completions/render, Methods: POST
+(APIServer pid=1) INFO:     Started server process [1]
+(APIServer pid=1) INFO:     Waiting for application startup.
+(APIServer pid=1) INFO:     Application startup complete.
+

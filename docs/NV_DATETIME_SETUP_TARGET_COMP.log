@@ -1,0 +1,9 @@
+------ 2026-05-20 16:59:27 ------
+------ SDK: JetPack_6.2.2_Linux ------
+16:59:27.610 - Info: exec_command: ssh   opennav@192.168.8.102 "df -B1 / | tail -1 | awk '{ printf \$4 }'"16:59:28.422 - Info: change working directory to /home/armadilo/nvidia/nvidia_sdk/JetPack_6.2.2_Linux_JETSON_AGX_ORIN_TARGETS16:59:28.422 - Info: [ Component Install Started ]16:59:28.422 - Info: current working directory is /home/armadilo/nvidia/nvidia_sdk/JetPack_6.2.2_Linux_JETSON_AGX_ORIN_TARGETS16:59:28.423 - Info: exec_command [host]:
+**********************
+set +e
+host_datetime=$(date -u)
+ssh -t -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no opennav@192.168.8.102 "sudo date -u -s '$host_datetime'"
+exit 0
+**********************16:59:28.423 - Info: exec_command: /home/armadilo/.nvsdkm/replays/scripts/JetPack_6.2.2_Linux/NV_DATETIME_SETUP_TARGET_COMP.sh16:59:29.036 - Info: [ Component Install Finished Successfully ]16:59:29.036 - Info: exec_command: ssh   opennav@192.168.8.102 "df -B1 / | tail -1 | awk '{ printf \$4 }'"16:59:29.228 - Info: [target] [ 0.00 B used. Disk Avail: 0.00 B ]16:59:29.228 - Info: [ NV_DATETIME_SETUP_TARGET_COMP Install took 1s ]

@@ -1,0 +1,16 @@
+------ 2026-05-20 15:48:51 ------
+------ SDK: JetPack_6.2.2_Linux ------
+15:48:51.855 - Info: [host] [ Disk Avail on Partition /dev/nvme0n1p5: 59.66 GB ]15:48:51.855 - Info: NV_L4T_DRIVERS_IMAGE_COMP include 1 package15:48:51.855 - Info: change working directory to /home/armadilo/nvidia/nvidia_sdk/JetPack_6.2.2_Linux_JETSON_AGX_ORIN_TARGETS15:48:51.855 - Info: [ Package PreInstall Started ]15:48:51.855 - Info: current working directory is /home/armadilo/nvidia/nvidia_sdk/JetPack_6.2.2_Linux_JETSON_AGX_ORIN_TARGETS15:48:51.855 - Info: exec_command [host]:
+**********************
+sudo rm -rf /home/armadilo/nvidia/nvidia_sdk/JetPack_6.2.2_Linux_JETSON_AGX_ORIN_TARGETS/Linux_for_Tegra/
+safe_apt_install "sudo apt-get install -y lbzip2" 5
+**********************15:48:51.855 - Info: exec_command: /home/armadilo/.nvsdkm/replays/scripts/JetPack_6.2.2_Linux/NV_L4T_DRIVERS_IMAGE_COMP.sh15:48:51.865 - Info: *begin sudo apt-get install -y lbzip2, 5
+15:48:51.923 - Info: Reading package lists...
+15:48:52.326 - Info: Building dependency tree...
+15:48:52.329 - Info: Reading state information...
+15:48:52.749 - Info: lbzip2 is already the newest version (2.5-2.3).
+15:48:52.749 - Info: 0 upgraded, 0 newly installed, 0 to remove and 649 not upgraded.
+15:48:52.751 - Info: [ Package PreInstall Finished Successfully ]15:48:52.751 - Info: [ Package Install Started ]15:48:52.751 - Info: current working directory is /home/armadilo/nvidia/nvidia_sdk/JetPack_6.2.2_Linux_JETSON_AGX_ORIN_TARGETS15:48:52.751 - Info: exec_command [host]:
+**********************
+tar -I lbzip2 -xf /home/armadilo/Downloads/nvidia/sdkm_downloads/Jetson_Linux_R36.5.0_aarch64.tbz2
+**********************15:48:52.751 - Info: exec_command: /home/armadilo/.nvsdkm/replays/scripts/JetPack_6.2.2_Linux/NV_L4T_DRIVERS_IMAGE_COMP.sh15:48:58.818 - Info: [ Package Install Finished Successfully ]15:48:58.819 - Info: [host] [ 959.15 MB used. Disk Avail on Partition /dev/nvme0n1p5: 58.72 GB ]15:48:58.819 - Info: [ NV_L4T_DRIVERS_IMAGE_COMP Install took 7s ]

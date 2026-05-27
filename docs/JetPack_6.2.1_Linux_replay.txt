@@ -1,0 +1,67 @@
+export _xdk_type=
+
+#INFO: Start to query NV_CUDA_HOST_COMP
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' cuda-toolkit-12-6
+export _xdk_type=
+
+#INFO: Start to query NV_CUDA_CROSS_HOST_COMP
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' cuda-cross-aarch64-12-6
+export _xdk_type=
+
+#INFO: Start to query NV_NVSCI_HOST_COMP
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' nvsci
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' cuda-toolkit-12-6
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' cuda-cross-aarch64-12-6
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' nvsci
+export _xdk_type=
+
+#INFO: Start to query NV_L4T_NVIDIA_NSIGHT_SYSTEMS_HOST_COMP
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' nsight-systems-2024.5.4
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' nsight-systems-2024.5.4
+export _xdk_type=
+
+#INFO: Start to query NV_L4T_NVIDIA_NSIGHT_GRAPHICS_HOST_COMP
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' nsight-graphics-for-embeddedlinux-2024.2.0.0
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' nsight-graphics-for-embeddedlinux-2024.2.0.0
+export _xdk_type=
+
+#INFO: Start to query NV_CUDA_HOST_COMP
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' cuda-toolkit-12-6
+export _xdk_type=
+
+#INFO: Start to query NV_CUDA_CROSS_HOST_COMP
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' cuda-cross-aarch64-12-6
+export _xdk_type=
+
+#INFO: Start to query NV_NVSCI_HOST_COMP
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' nvsci
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' cuda-toolkit-12-6
+export _xdk_type=
+
+#INFO: Start to query NV_L4T_NVIDIA_NSIGHT_SYSTEMS_HOST_COMP
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' nsight-systems-2024.5.4
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' cuda-cross-aarch64-12-6
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' nvsci
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' nsight-systems-2024.5.4
+export _xdk_type=
+
+#INFO: Start to query NV_L4T_NVIDIA_NSIGHT_GRAPHICS_HOST_COMP
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' nsight-graphics-for-embeddedlinux-2024.2.0.0
+dpkg-query -W -f='${db:Status-abbrev} ${Version}' nsight-graphics-for-embeddedlinux-2024.2.0.0
+export _xdk_type=
+
+#INFO: Start to install NV_L4T_DRIVERS_COMP
+cd /home/armadilo/nvidia/nvidia_sdk/JetPack_6.2.1_Linux_JETSON_ORIN_NANO_TARGETS
+/home/armadilo/.nvsdkm/replays/scripts/JetPack_6.2.1_Linux/NV_L4T_DRIVERS_COMP.sh
+/home/armadilo/.nvsdkm/replays/scripts/JetPack_6.2.1_Linux/NV_L4T_DRIVERS_COMP.sh
+export _xdk_type=
+
+#INFO: Start to install NV_L4T_FILE_SYSTEM_AND_OS_COMP
+cd /home/armadilo/nvidia/nvidia_sdk/JetPack_6.2.1_Linux_JETSON_ORIN_NANO_TARGETS/Linux_for_Tegra/rootfs/
+/home/armadilo/.nvsdkm/replays/scripts/JetPack_6.2.1_Linux/NV_L4T_FILE_SYSTEM_AND_OS_COMP.sh
+export _xdk_type=
+
+#INFO: Start to install NV_L4T_FLASH_JETSON_LINUX_COMP
+export EXTRA_LOG_FILE=/home/armadilo/.nvsdkm/componentLogs/JetPack_6.2.1_Linux/uart.log
+cd /home/armadilo/nvidia/nvidia_sdk/JetPack_6.2.1_Linux_JETSON_ORIN_NANO_TARGETS/Linux_for_Tegra
+/home/armadilo/.nvsdkm/replays/scripts/JetPack_6.2.1_Linux/NV_L4T_FLASH_JETSON_LINUX_COMP.sh

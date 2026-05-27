@@ -1,0 +1,16 @@
+------ 2026-05-20 16:59:29 ------
+------ SDK: JetPack_6.2.2_Linux ------
+16:59:29.318 - Info: exec_command: ssh   opennav@192.168.8.102 "df -B1 / | tail -1 | awk '{ printf \$4 }'"16:59:29.494 - Info: NV_L4T_GSTREAMER_TARGET_POST_INSTALL_COMP include 1 package16:59:29.494 - Info: [ Package Install Started ]16:59:29.494 - Info: target deb installer start to install16:59:29.494 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/nvidia-l4t-gstreamer_36.5.0-20260115194252_arm64.deb
+**********************16:59:29.675 - Info: Received disconnect from 192.168.8.102 port 22:2: Too many authentication failures
+16:59:29.675 - Info: 
+16:59:29.676 - Info: lost connection
+16:59:29.855 - Info: Received disconnect from 192.168.8.102 port 22:2: Too many authentication failures
+16:59:29.855 - Info: 
+16:59:29.856 - Error: Prepare folders on target failed; [exec_command]: scp /home/armadilo/.nvsdkm/replays/scripts/JetPack_6.2.2_Linux/NV_L4T_GSTREAMER_TARGET_POST_INSTALL_COMP.sh opennav@[192.168.8.102]:~; ssh -t opennav@192.168.8.102 "set -o pipefail; ~/NV_L4T_GSTREAMER_TARGET_POST_INSTALL_COMP.sh | sed 's/^/SDKM_INSTALL_ERROR /' && rm -f ~/NV_L4T_GSTREAMER_TARGET_POST_INSTALL_COMP.sh"; [deb_path]: /home/armadilo/Downloads/nvidia/sdkm_downloads/nvidia-l4t-gstreamer_36.5.0-20260115194252_arm64.deb16:59:29.856 - Info: [ Package Install Finished with Error ]16:59:29.856 - Info: [ NV_L4T_GSTREAMER_TARGET_POST_INSTALL_COMP Install took 1s ]

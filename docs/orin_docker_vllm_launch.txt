@@ -1,0 +1,1 @@
+docker run -it --rm --pull always   --runtime=nvidia --network host   -v /ssd/docker/data:/data -v /ssd/docker/.cache/huggingface:/root/.cache/huggingface   ghcr.io/nvidia-ai-iot/vllm:gemma4-jetson-orin   vllm serve cyankiwi/gemma-4-26B-A4B-it-AWQ-4bit --gpu-memory-utilization 0.8     --enable-auto-tool-choice     --reasoning-parser gemma4     --tool-call-parser gemma4
