@@ -73,7 +73,19 @@ docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
 
 ---
 
-## 4. Model Notes
+**Stop here if setting up for the benchmark pipeline. Below this is a full-setup for the VLM which may be useful outside of the context of the benchmark. See the pipieline's `README.md` for instructions for building the containers for the benchmark.**
+
+---
+
+## 4. Build the Server Image
+
+From this directory ([`vlm_preintegration/`](.)):
+
+```bash
+docker build -f Dockerfile.orin -t opennav-vlm-orin .
+```
+
+### Model Notes
 
 - Model: `ggml-org/gemma-4-31B-it-GGUF` (multimodal, text + image). Default quant
   `Q4_K_M` (~18.7 GB) fits the Orin's 64 GB comfortably. (Q8_0 ~32.6 GB also fits, but
@@ -91,22 +103,12 @@ Reference for Jetson LLM/VLM containers: https://www.jetson-ai-lab.com/models/
 
 ---
 
-## 5. Build the Server Image
-
-From this directory ([`vlm_preintegration/`](.)):
-
-```bash
-docker build -f Dockerfile.orin -t opennav-vlm-orin .
-```
-
----
-
-## 6. Run the Server
+## 5. Run the Server
 
 Launch the model server directly from NVIDIA's prebuilt container (it serves on `:8080`):
 
 ```bash
-docker run -it --rm --pull always --runtime=nvidia --network host \
+docker run -it --rm --runtime=nvidia --network host \
   -v /ssd/docker/data:/data \
   -v /ssd/docker/.cache/huggingface:/root/.cache/huggingface \
   ghcr.io/nvidia-ai-iot/llama_cpp:latest-jetson-orin \
@@ -114,17 +116,18 @@ docker run -it --rm --pull always --runtime=nvidia --network host \
 ```
 
 The bundled [`Dockerfile.orin`](Dockerfile.orin) bakes this same `llama-server` invocation,
-so you can alternatively build it (section 5) and run with the same runtime/cache flags:
+so you can alternatively build it (section 4) and run with the same runtime/cache flags:
 
 ```bash
 docker run --rm -it --runtime=nvidia --network host \
+  -v /ssd/docker/data:/data \
   -v /ssd/docker/.cache/huggingface:/root/.cache/huggingface \
   opennav-vlm-orin
 ```
 
 ---
 
-## 7. Verify
+## 6. Verify
 
 First call blocks while the model downloads to the NVMe and loads; subsequent calls are
 fast.
@@ -142,22 +145,6 @@ curl http://localhost:8080/v1/chat/completions \
 For a vision (VLM) check, send an image with the warehouse prompt
 (`docs/warehouse_prompt.txt`) via an `image_url` content block to confirm the `mmproj`
 path is active.
-
----
-
-## 8. Connect the Benchmark
-
-[`vlm_params.yaml`](../opennav_benchmark_ai_workload/opennav_benchmark_vlm/config/vlm_params.yaml)
-already points at this server:
-
-```yaml
-base_url: "http://localhost:8080/v1"
-api_key: "EMPTY"
-model: "gemma-4"
-```
-
-No changes needed when the server runs on the same host. For a remote host, set `base_url`
-to `http://<host-ip>:8080/v1`.
 
 ---
 

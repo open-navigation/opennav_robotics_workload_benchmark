@@ -108,7 +108,22 @@ We use `ryzers build` only to produce this image. Everything below uses plain `d
 
 ---
 
-## 5. Model Notes
+**Stop here if setting up for the benchmark pipeline. Below this is a full-setup for the VLM which may be useful outside of the context of the benchmark. See the pipieline's `README.md` for instructions for building the containers for the benchmark.
+**
+---
+
+## 5. Build the Server Image
+
+From this directory ([`vlm_preintegration/`](.)):
+
+```bash
+docker build -f Dockerfile.amd -t opennav-vlm-amd .
+```
+
+> [`Dockerfile.amd`](Dockerfile.amd) is `FROM llamacpp`. If you tagged the `ryzers build`
+> image differently (via `--name`), update its `FROM` line to match.
+
+### Model Notes
 
 - Model: `ggml-org/gemma-4-31B-it-GGUF` (multimodal, text + image). Default quant
   `Q4_K_M` (~18.7 GB) fits the EVO-X2's unified memory; do not change it unless you
@@ -123,20 +138,7 @@ We use `ryzers build` only to produce this image. Everything below uses plain `d
 
 ---
 
-## 6. Build the Server Image
-
-From this directory ([`vlm_preintegration/`](.)):
-
-```bash
-docker build -f Dockerfile.amd -t opennav-vlm-amd .
-```
-
-> [`Dockerfile.amd`](Dockerfile.amd) is `FROM llamacpp`. If you tagged the `ryzers build`
-> image differently (via `--name`), update its `FROM` line to match.
-
----
-
-## 7. Run the Server
+## 6. Run the Server
 
 Run the image with plain `docker run` (these are the flags `ryzers run` would generate). Its
 entrypoint auto-launches `llama-server`, so the server comes up on `:8080`:
@@ -171,7 +173,7 @@ Notes:
 
 ---
 
-## 8. Verify
+## 7. Verify
 
 First call blocks while the model downloads/loads; subsequent calls are fast.
 
@@ -188,22 +190,6 @@ curl http://localhost:8080/v1/chat/completions \
 For a vision (VLM) check, send an image with the warehouse prompt
 (`docs/warehouse_prompt.txt`) via an `image_url` content block to confirm the `mmproj`
 path is active.
-
----
-
-## 9. Connect the Benchmark
-
-[`vlm_params.yaml`](../opennav_benchmark_ai_workload/opennav_benchmark_vlm/config/vlm_params.yaml)
-already points at this server:
-
-```yaml
-base_url: "http://localhost:8080/v1"
-api_key: "EMPTY"
-model: "gemma-4"
-```
-
-No changes needed when the server runs on the same host. For a remote host, set `base_url`
-to `http://<host-ip>:8080/v1`.
 
 ---
 

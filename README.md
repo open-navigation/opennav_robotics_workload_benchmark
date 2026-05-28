@@ -14,6 +14,8 @@ This benchmark compares both system metrics as well as important performance ana
   </a>
 </p>
 
+TODO top down total run gif
+
 Click on the gif to see the full video.
 
 ⚠️ Need ROS 2, Nav2 help or support? Contact Open Navigation! ⚠️
