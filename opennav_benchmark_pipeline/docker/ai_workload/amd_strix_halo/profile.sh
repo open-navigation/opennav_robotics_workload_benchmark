@@ -6,5 +6,5 @@ VLM_EXTRA_RUN_ARGS=(
     --security-opt seccomp=unconfined
     --group-add video
     --group-add render
-    --volume "${PWD}/llamacpp_cache:/root/.cache"
+    --volume "$HOME/llamacpp_cache/huggingface:/root/.cache/huggingface"
 )

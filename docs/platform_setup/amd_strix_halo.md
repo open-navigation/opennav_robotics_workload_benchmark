@@ -106,6 +106,12 @@ docker images | grep llamacpp
 We use `ryzers build` only to produce this image. Everything below uses plain `docker build`
 / `docker run` (not `ryzers run`).
 
+Finally, create a location for the llama cache
+
+```
+mkdir ~/llamacpp_cache
+```
+
 ### Model Notes
 
 - Model: `ggml-org/gemma-4-31B-it-GGUF` (multimodal, text + image). Default quant
