@@ -10,7 +10,7 @@ This benchmark compares both system metrics as well as important performance ana
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=j5NtcGJvQyM">
-    <img src="docs/benchmark_demo.gif" alt="Benchmark Demo"/>
+    <img src="docs/images/benchmark_demo.gif" alt="Benchmark Demo"/>
   </a>
 </p>
 
@@ -88,7 +88,7 @@ All logs from the workflows and system metrics capture are saved in `opennav_ben
 The simulation is set up as a representatively complex and data intensive workload of a modern robotics application. It simulates a full 200,000 sqft industrial warehouse facility with loading docks, block stacking, long aisles, and blocked aisles due to simulated accident scenes. Larger simulations are absolutely possible, however we chose to limit it to what can be run on laptop processors from the last ~3 years to make this more accessible. For higher quality simulation and/or expanding the world size, see the `opennav_benchmark_pipeline` README for more instructions.
 
 <p align="center">
-  <img src="docs/gazebo.png" alt="Gazebo simulation" width="600"/>
+  <img src="docs/images/gazebo.png" alt="Gazebo simulation" width="600"/>
 </p>
 
 The robot simulated is an autonomous differential-drive forklift platform holding a pallet in its forks containing:
@@ -101,7 +101,7 @@ The robot simulated is an autonomous differential-drive forklift platform holdin
 The robot has a maximum speed of 2 m/s.
 
 <p align="center">
-  <img src="docs/rviz2.png" alt="Rviz data" width="600"/>
+  <img src="docs/images/rviz2.png" alt="Rviz data" width="600"/>
 </p>
 
 
