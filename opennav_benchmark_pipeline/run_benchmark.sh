@@ -148,6 +148,20 @@ if (( RMEM_MAX < CYCLONE_RMEM_MIN )); then
     exit 1
 fi
 
+# Resolve the AI workload run-flag profile from the VLM image tag suffix (text after the last ':').
+VLM_EXTRA_RUN_ARGS=()
+VLM_PROFILE=""
+if [[ -n "${VLM_IMAGE}" ]]; then
+    VLM_PROFILE_KEY="${VLM_IMAGE##*:}"
+    VLM_PROFILE="${SCRIPT_DIR}/docker/ai_workload/${VLM_PROFILE_KEY}/profile.sh"
+    if [[ ! -f "${VLM_PROFILE}" ]]; then
+        log "ERROR: VLM_IMAGE='${VLM_IMAGE}' has no matching AI workload profile at ${VLM_PROFILE}"
+        exit 1
+    fi
+    # shellcheck source=/dev/null
+    source "${VLM_PROFILE}"   # sets VLM_EXTRA_RUN_ARGS
+fi
+
 mkdir -p "${LOG_PARENT_DIR}"
 RUN_DIR="$(realpath "${LOG_PARENT_DIR}")/run_${RUN_TIMESTAMP}"
 mkdir -p "${RUN_DIR}/ros"
@@ -156,6 +170,8 @@ log "Benchmark run starting"
 log "  RUN_DIR=${RUN_DIR}"
 log "  AUTONOMY_IMAGE=${AUTONOMY_IMAGE}"
 log "  VLM_IMAGE=${VLM_IMAGE:-<disabled>}"
+log "  VLM_PROFILE=${VLM_PROFILE:-<none>}"
+log "  VLM_EXTRA_RUN_ARGS=${VLM_EXTRA_RUN_ARGS[*]:-<none>}"
 log "  METRICS_SCRIPT=${METRICS_SCRIPT:-<disabled>}"
 log "  HARDWARE_LOAD_SCRIPT=${HARDWARE_LOAD_SCRIPT:-<disabled>}"
 log "  NUM_LIDAR_3D=${NUM_LIDAR_3D}, NUM_LIDAR_2D=${NUM_LIDAR_2D}, NUM_RGBD_CAMERAS=${NUM_RGBD_CAMERAS}"
@@ -189,12 +205,13 @@ if [[ -n "${VLM_IMAGE}" ]]; then
     docker run -d --init \
         --name "${VLM_NAME}" \
         --net=host --ipc=host --privileged \
-        --shm-size=2g \
+        --shm-size=8g \
         --env "DISPLAY=${DISPLAY:-}" \
         --env "QT_X11_NO_MITSHM=1" \
         --volume "${XAUTH_PATH}:/root/.Xauthority:ro" \
         --volume "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
         --volume "${RUN_DIR}/ros:/root/.ros/log" \
+        ${VLM_EXTRA_RUN_ARGS[@]+"${VLM_EXTRA_RUN_ARGS[@]}"} \
         "${VLM_IMAGE}" >/dev/null
     VLM_LAUNCHED=1
 fi

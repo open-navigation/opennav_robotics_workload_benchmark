@@ -24,7 +24,7 @@ Change to what is appropriate for your situation in the Dockerfiles. If doing HI
 | Var | Default | Purpose |
 |---|---|---|
 | `AUTONOMY_IMAGE` | `opennav_benchmark/robotic_amr_workload:jazzy` | Autonomy workload image. |
-| `VLM_IMAGE` | `""` | If non-empty, also launches a VLM container from this image. |
+| `VLM_IMAGE` | `""` | If non-empty, also launches a VLM container from this image with tag belonging to the platform under benchmark (i.e. `jetson_thor`, `amd_strix_halo`, `jetson_orin`). |
 | `METRICS_SCRIPT` | `"capture_system_metrics.py"` | If non-empty, runs this executable on the host during the benchmark. |
 | `BENCHMARK_DURATION_SEC` | `1800` | How long to hold the benchmark before tearing down. |
 | `STARTUP_WAIT_SEC` | `20` | Seconds to wait after launching containers before starting to record metrics. |
@@ -57,6 +57,26 @@ If you want to run the simulator in the cloud consider using the full simulation
 # Headless (no GUI, no RViz host requirements):
 ./opennav_benchmark_pipeline/run_simulation.sh \
   ros2 launch opennav_benchmark_sim simulation_simplified.launch.py headless:=true use_rviz:=false
+```
+
+## Build & run the VLM (optional)
+
+The AI workload (VLM) is packaged separately for each benchmark platform under `docker/ai_workload/`. Build the Dockerfile matching the platform under test and tag it with that platform's name, so the orchestrator can resolve the matching run-flag profile from the tag suffix:
+
+```bash
+cd /path/to/opennav_robotics_workload_benchmark
+
+# Tag suffix = the platform directory under docker/ai_workload/:
+#   jetson_orin, jetson_thor, amd_strix_halo
+docker build -t opennav_benchmark/ai_workload:amd_strix_halo \
+  -f opennav_benchmark_pipeline/docker/ai_workload/amd_strix_halo/Dockerfile .
+```
+
+Each platform directory also ships a `profile.sh` capturing the extra `docker run` flags that platform needs (GPU runtime, device passthrough, etc.). The benchmark orchestrator only launches the VLM container when `VLM_IMAGE` is set; it derives the profile from the tag suffix (`amd_strix_halo` here) and applies those flags. Set it in the `run_benchmark.sh` script or pass it on the command line:
+
+```bash
+cd /path/to/opennav_robotics_workload_benchmark
+VLM_IMAGE=opennav_benchmark/ai_workload:amd_strix_halo ./opennav_benchmark_pipeline/run_benchmark.sh
 ```
 
 ## Build & run the benchmark
