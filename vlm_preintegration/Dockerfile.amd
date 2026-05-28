@@ -1,8 +1,8 @@
 # Gemma-4 31B VLM server for the AMD Strix Halo platform.
 #
-# Base image is the llama.cpp build produced by `ryzers build llamacpp`
-# (https://github.com/amdresearch/ryzers).
-FROM ryzers/llamacpp:latest
+# Base image is produced by `ryzers build --name llamacpp llamacpp`
+# (https://github.com/amdresearch/ryzers); see amd.md section 4.
+FROM llamacpp
 
 ENV PATH=/ryzers/llamacpp/build/bin:$PATH
 

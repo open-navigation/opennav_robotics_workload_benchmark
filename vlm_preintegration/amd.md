@@ -89,21 +89,22 @@ cd ryzers/
 pip install -e .
 ```
 
-Build the llama.cpp container image with `ryzers`:
+Build the llama.cpp image with `ryzers`, tagging the final image `llamacpp`:
 
 ```bash
-ryzers build llamacpp
+ryzers build --name llamacpp llamacpp
 ```
 
-Confirm the resulting image tag (you'll reference it in the Dockerfile `FROM` line):
+This builds a two-stage chain (`ryzer_env`, then llama.cpp from the
+`rocm/pytorch:rocm7.2.2_ubuntu24.04_py3.12_pytorch_release_2.10.0` base, compiled for the
+`gfx1151` Strix Halo iGPU) and tags the final image `llamacpp`. Confirm it:
 
 ```bash
-docker images | grep -i llamacpp
+docker images | grep llamacpp
 ```
 
-> The `ryzers` command is a wrapper that launches a ROCm-enabled Docker container.
-> `run_ryzers_docker.sh` is a single-line script showing the exact `docker run`
-> invocation. Crib its device flags and add your own mounts/network options as needed.
+We use `ryzers build` only to produce this image. Everything below uses plain `docker build`
+/ `docker run` (not `ryzers run`), so [`Dockerfile.amd`](Dockerfile.amd) is `FROM llamacpp`.
 
 ---
 
@@ -117,8 +118,8 @@ docker images | grep -i llamacpp
   `unknown model architecture: 'gemma4'`, the bundled llama.cpp is too old. Rebuild the
   ryzers image against current `llama.cpp`.
 - `llama-server -hf` downloads the GGUF and its vision projector (`mmproj`) into
-  `LLAMA_CACHE` (set to `/root/.cache/huggingface` in the image). The `ryzers` wrapper
-  mounts `-v $PWD/llamacpp_cache:/root/.cache`, so the download persists across restarts.
+  `LLAMA_CACHE` (set to `/root/.cache/huggingface` in the image). The run command's
+  `-v $PWD/llamacpp_cache:/root/.cache` mount (section 7) persists these across restarts.
 
 ---
 
@@ -130,25 +131,18 @@ From this directory ([`vlm_preintegration/`](.)):
 docker build -f Dockerfile.amd -t opennav-vlm-amd .
 ```
 
-> If `ryzers build llamacpp` produced a tag other than `ryzers/llamacpp:latest`, edit the
-> `FROM` line in [`Dockerfile.amd`](Dockerfile.amd) first.
+> [`Dockerfile.amd`](Dockerfile.amd) is `FROM llamacpp`. If you tagged the `ryzers build`
+> image differently (via `--name`), update its `FROM` line to match.
 
 ---
 
 ## 7. Run the Server
 
-Inside the ryzers llama.cpp container (from the re-entry steps in section 4), launch the
-server (it serves on `:8080`):
+Run the image with plain `docker run` (these are the flags `ryzers run` would generate). Its
+entrypoint auto-launches `llama-server`, so the server comes up on `:8080`:
 
 ```bash
-llama-server -hf ggml-org/gemma-4-31B-it-GGUF:Q4_K_M
-```
-
-Alternatively, run the bundled [`Dockerfile.amd`](Dockerfile.amd) image directly with the
-same flags `ryzers`' `run_ryzers_docker.sh` uses. Its entrypoint auto-launches
-`llama-server`:
-
-```bash
+mkdir -p $PWD/llamacpp_cache
 docker run --rm -it \
   --shm-size 16G \
   --cap-add=SYS_PTRACE \
@@ -163,11 +157,17 @@ docker run --rm -it \
   opennav-vlm-amd
 ```
 
-`run_ryzers_docker.sh` additionally mounts `-v $PWD/images:/images` and
-`-v $PWD/scripts:/scripts` and passes `-e DISPLAY=$DISPLAY` /
-`-v /tmp/.X11-unix:/tmp/.X11-unix` for interactive visual-prompting and GUI use; the
-headless benchmark server doesn't need them. The model cache persists via
-`-v $PWD/llamacpp_cache:/root/.cache`, which contains the `LLAMA_CACHE` HuggingFace dir.
+Notes:
+- `-v $PWD/llamacpp_cache:/root/.cache` is the model-persistence mount. It binds the whole
+  `/root/.cache`, so the downloaded GGUF shards and the vision `mmproj` (under `LLAMA_CACHE`,
+  i.e. `/root/.cache/huggingface`) survive container restarts. This single mount is sufficient;
+  no separate model or HuggingFace-cache directory needs mounting.
+- If ROCm doesn't detect the `gfx1151` iGPU, add `-e HSA_OVERRIDE_GFX_VERSION=11.5.1`.
+- The headless server does not need the extra flags `ryzers run` adds for interactive use:
+  X11 (`-e DISPLAY=$DISPLAY`, `-v /tmp/.X11-unix:/tmp/.X11-unix`), one `--device` per
+  `/dev/video*`, or the `$PWD/images` / `$PWD/scripts` mounts.
+- For the benchmark pipeline, the same image is launched detached via `VLM_IMAGE`; host
+  networking already exposes `:8080` to match `vlm_params.yaml`.
 
 ---
 
