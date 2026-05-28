@@ -4,6 +4,8 @@ Orchestrates a benchmark experiment across one or two Docker containers (an auto
 
 ## Host prerequisites
 
+Setting up a platform from scratch (flashing/OS, GPU drivers, container runtime, and building the VLM inference image) is documented per platform under [`docs/platform_setup/`](../docs/platform_setup/): [`jetson_orin.md`](../docs/platform_setup/jetson_orin.md), [`jetson_thor.md`](../docs/platform_setup/jetson_thor.md), [`amd_strix_halo.md`](../docs/platform_setup/amd_strix_halo.md).
+
 You must raise `net.core.rmem_max` and `net.core.wmem_max` before the autonomy container will create a ROS 2 node. On Ubuntu the default is ~200KB which is not sufficient for large topics.
 
 ```bash
