@@ -4,7 +4,7 @@
     <General>
       <Interfaces>
         <!-- EDIT THIS to match the subnet of the LAN connecting the two HIL machines. -->
-        <NetworkInterface address="192.168.1.0" priority="default" multicast="default" />
+        <NetworkInterface address="10.2.1.0" priority="default" multicast="default" />
       </Interfaces>
       <AllowMulticast>default</AllowMulticast>
       <MaxMessageSize>65500B</MaxMessageSize>

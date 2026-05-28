@@ -14,8 +14,8 @@ sudo sysctl -w net.core.wmem_max=2147483647
 To persist across reboots, drop those two lines (as `net.core.rmem_max=…`) into `/etc/sysctl.d/10-cyclone.conf`.
 
 The autonomy image bakes a Cyclone DDS config in at build time. Two are shipped:
-- `cyclonedds_localhost.xml` (**default**) — DDS bound to loopback. Single-machine usage.
-- `cyclonedds_hil.xml` DDS bound to a LAN subnet. Cross-machine HIL (simulator on machine A, autonomy on machine B).
+- `cyclonedds_localhost.xml` DDS bound to loopback. Single-machine usage.
+- `cyclonedds_hil.xml` DDS bound to a LAN subnet (10.2.1.0, by default). Cross-machine HIL (simulator on machine A, benchmark on machine B).
 
 Change to what is appropriate for your situation in the Dockerfiles. If doing HIL testing, use that XML putting the subnet as the static IP range used on the LAN in your setup.
 
