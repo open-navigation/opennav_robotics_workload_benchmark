@@ -4,6 +4,8 @@ This is a guide for practitioners that seek to reproduce the experiments. This i
 
 Unless specified, run all steps on all machines: simulation and testbed platforms.
 
+If you get into troublesome behavior, try checking if any zombie docker containers are running `sudo docker ps` and `sudo docker kill <docker_num>`.
+
 1. Clone the repository on all machines
 
 ```bash
