@@ -61,7 +61,7 @@ If you want to run the simulator in the cloud consider using the full simulation
   ros2 launch opennav_benchmark_sim simulation_simplified.launch.py headless:=true use_rviz:=false
 ```
 
-The script `run_simulation.sh` will automatically not launch rviz or the gazebo client when over SSH for your convinience.
+The script `run_simulation.sh` will automatically not launch rviz or the gazebo client when over SSH for your convenience.
 
 ## Build & run the VLM (optional)
 

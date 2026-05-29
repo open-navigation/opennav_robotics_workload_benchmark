@@ -60,7 +60,7 @@ Verify connection with `ifconfig` on the subnet of your choosing.
 
 6. Run the simulation from the instructions in `opennav_benchmark_pipeline/README.md` on one machine.
 
-7. Run the benchmark from the instrucitons in `opennav_benchmark_pipeline/README.md` on the other machine.
+7. Run the benchmark from the instructions in `opennav_benchmark_pipeline/README.md` on the other machine.
 
 If you want to run with a VLM model, make sure to set `VLM_IMAGE=opennav_benchmark/ai_workload:<your platform here>` before the script to launch that server.
 

@@ -77,7 +77,7 @@ graph LR
 The compute platform being benchmarked will then run a benchmark script which will launch the AMR autonomy and (optional) AI workloads, along with a light weight script which will measure system metrics like CPU, memory, and GPU utilization.
 To simulate the affects of hardware driver interfaces on the compute landscape, an additional script will run to simulate the load from sensor drivers on the platform.
 The CPU load on each is determined by measuring the real-world average utilization metrics running Realsense D435 and Ouster OS-1 drivers on each platform. 
-Other sensors such as the Orbecc Gemini 355 and Hesai XT32 are measured to be similar.
+Other sensors such as the Orbecc Gemini 335 and Hesai XT32 are measured to be similar.
 
 All logs from the workflows and system metrics capture are saved in `opennav_benchmark_logs` for later analysis.
 `opennav_benchmark_analysis` provides automated tools to visualize and extract key metrics from a single platform's run or compare and contrast multiple platforms at once.
@@ -108,13 +108,13 @@ The robot has a maximum speed of 2 m/s.
 
 ## Robotic & AI Workloads
 
-A mission dispatcher will send the forklift from its charging dock to pick up a pallet either in the block stack or loading dock area and drop it at a shelf in the long-term storage racks. The BT Navigator accepts these missions and executes the configurable beahvior tree describing the navigation behavior to perform. This will repeat indefinitely for the duration of the benchmark run, except every 200 pick-and-place missions the robot will return to the charging dock and dock before continuing. A 10 second wait is enacted while picking or placing to simulate downtime due to picking or placing the pallet. 
+A mission dispatcher will send the forklift from its charging dock to pick up a pallet either in the block stack or loading dock area and drop it at a shelf in the long-term storage racks. The BT Navigator accepts these missions and executes the configurable behavior tree describing the navigation behavior to perform. This will repeat indefinitely for the duration of the benchmark run, except every 200 pick-and-place missions the robot will return to the charging dock and dock before continuing. A 10 second wait is enacted while picking or placing to simulate downtime due to picking or placing the pallet. 
 
 Nav2 will perform autonomous navigation path planning using the kinematically feasible Hybrid-A* planning algorithm across the warehouse-sized space. This uses the full footprint of the vehicle to do SE2 collision checking to ensure collision free and drivable paths for non-circular vehicles. It also uses the MPPI controller, an optimization based controller which can both accurately track paths, align with precise goal positions, as well as dynamically adjust off the path to provide more margin from obstacles or perform complex maneuvers in confined environments.
 
 The robotic AMR workload will then process 9/10 of the sensors above. The RGB camera is neglected and is used by the AI workload only. The 3D lidars are processed by the Spatio-Temporal Voxel Layer, the standard solution for 3D lidars which maintains a spatio-temporal representation of the environment clearing using frustum modeling. The 2D lidars and RGBD cameras are processed by the obstacle and voxel layers, respectively, which use raycasting to clear out free space.
 
-In addition, Nav2 performs velocity smoothing and collision monitoring using the controller's outputs to ensure dynamic feasibility and collision-free navigation with raw sensor data as a psuedo-safety layer. Localization is provided by odometry from the simulation as well as AMCL particle filtering.
+In addition, Nav2 performs velocity smoothing and collision monitoring using the controller's outputs to ensure dynamic feasibility and collision-free navigation with raw sensor data as a pseudo-safety layer. Localization is provided by odometry from the simulation as well as AMCL particle filtering.
 
 The AI workload exposes a VLM server which is regularly queried by the behavior tree to provide scene understanding or contextual information to impact decision making and algorithm settings or selection. While VLMs could be leveraged in a number of ways in an application, the frequent queries to the VLM provide a regularized workload for benchmark measurements which is advantageous for a fair and consistent result. Other applications of VLMs would call them irregularly as-needed. 
 
@@ -123,7 +123,7 @@ The VLM server subscribes to the RGB camera topic mounted on the chassis of the 
 
 ## Results and Comparison
 
-TODO graphs, high-level metircs, and log-based analysis 
+TODO graphs, high-level metrics, and log-based analysis 
 
 
 
