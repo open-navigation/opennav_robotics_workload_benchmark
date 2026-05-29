@@ -360,13 +360,13 @@ local_costmap:
         origin_z: 0.0
         z_resolution: 0.05
         z_voxels: 16
-        max_obstacle_height: 2.0
+        max_obstacle_height: 3.5
         mark_threshold: 2
         # 3D Ouster lidars (360deg, 30m range) + Orbbec depth cameras (7m range)
         observation_sources: camera_front_left camera_front_right camera_rear vlm_obstacles
         camera_front_left:
           topic: /camera_front_left/points
-          max_obstacle_height: 2.0
+          max_obstacle_height: 3.5
           min_obstacle_height: 0.1
           clearing: True
           marking: True
@@ -377,7 +377,7 @@ local_costmap:
           obstacle_min_range: 0.1
         camera_front_right:
           topic: /camera_front_right/points
-          max_obstacle_height: 2.0
+          max_obstacle_height: 3.5
           min_obstacle_height: 0.1
           clearing: True
           marking: True
@@ -388,7 +388,7 @@ local_costmap:
           obstacle_min_range: 0.1
         camera_rear:
           topic: /camera_rear/points
-          max_obstacle_height: 2.0
+          max_obstacle_height: 3.5
           min_obstacle_height: 0.1
           clearing: True
           marking: True
@@ -399,7 +399,7 @@ local_costmap:
           obstacle_min_range: 0.1
         vlm_obstacles:
           topic: /vlm_virtual_obstacles
-          max_obstacle_height: 2.0
+          max_obstacle_height: 3.5
           min_obstacle_height: 0.1
           clearing: False
           marking: True
@@ -431,11 +431,11 @@ local_costmap:
           clearing: true
           obstacle_range: 15.0
           min_obstacle_height: 0.2
-          max_obstacle_height: 2.5
+          max_obstacle_height: 3.5
           expected_update_rate: 0.0
           observation_persistence: 0.0
           inf_is_valid: false
-          filter: "voxel"
+          filter: ""
           voxel_min_points: 0
           clear_after_reading: true
           max_z: 15.0
@@ -452,11 +452,11 @@ local_costmap:
           clearing: true
           obstacle_range: 15.0
           min_obstacle_height: 0.2
-          max_obstacle_height: 2.5
+          max_obstacle_height: 3.5
           expected_update_rate: 0.0
           observation_persistence: 0.0
           inf_is_valid: false
-          filter: "voxel"
+          filter: ""
           voxel_min_points: 0
           clear_after_reading: true
           max_z: 15.0
@@ -473,11 +473,11 @@ local_costmap:
           clearing: true
           obstacle_range: 15.0
           min_obstacle_height: 0.2
-          max_obstacle_height: 2.5
+          max_obstacle_height: 3.5
           expected_update_rate: 0.0
           observation_persistence: 0.0
           inf_is_valid: false
-          filter: "voxel"
+          filter: ""
           voxel_min_points: 0
           clear_after_reading: true
           max_z: 15.0
@@ -517,7 +517,7 @@ global_costmap:
         observation_sources: scan_front_left scan_front_right
         scan_front_left:
           topic: /scan_front_left
-          max_obstacle_height: 2.0
+          max_obstacle_height: 3.5
           clearing: True
           marking: True
           data_type: "LaserScan"
@@ -528,7 +528,7 @@ global_costmap:
           inf_is_valid: True
         scan_front_right:
           topic: /scan_front_right
-          max_obstacle_height: 2.0
+          max_obstacle_height: 3.5
           clearing: True
           marking: True
           data_type: "LaserScan"
@@ -545,12 +545,12 @@ global_costmap:
         origin_z: 0.0
         z_resolution: 0.1
         z_voxels: 16
-        max_obstacle_height: 2.0
+        max_obstacle_height: 3.5
         mark_threshold: 2
         observation_sources: camera_front_left camera_front_right camera_rear vlm_obstacles
         camera_front_left:
           topic: /camera_front_left/points
-          max_obstacle_height: 2.0
+          max_obstacle_height: 3.5
           min_obstacle_height: 0.1
           clearing: True
           marking: True
@@ -561,7 +561,7 @@ global_costmap:
           obstacle_min_range: 0.1
         camera_front_right:
           topic: /camera_front_right/points
-          max_obstacle_height: 2.0
+          max_obstacle_height: 3.5
           min_obstacle_height: 0.1
           clearing: True
           marking: True
@@ -572,7 +572,7 @@ global_costmap:
           obstacle_min_range: 0.1
         camera_rear:
           topic: /camera_rear/points
-          max_obstacle_height: 2.0
+          max_obstacle_height: 3.5
           min_obstacle_height: 0.1
           clearing: True
           marking: True
@@ -583,7 +583,7 @@ global_costmap:
           obstacle_min_range: 0.1
         vlm_obstacles:
           topic: /vlm_virtual_obstacles
-          max_obstacle_height: 2.0
+          max_obstacle_height: 3.5
           min_obstacle_height: 0.1
           clearing: False
           marking: True
@@ -614,12 +614,12 @@ global_costmap:
           marking: true
           clearing: true
           obstacle_range: 15.0
-          min_obstacle_height: 0.2
-          max_obstacle_height: 2.5
+          min_obstacle_height: 0.1
+          max_obstacle_height: 3.5
           expected_update_rate: 0.0
           observation_persistence: 0.0
           inf_is_valid: false
-          filter: "voxel"
+          filter: ""
           voxel_min_points: 0
           clear_after_reading: true
           max_z: 15.0
@@ -635,12 +635,12 @@ global_costmap:
           marking: true
           clearing: true
           obstacle_range: 15.0
-          min_obstacle_height: 0.2
-          max_obstacle_height: 2.5
+          min_obstacle_height: 0.1
+          max_obstacle_height: 3.5
           expected_update_rate: 0.0
           observation_persistence: 0.0
           inf_is_valid: false
-          filter: "voxel"
+          filter: ""
           voxel_min_points: 0
           clear_after_reading: true
           max_z: 15.0
@@ -656,12 +656,12 @@ global_costmap:
           marking: true
           clearing: true
           obstacle_range: 15.0
-          min_obstacle_height: 0.2
-          max_obstacle_height: 2.5
+          min_obstacle_height: 0.1
+          max_obstacle_height: 3.5
           expected_update_rate: 0.0
           observation_persistence: 0.0
           inf_is_valid: false
-          filter: "voxel"
+          filter: ""
           voxel_min_points: 0
           clear_after_reading: true
           max_z: 15.0
