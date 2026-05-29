@@ -19,6 +19,9 @@ fi
 
 if [[ -z "${DISPLAY:-}" ]]; then
     echo "WARNING: DISPLAY is unset; Gazebo GUI and RViz will not appear on host" >&2
+    USE_RVIZ="false"
+else
+    USE_RVIZ="true"
 fi
 
 exec docker run --rm -it --init \
@@ -27,6 +30,7 @@ exec docker run --rm -it --init \
     --shm-size=2g \
     --env "DISPLAY=${DISPLAY:-}" \
     --env "QT_X11_NO_MITSHM=1" \
+    --env "USE_RVIZ=${USE_RVIZ}" \
     --volume "${XAUTH_PATH}:/root/.Xauthority:ro" \
     --volume "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
     "${SIM_IMAGE}" \

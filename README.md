@@ -136,7 +136,7 @@ If you wish to add your own platform, simply:
 * Update the `hardware_platforms.py` to capture the system metrics for your particular platform 
 * Update `detect_platform()` to add the new platform to the detection schema
 * Provide an appropriate `HARDWARE_PROFILES` which corresponds to your sensor driver load on the platform for each representative sensor
-* Create the `ai_workload` Dockerfile and `profiles.sh` to launch `ggml-org/gemma-4-31B-it-GGUF:Q4_K_M`
+* Create the `ai_workload` Dockerfile and `profiles.sh` to launch `ggml-org/gemma-4-31B-it-GGUF:Q4_K_M` and expose a ``llama.cpp`` server.
 
 If you end up doing so, consider opening a PR with your modifications and provide the data & analysis for your platform so others can learn from it!
 

@@ -10,7 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 AUTONOMY_IMAGE="${AUTONOMY_IMAGE:-opennav_benchmark/robotic_amr_workload:jazzy}"
 VLM_IMAGE="${VLM_IMAGE:-}"
 METRICS_SCRIPT="${METRICS_SCRIPT:-${SCRIPT_DIR}/scripts/capture_system_metrics.py}"
-HARDWARE_LOAD_SCRIPT="${HARDWARE_LOAD_SCRIPT:-}"
+HARDWARE_LOAD_SCRIPT="${HARDWARE_LOAD_SCRIPT:-${SCRIPT_DIR}/scripts/simulated_hardware_load.py}"
 NUM_LIDAR_3D="${NUM_LIDAR_3D:-3}"
 NUM_LIDAR_2D="${NUM_LIDAR_2D:-2}"
 NUM_RGBD_CAMERAS="${NUM_RGBD_CAMERAS:-3}"
@@ -211,7 +211,7 @@ if [[ -n "${VLM_IMAGE}" ]]; then
         --env "QT_X11_NO_MITSHM=1" \
         --volume "${XAUTH_PATH}:/root/.Xauthority:ro" \
         --volume "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
-        --volume "${RUN_DIR}/ros:/root/.ros/log" \
+        --volume "${RUN_DIR}:/var/log/llama" \
         ${VLM_EXTRA_RUN_ARGS[@]+"${VLM_EXTRA_RUN_ARGS[@]}"} \
         "${VLM_IMAGE}" >/dev/null
     VLM_LAUNCHED=1

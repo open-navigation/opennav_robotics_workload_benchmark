@@ -14,4 +14,4 @@ ENV LLAMA_CACHE=/root/.cache/huggingface
 EXPOSE 8080
 
 # Auto-launch the OpenAI-compatible server on `docker run`.
-ENTRYPOINT ["/bin/bash", "-c", "exec llama-server -hf \"$LLAMA_MODEL\" --host 0.0.0.0 --port \"$LLAMA_PORT\" \"$@\"", "--"]
+ENTRYPOINT ["/bin/bash", "-c", "exec llama-server -hf \"$LLAMA_MODEL\" --host 0.0.0.0 --port \"$LLAMA_PORT\" --log-file /var/log/llama/server.log \"$@\"", "--"]

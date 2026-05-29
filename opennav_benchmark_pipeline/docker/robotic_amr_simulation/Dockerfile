@@ -41,4 +41,5 @@ ENV GZ_SIM_RESOURCE_PATH=/root/ws/install/opennav_benchmark_sim/share/opennav_be
 
 COPY opennav_benchmark_pipeline/docker/robotic_amr_simulation/entrypoint.sh /ros_entrypoint.sh
 RUN chmod +x /ros_entrypoint.sh
-CMD ["ros2", "launch", "opennav_benchmark_sim", "simulation_simplified.launch.py", "headless:=true"]
+ENV USE_RVIZ=true
+CMD ros2 launch opennav_benchmark_sim simulation_simplified.launch.py headless:=true use_rviz:=${USE_RVIZ}
