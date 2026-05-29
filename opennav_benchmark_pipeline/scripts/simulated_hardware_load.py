@@ -36,12 +36,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from hardware_platforms import detect_platform, HARDWARE_PROFILES
 
 
-def cpu_burn_full(stop_event):
-    """Worker that burns 100% of one core until stopped."""
-    while not stop_event.is_set():
-        pass
-
-
 def cpu_burn_fractional(duty_cycle, stop_event):
     """Worker that burns a fraction of one core using duty cycling.
 
@@ -49,22 +43,31 @@ def cpu_burn_fractional(duty_cycle, stop_event):
         duty_cycle: Fraction of time to busy-loop (0.0 to 1.0).
         stop_event: Multiprocessing event to signal shutdown.
     """
-    cycle_sec = 0.1  # 100ms cycle
-    busy_sec = duty_cycle * cycle_sec
-    sleep_sec = cycle_sec - busy_sec
-    while not stop_event.is_set():
-        end = time.monotonic() + busy_sec
-        while time.monotonic() < end:
+    if duty_cycle >= 1.0:
+        while not stop_event.is_set():
             pass
-        if sleep_sec > 0:
-            time.sleep(sleep_sec)
+    else:
+        cycle_sec = 0.1  # 100ms cycle
+        busy_sec = duty_cycle * cycle_sec
+        sleep_sec = cycle_sec - busy_sec
+        while not stop_event.is_set():
+            end = time.monotonic() + busy_sec
+            while time.monotonic() < end:
+                pass
+            if sleep_sec > 0:
+                time.sleep(sleep_sec)
 
 
-def compute_total_load(profile, num_3d, num_2d, num_rgbd):
-    """Compute total CPU load in units of cores."""
-    return (profile['lidar_3d'] * num_3d +
-            profile['lidar_2d'] * num_2d +
-            profile['rgbd_camera'] * num_rgbd)
+def build_sensor_list(profile, num_3d, num_2d, num_rgbd):
+    """Build a flat list of (label, cpu_load) for each sensor instance."""
+    sensors = []
+    for i in range(num_3d):
+        sensors.append((f'3d_lidar_{i}', profile['lidar_3d']))
+    for i in range(num_2d):
+        sensors.append((f'2d_lidar_{i}', profile['lidar_2d']))
+    for i in range(num_rgbd):
+        sensors.append((f'rgbd_camera_{i}', profile['rgbd_camera']))
+    return sensors
 
 
 def main():
@@ -83,41 +86,50 @@ def main():
     platform = detect_platform()
     profile = HARDWARE_PROFILES.get(platform, HARDWARE_PROFILES['amd_strix_halo'])
 
-    total_load = compute_total_load(
+    sensors = build_sensor_list(
         profile, args.lidar_3d, args.lidar_2d, args.rgbd_cameras)
-
-    full_workers = int(math.floor(total_load))
-    fractional = total_load - full_workers
-    num_workers = full_workers + (1 if fractional > 0.001 else 0)
+    total_load = sum(load for _, load in sensors)
 
     print(f"Platform: {platform}")
     print(f"Profile: {profile}")
     print(f"Sensors: {args.lidar_3d} 3D LiDAR, {args.lidar_2d} 2D LiDAR, "
           f"{args.rgbd_cameras} RGBD cameras")
-    print(f"Total load target: {total_load:.3f} cores "
-          f"({full_workers} full + {fractional:.3f} fractional)")
-    print(f"Spawning {num_workers} worker process(es)")
+    print(f"Total load target: {total_load:.3f} cores")
+    num_processes = 0
+    for label, load in sensors:
+        n_full = int(math.floor(load))
+        frac = load - n_full
+        n_procs = n_full + (1 if frac > 0.001 else 0)
+        num_processes += n_procs
+        print(f"  {label}: {load:.3f} cores ({n_procs} process(es))")
+    print(f"Spawning {num_processes} worker process(es) "
+          f"for {len(sensors)} sensor(s)")
     sys.stdout.flush()
 
-    if num_workers == 0:
-        print("No load to generate (total load is zero). Exiting.")
+    if not sensors:
+        print("No load to generate (no sensors configured). Exiting.")
         return
 
     stop_event = multiprocessing.Event()
     workers = []
 
-    for _ in range(full_workers):
-        p = multiprocessing.Process(target=cpu_burn_full, args=(stop_event,))
-        p.daemon = True
-        p.start()
-        workers.append(p)
-
-    if fractional > 0.001:
-        p = multiprocessing.Process(
-            target=cpu_burn_fractional, args=(fractional, stop_event))
-        p.daemon = True
-        p.start()
-        workers.append(p)
+    for label, load in sensors:
+        n_full = int(math.floor(load))
+        frac = load - n_full
+        for j in range(n_full):
+            p = multiprocessing.Process(
+                target=cpu_burn_fractional, args=(1.0, stop_event),
+                name=f'{label}_full_{j}')
+            p.daemon = True
+            p.start()
+            workers.append(p)
+        if frac > 0.001:
+            p = multiprocessing.Process(
+                target=cpu_burn_fractional, args=(frac, stop_event),
+                name=f'{label}_frac')
+            p.daemon = True
+            p.start()
+            workers.append(p)
 
     def shutdown(signum, frame):
         print(f"\nReceived signal {signum}, shutting down...")

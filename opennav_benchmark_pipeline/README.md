@@ -2,6 +2,8 @@
 
 Orchestrates a benchmark experiment across one or two Docker containers (an autonomy / AMR workload and an optional AI workload) plus an optional host-side system-metrics capture script to measure performance and resource utilization.
 
+The [Practitioners Guide](../docs/practitioners_guide.md) may be of interest for those reading this far in detail looking to reproduce or test their own platforms.
+
 ## Host prerequisites
 
 Setting up a platform from scratch (flashing/OS, GPU drivers, container runtime, and building the VLM inference image) is documented per platform under [`docs/platform_setup/`](../docs/platform_setup/): [`jetson_orin.md`](../docs/platform_setup/jetson_orin.md), [`jetson_thor.md`](../docs/platform_setup/jetson_thor.md), [`amd_strix_halo.md`](../docs/platform_setup/amd_strix_halo.md).
@@ -18,27 +20,6 @@ The autonomy image bakes a Cyclone DDS config in at build time. Two are shipped:
 - `cyclonedds_hil.xml` DDS bound to a LAN subnet (10.2.1.0, by default). Cross-machine HIL (simulator on machine A, benchmark on machine B).
 
 Change to what is appropriate for your situation in the Dockerfiles. If doing HIL testing, use that XML putting the subnet as the static IP range used on the LAN in your setup.
-
-```bash
-nmcli con show  # Shows connections, plug in a cable find the one that's active
-
-# Change the IP address
-nmcli con mod "Wired connection 1" \
-  ipv4.method manual \
-  ipv4.addresses 10.2.1.10/24 \
-  ipv4.gateway 10.2.1.1 \
-  ipv4.dns "8.8.8.8 1.1.1.1"
-
-nmcli con up "Wired connection 1"  # Connect to the network
-
-ifconfig # Verify the changes
-```
-
-For example:
-* Thor to `10.2.1.10`
-* Orin to `10.2.1.20`
-* Strix Halo to `10.2.1.30`
-* Dev / Sim Machine `10.2.1.40`
 
 ## Parameters
 
@@ -80,6 +61,8 @@ If you want to run the simulator in the cloud consider using the full simulation
   ros2 launch opennav_benchmark_sim simulation_simplified.launch.py headless:=true use_rviz:=false
 ```
 
+The script `run_simulation.sh` will automatically not launch rviz or the gazebo client when over SSH for your convinience.
+
 ## Build & run the VLM (optional)
 
 The AI workload (VLM) is packaged separately for each benchmark platform under `docker/ai_workload/`. Build the Dockerfile matching the platform under test and tag it with that platform's name, so the orchestrator can resolve the matching run-flag profile from the tag suffix:
@@ -93,12 +76,13 @@ docker build -t opennav_benchmark/ai_workload:amd_strix_halo \
   -f opennav_benchmark_pipeline/docker/ai_workload/amd_strix_halo/Dockerfile .
 ```
 
-Each platform directory also ships a `profile.sh` capturing the extra `docker run` flags that platform needs (GPU runtime, device passthrough, etc.). The benchmark orchestrator only launches the VLM container when `VLM_IMAGE` is set; it derives the profile from the tag suffix (`amd_strix_halo` here) and applies those flags. Set it in the `run_benchmark.sh` script or pass it on the command line:
+You can test it via:
 
 ```bash
-cd /path/to/opennav_robotics_workload_benchmark
-VLM_IMAGE=opennav_benchmark/ai_workload:amd_strix_halo ./opennav_benchmark_pipeline/run_benchmark.sh  # replace tags with jetson_orin, jetson_thor too
+./opennav_benchmark_pipeline/run_vlm.sh opennav_benchmark/ai_workload:amd_strix_halo  # jetson_orin, jetson_thor, amd_strix_halo
 ```
+
+Each platform directory also ships a `profile.sh` capturing the extra `docker run` flags that platform needs (GPU runtime, device passthrough, etc.). 
 
 ## Build & run the benchmark
 
@@ -119,7 +103,14 @@ cd /path/to/opennav_robotics_workload_benchmark
 
 Each run produces logs from the benchmark autonomy workload / VLM / metrics in the directory `opennav_benchmark_logs/run_<unix_ts>`. This can be used to analyze the captured metrics, AI output, and autonomy logs (such as with the `opennav_benchmark_analysis` directory).
 
-For ad-hoc runs, you can launch the autonomy workload container by hand. Open a second terminal alongside the simulation:
+The benchmark orchestrator only launches the VLM container when `VLM_IMAGE` is set; it derives the profile from the tag suffix (`amd_strix_halo` here) and applies those flags. Set it in the `run_benchmark.sh` script or pass it on the command line:
+
+```bash
+cd /path/to/opennav_robotics_workload_benchmark
+VLM_IMAGE=opennav_benchmark/ai_workload:amd_strix_halo ./opennav_benchmark_pipeline/run_benchmark.sh  # replace tags with jetson_orin, jetson_thor too
+```
+
+For ad-hoc runs, you can launch the autonomy workload container by hand without the rest of the benchmark:
 
 ```bash
 docker run --rm -it --init \
@@ -132,8 +123,6 @@ docker run --rm -it --init \
   --volume "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
   opennav_benchmark/robotic_amr_workload:jazzy
 ```
-
-To capture ROS logs, add `--volume "$(pwd)/opennav_benchmark_logs/manual:/root/.ros/log"` before the image name.
 
 ## Running the analysis
 
