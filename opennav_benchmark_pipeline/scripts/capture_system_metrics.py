@@ -154,7 +154,7 @@ def main():
     print(f'Detected platform: {platform}')
 
     # Initialize GPU metrics collector
-    if platform == 'amd_ryzenai_maxplus_395':
+    if platform == 'amd_strix_halo':
         gpu = AmdGpuMetrics()
     elif platform in ('jetson_orin', 'jetson_thor'):
         gpu = JetsonGpuMetrics(variant=platform)

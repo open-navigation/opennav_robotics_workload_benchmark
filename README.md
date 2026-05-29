@@ -15,12 +15,11 @@ This benchmark compares both system metrics as well as important performance ana
   <a href="https://www.youtube.com/watch?v=6H02OBs6xZc">
     <img src="docs/images/benchmark_run.gif" alt="Benchmark Demo"/>
   </a>
+
+  Click on the gifs above to see the full length videos!
+
+  ⚠️ Need ROS 2, Nav2 help or support? Contact Open Navigation! ⚠️
 </p>
-
-Click on the gifs above to see the full length videos!
-
-⚠️ Need ROS 2, Nav2 help or support? Contact Open Navigation! ⚠️
-
 
 ## Platforms Evaluated
 
@@ -137,6 +136,7 @@ If you wish to add your own platform, simply:
 * Update the `hardware_platforms.py` to capture the system metrics for your particular platform 
 * Update `detect_platform()` to add the new platform to the detection schema
 * Provide an appropriate `HARDWARE_PROFILES` which corresponds to your sensor driver load on the platform for each representative sensor
+* Create the `ai_workload` Dockerfile and `profiles.sh` to launch `ggml-org/gemma-4-31B-it-GGUF:Q4_K_M`
 
 If you end up doing so, consider opening a PR with your modifications and provide the data & analysis for your platform so others can learn from it!
 

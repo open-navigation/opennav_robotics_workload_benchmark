@@ -71,7 +71,7 @@ METRIC_LABELS = {
 
 # Platform display names
 PLATFORM_LABELS = {
-    'amd_ryzenai_maxplus_395': 'AMD Ryzen AI Max+ 395',
+    'amd_strix_halo': 'AMD Strix Halo',
     'jetson_orin': 'NVIDIA Jetson Orin',
     'jetson_thor': 'NVIDIA Jetson Thor',
 }

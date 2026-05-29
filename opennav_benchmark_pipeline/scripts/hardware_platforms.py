@@ -22,7 +22,7 @@ import os
 
 def detect_platform():
     """Detect the hardware platform. Returns one of:
-    'jetson_orin', 'jetson_thor', 'amd_ryzenai_maxplus_395', 'unknown'."""
+    'jetson_orin', 'jetson_thor', 'amd_strix_halo', 'unknown'."""
     # Check for Jetson via device-tree model
     try:
         with open('/proc/device-tree/model', 'r') as f:
@@ -44,7 +44,7 @@ def detect_platform():
         with open('/proc/cpuinfo', 'r') as f:
             cpuinfo = f.read()
         if 'AuthenticAMD' in cpuinfo or 'AMD' in cpuinfo:
-            return 'amd_ryzenai_maxplus_395'
+            return 'amd_strix_halo'
     except (FileNotFoundError, PermissionError):
         pass
 
@@ -55,19 +55,19 @@ def detect_platform():
 # expressed as a fraction of one CPU core (e.g., 0.15 = 15% of one core).
 HARDWARE_PROFILES = {
     'jetson_orin': {
-        'lidar_3d': 0.15,
-        'lidar_2d': 0.05,
-        'rgbd_camera': 0.20,
+        'lidar_3d': 0.15, #TODO
+        'lidar_2d': 0.07,
+        'rgbd_camera': 1.55,
     },
     'jetson_thor': {
-        'lidar_3d': 0.10,
-        'lidar_2d': 0.03,
-        'rgbd_camera': 0.15,
+        'lidar_3d': 0.10, #TODO
+        'lidar_2d': 0.04,
+        'rgbd_camera': 1.30,
     },
-    'amd_ryzenai_maxplus_395': {
-        'lidar_3d': 0.08,
-        'lidar_2d': 0.03,
-        'rgbd_camera': 0.12,
+    'amd_strix_halo': {
+        'lidar_3d': 0.08, #TODO 
+        'lidar_2d': 0.014,
+        'rgbd_camera': 0.52,
     },
 }
 

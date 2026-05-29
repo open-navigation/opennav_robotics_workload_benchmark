@@ -81,7 +81,7 @@ def main():
     args = parser.parse_args()
 
     platform = detect_platform()
-    profile = HARDWARE_PROFILES.get(platform, HARDWARE_PROFILES['amd_ryzenai_maxplus_395'])
+    profile = HARDWARE_PROFILES.get(platform, HARDWARE_PROFILES['amd_strix_halo'])
 
     total_load = compute_total_load(
         profile, args.lidar_3d, args.lidar_2d, args.rgbd_cameras)

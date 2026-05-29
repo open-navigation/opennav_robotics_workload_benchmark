@@ -11,7 +11,8 @@ already targets out of the box.
 > Keep the model and quant identical across platforms for a valid 1:1 comparison.
 
 > Storage: The Orin AGX ships with limited onboard eMMC (64 GB). An additional NVMe
-> SSD is required to hold the model and container storage; see step 2.
+> SSD is required to hold the model and container storage; see step 2. Install and setup
+> the NVME **before** any of these instructions or you'll have a very bad time recovering.
 
 ---
 
