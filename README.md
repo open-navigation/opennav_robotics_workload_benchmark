@@ -132,12 +132,11 @@ TODO graphs, high-level metircs, and log-based analysis
 See the instructions in the `opennav_benchmark_pipeline` for building and running the benchmark.
 The pipeline provides Dockerfiles for the simulation, AMR Robot workload, and AI workloads which can be run to reproduce the benchmark.
 
-If you wish to add your own platform, simply:
-* Update the `hardware_platforms.py` to capture the system metrics for your particular platform 
+If you wish to add your own platform, simply update the `hardware_platforms.py` with:
 * Update `detect_platform()` to add the new platform to the detection schema
-* Provide an appropriate `HARDWARE_PROFILES` which corresponds to your sensor driver load on the platform for each representative sensor
-* Create the `ai_workload` Dockerfile and `profiles.sh` to launch `ggml-org/gemma-4-31B-it-GGUF:Q4_K_M` and expose a ``llama.cpp`` server.
+* Update the `HARDWARE_PROFILES` to correspond with the static load from your sensor drivers for each type of sensor
+* Update to capture the system metrics for your particular platform based on `GpuMetrics`
 
-If you end up doing so, consider opening a PR with your modifications and provide the data & analysis for your platform so others can learn from it!
+Then, create the `ai_workload` Dockerfile and `profiles.sh` to launch `ggml-org/gemma-4-31B-it-GGUF:Q4_K_M` and expose a ``llama.cpp`` server. If you end up doing so, consider opening a PR with your modifications and provide the data & analysis for your platform so others can learn from it!
 
 Happy benchmarking :-) 

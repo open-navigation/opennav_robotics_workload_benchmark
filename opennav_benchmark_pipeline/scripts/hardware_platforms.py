@@ -83,7 +83,7 @@ class GpuMetrics:
         try:
             with open(path, 'r') as f:
                 return cast(f.read().strip())
-        except (FileNotFoundError, PermissionError, ValueError, OSError) as e:
+        except (FileNotFoundError, PermissionError, ValueError, TypeError, OSError) as e:
             key = path
             if key not in self._warnings_issued:
                 self._warnings_issued.add(key)
