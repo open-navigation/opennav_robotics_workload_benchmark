@@ -12,11 +12,12 @@ This benchmark compares both system metrics as well as important performance ana
   <a href="https://www.youtube.com/watch?v=j5NtcGJvQyM">
     <img src="docs/images/benchmark_demo.gif" alt="Benchmark Demo"/>
   </a>
+  <a href="https://www.youtube.com/watch?v=6H02OBs6xZc">
+    <img src="docs/images/benchmark_run.gif" alt="Benchmark Demo"/>
+  </a>
 </p>
 
-TODO top down total run gif
-
-Click on the gif to see the full video.
+Click on the gifs above to see the full length videos!
 
 ⚠️ Need ROS 2, Nav2 help or support? Contact Open Navigation! ⚠️
 
