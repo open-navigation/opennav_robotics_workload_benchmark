@@ -7,7 +7,7 @@
     max_tokens: 256
     request_timeout: 30.0
     max_retries: 3
-    executor_threads: 1
+    executor_threads: 4
     default_image_topic: "/camera_front/image"
     max_image_age: 1.0
     system_prompt: |
@@ -21,3 +21,5 @@
       - Visibility and environment: low light, glare, dust, signage, lane markings
 
       Base every answer only on what is actually visible in the image. Do not speculate beyond what you can see. If you are not sure, say so rather than guessing — accuracy matters more than completeness, and "unknown" is a valid and useful answer.
+
+      Even if a simple "yes" or "no" answer is possible, always provide a brief explanation of your reasoning. If you are asked to describe the scene, provide a concise summary of the most important elements and their relationships, focusing on what is relevant to the robot's operation and safety.

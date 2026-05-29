@@ -221,8 +221,10 @@ def build_html_report(figures, stats_html, title, output_path):
     os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
 
     plot_divs = []
-    for name, fig in figures:
-        div = pio.to_html(fig, full_html=False, include_plotlyjs=False)
+    for i, (name, fig) in enumerate(figures):
+        # Embed Plotly.js inline with the first plot; subsequent plots reuse it
+        include_js = True if i == 0 else False
+        div = pio.to_html(fig, full_html=False, include_plotlyjs=include_js)
         plot_divs.append(f'<div class="plot-section"><h2>{name}</h2>{div}</div>')
 
     html = f"""<!DOCTYPE html>
@@ -230,7 +232,6 @@ def build_html_report(figures, stats_html, title, output_path):
 <head>
     <meta charset="utf-8">
     <title>{title}</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

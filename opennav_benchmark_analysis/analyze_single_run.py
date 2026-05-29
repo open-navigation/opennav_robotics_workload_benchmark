@@ -101,7 +101,7 @@ def plot_cpu_core_heatmap(df, metadata):
 
 
 def plot_cpu_core_distribution(df, metadata):
-    """Box plot showing per-core utilization distribution + active cores over time."""
+    """Box plot showing per-core utilization distribution."""
     core_cols = sorted(
         [c for c in df.columns if c.startswith('cpu_core_')],
         key=lambda c: int(c.split('_')[-1])
@@ -109,31 +109,18 @@ def plot_cpu_core_distribution(df, metadata):
     if not core_cols:
         return None
 
-    fig = make_subplots(
-        rows=1, cols=2,
-        subplot_titles=('Per-Core Utilization Distribution', 'Active Cores Over Time'),
-        column_widths=[0.5, 0.5],
-    )
+    fig = go.Figure()
 
     for col in core_cols:
         core_num = col.split('_')[-1]
         fig.add_trace(go.Box(
             y=df[col], name=f'Core {core_num}',
             showlegend=False,
-        ), row=1, col=1)
+        ))
 
-    if 'cores_active_percent' in df.columns:
-        fig.add_trace(go.Scatter(
-            x=df['elapsed_sec'], y=df['cores_active_percent'],
-            mode='lines', name='Active Cores %',
-            line=dict(color='#EF553B', width=2),
-        ), row=1, col=2)
-        fig.update_yaxes(title_text='Active Cores (%)', range=[0, 105], row=1, col=2)
-        fig.update_xaxes(title_text='Elapsed Time (s)', row=1, col=2)
-
-    fig.update_yaxes(title_text='CPU Utilization (%)', row=1, col=1)
+    fig.update_yaxes(title_text='CPU Utilization (%)')
     fig.update_layout(
-        title=f"CPU Core Usage Distribution — {metadata['platform_label']}",
+        title=f"Per-Core Utilization Distribution — {metadata['platform_label']}",
         template='plotly',
         height=500,
     )
@@ -344,6 +331,194 @@ def plot_io_rates(df, metadata):
     return fig
 
 
+def plot_cpu_gpu_correlation(df, metadata):
+    """Scatter plot of CPU vs GPU utilization to show resource contention."""
+    if 'cpu_total' not in df.columns or 'gpu_util' not in df.columns:
+        return None
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=df['cpu_total'], y=df['gpu_util'],
+        mode='markers',
+        marker=dict(
+            color=df['elapsed_sec'],
+            colorscale='Viridis',
+            colorbar=dict(title='Time (s)'),
+            size=4, opacity=0.6,
+        ),
+        name='Samples',
+    ))
+
+    # Add correlation coefficient annotation
+    corr = df['cpu_total'].corr(df['gpu_util'])
+    fig.add_annotation(
+        x=0.98, y=0.98, xref='paper', yref='paper',
+        text=f'r = {corr:.3f}',
+        showarrow=False, font=dict(size=14),
+        bgcolor='white', bordercolor='gray', borderwidth=1,
+    )
+
+    fig.update_layout(
+        title=f"CPU vs GPU Utilization Correlation — {metadata['platform_label']}",
+        xaxis_title='CPU Total (%)',
+        yaxis_title='GPU Utilization (%)',
+        xaxis=dict(range=[0, 105]),
+        yaxis=dict(range=[0, 105]),
+        template='plotly',
+    )
+    return fig
+
+
+def plot_power_efficiency(df, metadata):
+    """Work-per-watt efficiency: GPU utilization / board power over time."""
+    power_col = 'gpu_power_w' if 'gpu_power_w' in df.columns else 'board_power_w'
+    if power_col not in df.columns or 'gpu_util' not in df.columns:
+        return None
+
+    efficiency = df['gpu_util'] / df[power_col].replace(0, np.nan)
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(go.Scatter(
+        x=df['elapsed_sec'], y=efficiency,
+        mode='lines', name='GPU Util / Power',
+        line=dict(color='#00CC96', width=2),
+    ), secondary_y=False)
+
+    fig.add_trace(go.Scatter(
+        x=df['elapsed_sec'], y=df[power_col],
+        mode='lines', name=get_metric_label(power_col),
+        line=dict(color='#EF553B', width=1, dash='dot'),
+        opacity=0.6,
+    ), secondary_y=True)
+
+    fig.update_xaxes(title_text='Elapsed Time (s)')
+    fig.update_yaxes(title_text='Efficiency (GPU % / W)', secondary_y=False)
+    fig.update_yaxes(title_text='Power (W)', secondary_y=True)
+    fig.update_layout(
+        title=f"Power Efficiency — {metadata['platform_label']}",
+        template='plotly',
+    )
+    return fig
+
+
+def plot_rolling_stability(df, metadata, window=30):
+    """Rolling standard deviation of CPU/GPU/RAM to identify jitter periods."""
+    metrics = []
+    if 'cpu_total' in df.columns:
+        metrics.append(('cpu_total', 'CPU Total', '#636EFA'))
+    if 'gpu_util' in df.columns:
+        metrics.append(('gpu_util', 'GPU Util', '#00CC96'))
+    if 'ram_percent' in df.columns:
+        metrics.append(('ram_percent', 'RAM', '#EF553B'))
+
+    if not metrics:
+        return None
+
+    n = len(metrics)
+    fig = make_subplots(rows=n, cols=1, shared_xaxes=True,
+                        vertical_spacing=0.08)
+
+    for i, (col, label, color) in enumerate(metrics, 1):
+        rolling_std = df[col].rolling(window=window, min_periods=1).std()
+        fig.add_trace(go.Scatter(
+            x=df['elapsed_sec'], y=rolling_std,
+            mode='lines', name=f'{label} σ',
+            line=dict(color=color, width=2),
+        ), row=i, col=1)
+        fig.update_yaxes(title_text=f'{label} Std Dev', row=i, col=1)
+
+    fig.update_xaxes(title_text='Elapsed Time (s)', row=n, col=1)
+    fig.update_layout(
+        title=f"Rolling Stability (σ, {window}s window) — {metadata['platform_label']}",
+        template='plotly',
+        height=250 * n,
+    )
+    return fig
+
+
+def plot_thermal_throttling(df, metadata):
+    """Overlay GPU clock speed against temperature to detect thermal throttling."""
+    if 'gpu_clock_mhz' not in df.columns or 'gpu_temp' not in df.columns:
+        return None
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(go.Scatter(
+        x=df['elapsed_sec'], y=df['gpu_clock_mhz'],
+        mode='lines', name='GPU Clock (MHz)',
+        line=dict(color='#AB63FA', width=2),
+    ), secondary_y=False)
+
+    fig.add_trace(go.Scatter(
+        x=df['elapsed_sec'], y=df['gpu_temp'],
+        mode='lines', name='GPU Temp (°C)',
+        line=dict(color='#EF553B', width=2),
+    ), secondary_y=True)
+
+    # Detect potential throttle events: clock drops > 10% from rolling max
+    rolling_max = df['gpu_clock_mhz'].rolling(window=30, min_periods=1).max()
+    throttle_mask = df['gpu_clock_mhz'] < (rolling_max * 0.9)
+    if throttle_mask.any():
+        throttle_times = df.loc[throttle_mask, 'elapsed_sec']
+        throttle_clocks = df.loc[throttle_mask, 'gpu_clock_mhz']
+        fig.add_trace(go.Scatter(
+            x=throttle_times, y=throttle_clocks,
+            mode='markers', name='Potential Throttle',
+            marker=dict(color='red', size=6, symbol='x'),
+        ), secondary_y=False)
+
+    fig.update_xaxes(title_text='Elapsed Time (s)')
+    fig.update_yaxes(title_text='GPU Clock (MHz)', secondary_y=False)
+    fig.update_yaxes(title_text='Temperature (°C)', secondary_y=True)
+    fig.update_layout(
+        title=f"Thermal Throttling Detection — {metadata['platform_label']}",
+        template='plotly',
+    )
+    return fig
+
+
+def plot_gpu_vram_headroom(df, metadata):
+    """GPU VRAM used vs total, showing headroom percentage."""
+    if 'gpu_mem_used_mb' not in df.columns or 'gpu_mem_total_mb' not in df.columns:
+        return None
+
+    total_mb = df['gpu_mem_total_mb'].iloc[0]
+    usage_pct = (df['gpu_mem_used_mb'] / total_mb * 100)
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(go.Scatter(
+        x=df['elapsed_sec'], y=df['gpu_mem_used_mb'],
+        mode='lines', name='VRAM Used (MB)',
+        line=dict(color='#EF553B', width=2),
+        fill='tozeroy', fillcolor='rgba(239, 85, 59, 0.15)',
+    ), secondary_y=False)
+
+    fig.add_hline(
+        y=total_mb, secondary_y=False,
+        line_dash='dash', line_color='#AB63FA',
+        annotation_text=f'Total: {total_mb:.0f} MB',
+        annotation_position='top right',
+    )
+
+    fig.add_trace(go.Scatter(
+        x=df['elapsed_sec'], y=usage_pct,
+        mode='lines', name='VRAM Usage (%)',
+        line=dict(color='#636EFA', width=2, dash='dot'),
+    ), secondary_y=True)
+
+    fig.update_xaxes(title_text='Elapsed Time (s)')
+    fig.update_yaxes(title_text='VRAM (MB)', secondary_y=False)
+    fig.update_yaxes(title_text='VRAM Usage (%)', range=[0, 105], secondary_y=True)
+    fig.update_layout(
+        title=f"GPU VRAM Headroom — {metadata['platform_label']}",
+        template='plotly',
+    )
+    return fig
+
+
 def plot_load_processes(df, metadata):
     """Load averages and process count."""
     fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -420,6 +595,11 @@ def main():
         ('RAM Usage', plot_ram_usage),
         ('Memory Bandwidth', plot_memory_bandwidth),
         ('Power & Thermal', plot_power_thermal),
+        ('CPU GPU Correlation', plot_cpu_gpu_correlation),
+        ('Power Efficiency', plot_power_efficiency),
+        ('Rolling Stability', plot_rolling_stability),
+        ('Thermal Throttling', plot_thermal_throttling),
+        ('GPU VRAM Headroom', plot_gpu_vram_headroom),
         ('IO Rates', plot_io_rates),
         ('Load & Processes', plot_load_processes),
     ]

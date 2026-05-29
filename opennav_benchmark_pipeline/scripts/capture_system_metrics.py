@@ -166,7 +166,7 @@ def main():
 
     # Output file
     start_time = int(time.time())
-    filename = os.path.join(run_dir, f'system_metrics_{start_time}.json')
+    filename = os.path.join(run_dir, f'system_metrics.json')
     print(f'Writing metrics to: {filename}')
 
     # Data structure

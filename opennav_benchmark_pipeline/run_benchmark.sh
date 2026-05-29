@@ -89,11 +89,6 @@ cleanup() {
             return
         fi
         if docker ps -q -f "name=^${name}$" | grep -q .; then
-            # SIGINT is what Ctrl+C in a terminal sends. That's what `ros2 launch`
-            # handles for graceful shutdown (it propagates the interrupt to every
-            # child node, which then runs their lifecycle cleanup hooks).
-            # tini (from --init) forwards SIGINT from PID 1 to the actual ros2 launch
-            # process, which Python's signal handling otherwise blocks for PID 1.
             log "Stopping ${role} container ${name} (SIGINT, grace ${SHUTDOWN_GRACE_SEC}s)"
             docker stop --signal=SIGINT --time="${SHUTDOWN_GRACE_SEC}" "${name}" >/dev/null 2>&1 || true
             if docker ps -q -f "name=^${name}$" | grep -q .; then
@@ -102,7 +97,7 @@ cleanup() {
             fi
         fi
         # Capture full stdout/stderr after the container has stopped
-        local log_file="${RUN_DIR}/${role}_stdout.log"
+        local log_file="${RUN_DIR}/${role}.stdout"
         docker logs "${name}" > "${log_file}" 2>&1 || true
         docker rm -f "${name}" >/dev/null 2>&1 || true
     }
@@ -211,7 +206,7 @@ if [[ -n "${VLM_IMAGE}" ]]; then
         --env "QT_X11_NO_MITSHM=1" \
         --volume "${XAUTH_PATH}:/root/.Xauthority:ro" \
         --volume "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
-        --volume "${RUN_DIR}:/var/log/llama" \
+        --volume "${RUN_DIR}/llamacpp:/var/log/llama" \
         ${VLM_EXTRA_RUN_ARGS[@]+"${VLM_EXTRA_RUN_ARGS[@]}"} \
         "${VLM_IMAGE}" >/dev/null
     VLM_LAUNCHED=1

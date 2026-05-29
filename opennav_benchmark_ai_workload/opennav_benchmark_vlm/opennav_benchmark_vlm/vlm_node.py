@@ -31,7 +31,7 @@ class VLMNode(Node):
         self.declare_parameter('max_tokens', 256)
         self.declare_parameter('request_timeout', 30.0)
         self.declare_parameter('max_retries', 3)
-        self.declare_parameter('executor_threads', 1)
+        self.declare_parameter('executor_threads', 4)
         self.declare_parameter('default_image_topic', '/camera/rgb/image')
         self.declare_parameter('max_image_age', 1.0)
         self.declare_parameter(
@@ -141,6 +141,7 @@ class VLMNode(Node):
 
     def _execute(self, goal_handle, parser, result_cls, feedback_cls):
         """Run the type-enforced VLM query loop: resolve image, prompt the VLM, parse, retry up to max_retries."""
+        self.get_logger().info(f'Goal received with prompt: {goal_handle.request.prompt}')
         goal = goal_handle.request
         result = result_cls()
         result.value = parser.zero_value
@@ -214,6 +215,7 @@ class VLMNode(Node):
                     result.value = parsed
                     result.success = True
                 goal_handle.succeed()
+                self.get_logger().info(f'Completed prompt: "{goal_handle.request.prompt}" with response: {result.value}')
                 return result
 
             self._publish_feedback(
