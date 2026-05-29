@@ -55,17 +55,17 @@ def detect_platform():
 # expressed as a fraction of one CPU core (e.g., 0.15 = 15% of one core).
 HARDWARE_PROFILES = {
     'jetson_orin': {
-        'lidar_3d': 0.15, #TODO
-        'lidar_2d': 0.07,
+        'lidar_3d': 0.67,
+        'lidar_2d': 0.12,
         'rgbd_camera': 1.55,
     },
     'jetson_thor': {
-        'lidar_3d': 0.10, #TODO
+        'lidar_3d': 0.22,
         'lidar_2d': 0.04,
         'rgbd_camera': 1.30,
     },
     'amd_strix_halo': {
-        'lidar_3d': 0.08, #TODO 
+        'lidar_3d': 0.16, 
         'lidar_2d': 0.014,
         'rgbd_camera': 0.52,
     },
