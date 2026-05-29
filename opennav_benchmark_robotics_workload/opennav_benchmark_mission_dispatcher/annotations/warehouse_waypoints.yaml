@@ -1122,42 +1122,37 @@ zone_d:
     slot_20: {x: 49.36, y: 64.5, yaw: 3.1416}
     slot_21: {x: 54.23, y: 64.5, yaw: 3.1416}
 zone_pickups:
+  # Blockstack 1 and 2 have points culled for simplified world box overextension (too small to fit robot)
   blockstack_1:
-    pickup_pt_1: {x: 34.1, y: 33.0, yaw: 3.1416}
-    pickup_pt_2: {x: 39.0, y: 26.8, yaw: -1.5708}
-    pickup_pt_3: {x: 43.9, y: 33.0, yaw: 0.0}
-  blockstack_2:
-    pickup_pt_1: {x: 34.1, y: 42.0, yaw: 3.1416}
-    pickup_pt_2: {x: 39.0, y: 48.2, yaw: 1.5708}
-    pickup_pt_3: {x: 43.9, y: 42.0, yaw: 0.0}
+    pickup_pt_2: {x: 39.0, y: 26.65, yaw: -1.5708}
   blockstack_3:
-    pickup_pt_1: {x: 54.9, y: 33.0, yaw: 0.0}
-    pickup_pt_2: {x: 50.0, y: 26.8, yaw: -1.5708}
-    pickup_pt_3: {x: 45.1, y: 33.0, yaw: 3.1416}
+    pickup_pt_1: {x: 55.05, y: 33.0, yaw: 0.0}
+    pickup_pt_2: {x: 50.0, y: 26.65, yaw: -1.5708}
+    pickup_pt_3: {x: 44.95, y: 33.0, yaw: 3.1416}
   blockstack_4:
-    pickup_pt_1: {x: 54.9, y: 42.0, yaw: 0.0}
-    pickup_pt_2: {x: 50.0, y: 48.2, yaw: 1.5708}
-    pickup_pt_3: {x: 45.1, y: 42.0, yaw: 3.1416}
+    pickup_pt_1: {x: 55.05, y: 42.0, yaw: 0.0}
+    pickup_pt_2: {x: 50.0, y: 48.35, yaw: 1.5708}
+    pickup_pt_3: {x: 44.95, y: 42.0, yaw: 3.1416}
   blockstack_5:
-    pickup_pt_1: {x: 39.25, y: -60.0, yaw: 3.1416}
-    pickup_pt_2: {x: 50.0, y: -51.85, yaw: 1.5708}
+    pickup_pt_1: {x: 38.10, y: -60.0, yaw: 3.1416}  # Manually adjusted for simplified world box overextension (+1m)
+    pickup_pt_2: {x: 50.0, y: -50.70, yaw: 1.5708}  # Manually adjusted for simplified world box overextension (+1m)
   blockstack_6:
-    pickup_pt_1: {x: -61.8, y: -59.6, yaw: 3.1416}
-    pickup_pt_2: {x: -54.2, y: -59.6, yaw: 0.0}
-    pickup_pt_3: {x: -58.0, y: -53.7, yaw: 1.5708}
+    pickup_pt_1: {x: -61.95, y: -59.6, yaw: 3.1416}
+    pickup_pt_2: {x: -54.05, y: -59.6, yaw: 0.0}
+    pickup_pt_3: {x: -58.0, y: -52.55, yaw: 1.5708}
   blockstack_7:
-    pickup_pt_1: {x: -44.8, y: -59.6, yaw: 3.1416}
-    pickup_pt_2: {x: -37.2, y: -59.6, yaw: 0.0}
-    pickup_pt_3: {x: -41.0, y: -53.7, yaw: 1.5708}
+    pickup_pt_1: {x: -44.95, y: -59.6, yaw: 3.1416}
+    pickup_pt_2: {x: -37.05, y: -59.6, yaw: 0.0}
+    pickup_pt_3: {x: -41.0, y: -52.55, yaw: 1.5708}
   blockstack_8:
-    pickup_pt_1: {x: -28.8, y: -59.6, yaw: 3.1416}
-    pickup_pt_2: {x: -21.2, y: -59.6, yaw: 0.0}
-    pickup_pt_3: {x: -25.0, y: -53.7, yaw: 1.5708}
+    pickup_pt_1: {x: -28.95, y: -59.6, yaw: 3.1416}
+    pickup_pt_2: {x: -21.05, y: -59.6, yaw: 0.0}
+    pickup_pt_3: {x: -25.0, y: -52.55, yaw: 1.5708}
   blockstack_9:
-    pickup_pt_1: {x: -11.8, y: -59.6, yaw: 3.1416}
-    pickup_pt_2: {x: -4.2, y: -59.6, yaw: 0.0}
-    pickup_pt_3: {x: -8.0, y: -53.7, yaw: 1.5708}
+    pickup_pt_1: {x: -11.95, y: -59.6, yaw: 3.1416}
+    pickup_pt_2: {x: -4.05, y: -59.6, yaw: 0.0}
+    pickup_pt_3: {x: -8.0, y: -52.55, yaw: 1.5708}
   blockstack_10:
-    pickup_pt_1: {x: 5.2, y: -59.6, yaw: 3.1416}
-    pickup_pt_2: {x: 12.8, y: -59.6, yaw: 0.0}
-    pickup_pt_3: {x: 9.0, y: -53.7, yaw: 1.5708}
+    pickup_pt_1: {x: 5.05, y: -59.6, yaw: 3.1416}
+    pickup_pt_2: {x: 12.95, y: -59.6, yaw: 0.0}
+    pickup_pt_3: {x: 9.0, y: -52.55, yaw: 1.5708}

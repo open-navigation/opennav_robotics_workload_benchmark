@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN pip3 install --break-system-packages --no-cache-dir openai
 
+RUN apt-get update \
+ && rosdep update --rosdistro jazzy \
+ && apt install ros-jazzy-navigation2 ros-jazzy-spatio-temporal-voxel-layer ros-jazzy-nav2-bringup -y
+
 WORKDIR /root/ws
 COPY opennav_benchmark_robotics_workload/opennav_benchmark_mission_dispatcher/  src/opennav_benchmark_mission_dispatcher/
 COPY opennav_benchmark_robotics_workload/opennav_benchmark_nav2/         src/opennav_benchmark_nav2/
@@ -21,9 +25,7 @@ COPY opennav_benchmark_ai_workload/opennav_benchmark_vlm/       src/opennav_benc
 COPY opennav_benchmark_ai_workload/opennav_benchmark_vlm_msgs/  src/opennav_benchmark_vlm_msgs/
 COPY opennav_benchmark_ai_workload/opennav_benchmark_vlm_bt/    src/opennav_benchmark_vlm_bt/
 
-RUN apt-get update \
- && rosdep update --rosdistro jazzy \
- && rosdep install --from-paths src --ignore-src -y --rosdistro jazzy \
+RUN rosdep install --from-paths src --ignore-src -y --rosdistro jazzy \
  && rm -rf /var/lib/apt/lists/* \
  && . /opt/ros/jazzy/setup.sh \
  && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release

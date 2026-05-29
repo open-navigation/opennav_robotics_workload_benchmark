@@ -44,7 +44,7 @@ BIG_SHELF_LANE_OFFSET = 1.0      # metres from aisle center to each lane (big)
 SMALL_SHELF_LANE_OFFSET = 0.5    # metres from aisle center to each lane (small)
 
 CORRIDOR_MARGIN = 0.5  # extra clearance around the N-S corridor
-PICKUP_CLEARANCE = 2.3  # metres from pallet cluster edge to pickup waypoint
+PICKUP_CLEARANCE = 2.45  # metres from pallet cluster edge to pickup waypoint
 
 # Actual shelf mesh dimensions (from shelf_big_movai.dae)
 SHELF_LINK_X_OFFSET = -0.5       # link pose offset in all shelf models
