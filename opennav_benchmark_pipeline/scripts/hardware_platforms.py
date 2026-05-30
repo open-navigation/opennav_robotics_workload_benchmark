@@ -361,6 +361,15 @@ class JetsonGpuMetrics(GpuMetrics):
                             label = f.read().strip()
                     except (OSError, ValueError):
                         pass
+                    # Some sensors (e.g. INA238 on Thor) have a device-level
+                    # label file instead of per-channel power*_label
+                    if label == 'unknown':
+                        device_label = os.path.join(hwmon_dir, 'label')
+                        try:
+                            with open(device_label, 'r') as f:
+                                label = f.read().strip()
+                        except (OSError, ValueError):
+                            pass
                     power_paths[label] = power_file
 
         # Fallback: INA3221 via i2c
@@ -376,35 +385,35 @@ class JetsonGpuMetrics(GpuMetrics):
                     pass
                 power_paths[label] = power_file
 
-        # Fallback: compute power from voltage (in*_input) x current (curr*_input)
-        # Some INA3221 drivers (e.g. Orin) don't expose power*_input directly
-        if not power_paths:
-            self._power_vi_pairs = []
-            for hwmon_dir in sorted(glob.glob('/sys/class/hwmon/hwmon*')):
-                name_path = os.path.join(hwmon_dir, 'name')
+        # Also collect voltage x current pairs for per-rail breakdown
+        # (e.g. Orin INA3221 without power*_input, or Thor INA3221
+        # alongside a separate INA238 total power sensor)
+        self._power_vi_pairs = []
+        for hwmon_dir in sorted(glob.glob('/sys/class/hwmon/hwmon*')):
+            name_path = os.path.join(hwmon_dir, 'name')
+            try:
+                with open(name_path, 'r') as f:
+                    name = f.read().strip()
+            except (OSError, ValueError):
+                continue
+            if 'ina' not in name.lower():
+                continue
+            # INA3221 has 3 channels: in1/curr1, in2/curr2, in3/curr3
+            for ch in range(1, 4):
+                v_path = os.path.join(hwmon_dir, f'in{ch}_input')
+                i_path = os.path.join(hwmon_dir, f'curr{ch}_input')
+                label_path = os.path.join(hwmon_dir, f'in{ch}_label')
+                if not (os.path.exists(v_path) and os.path.exists(i_path)):
+                    continue
+                label = 'unknown'
                 try:
-                    with open(name_path, 'r') as f:
-                        name = f.read().strip()
+                    with open(label_path, 'r') as f:
+                        label = f.read().strip()
                 except (OSError, ValueError):
+                    pass
+                if label == 'unknown':
                     continue
-                if 'ina' not in name.lower():
-                    continue
-                # INA3221 has 3 channels: in1/curr1, in2/curr2, in3/curr3
-                for ch in range(1, 4):
-                    v_path = os.path.join(hwmon_dir, f'in{ch}_input')
-                    i_path = os.path.join(hwmon_dir, f'curr{ch}_input')
-                    label_path = os.path.join(hwmon_dir, f'in{ch}_label')
-                    if not (os.path.exists(v_path) and os.path.exists(i_path)):
-                        continue
-                    label = 'unknown'
-                    try:
-                        with open(label_path, 'r') as f:
-                            label = f.read().strip()
-                    except (OSError, ValueError):
-                        pass
-                    if label == 'unknown':
-                        continue
-                    self._power_vi_pairs.append((label, v_path, i_path))
+                self._power_vi_pairs.append((label, v_path, i_path))
 
         return power_paths
 
@@ -457,18 +466,23 @@ class JetsonGpuMetrics(GpuMetrics):
         total_power_mw = 0
         has_power = False
         if self._power_paths:
-            # Direct power*_input files (e.g. Thor)
+            # Direct power*_input files (e.g. Thor INA238)
+            # hwmon power*_input values are in microwatts (uW)
             for label, path in self._power_paths.items():
                 val = self._read_sysfs(path)
                 if val is not None:
+                    val_mw = val / 1000.0
                     key = f'power_{label.lower().replace(" ", "_")}_mw'
-                    metrics[key] = val
+                    metrics[key] = round(val_mw, 1)
                     if any(kw in label.lower() for kw in ['total', 'vdd', 'sys', 'vin']):
-                        total_power_mw += val
+                        total_power_mw += val_mw
                         has_power = True
-        elif hasattr(self, '_power_vi_pairs') and self._power_vi_pairs:
+        if hasattr(self, '_power_vi_pairs') and self._power_vi_pairs:
             # Compute power from voltage x current (e.g. Orin INA3221)
             # Voltage in mV, current in mA -> power in mW = (mV * mA) / 1000
+            # When direct power readings already provide board total (e.g. Thor
+            # INA238), only log per-rail breakdown without double-counting.
+            vi_counts_toward_total = not has_power
             for label, v_path, i_path in self._power_vi_pairs:
                 voltage = self._read_sysfs(v_path)
                 current = self._read_sysfs(i_path)
@@ -476,7 +490,9 @@ class JetsonGpuMetrics(GpuMetrics):
                     power_mw = round(voltage * current / 1000.0, 1)
                     key = f'power_{label.lower().replace(" ", "_")}_mw'
                     metrics[key] = power_mw
-                    if any(kw in label.lower() for kw in ['total', 'vdd', 'sys', 'vin']):
+                    if vi_counts_toward_total and any(
+                            kw in label.lower()
+                            for kw in ['total', 'vdd', 'sys', 'vin']):
                         total_power_mw += power_mw
                         has_power = True
         if has_power:
