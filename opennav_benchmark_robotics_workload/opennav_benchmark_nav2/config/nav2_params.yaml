@@ -188,7 +188,7 @@ controller_server:
 
 planner_server:
   ros__parameters:
-    expected_planner_frequency: 0.5
+    expected_planner_frequency: 999999999.0  # Bogus value to print planner times for throughput benchmarking
     planner_plugins: ["GridBased"]
     costmap_update_timeout: 1.0
 
