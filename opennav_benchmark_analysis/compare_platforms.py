@@ -31,8 +31,8 @@ from plotly.subplots import make_subplots
 
 from utils import (
     load_run, compute_stats, save_plot, build_html_report, get_metric_label,
-    count_control_loop_misses, parse_planner_loop_times,
-    load_vlm_queries, VLM_OUTCOMES, PLATFORM_LABELS
+    count_completed_missions, count_control_loop_misses,
+    parse_planner_loop_times, load_vlm_queries, VLM_OUTCOMES, PLATFORM_LABELS
 )
 
 # Vibrant colors matching Plotly's default colorful palette
@@ -960,6 +960,29 @@ def plot_summary_bars(platforms):
     return fig
 
 
+def plot_completed_missions(mission_counts):
+    """Bar chart of completed missions per platform."""
+    fig = go.Figure()
+
+    for key, count in mission_counts.items():
+        fig.add_trace(go.Bar(
+            x=[PLATFORM_ARG_LABELS[key]],
+            y=[count],
+            marker_color=PLATFORM_COLORS[key],
+            text=[str(count)],
+            textposition='outside',
+            showlegend=False,
+        ))
+
+    fig.update_layout(
+        title='Completed Missions (15 Min Window) — Higher Is Better',
+        yaxis_title='Missions Completed',
+        template='plotly',
+        height=500,
+    )
+    return fig
+
+
 def plot_planner_cycle_times(platforms_planner):
     """Box plot of planner cycle time distributions per platform."""
     fig = go.Figure()
@@ -1110,9 +1133,11 @@ def main():
         platforms[key] = (meta, df)
         print(f'  Samples: {len(df)}, Platform in file: {meta["platform_label"]}')
 
-    # Count control loop misses from ROS logs for each platform
+    # Count completed missions and control loop misses from ROS logs
+    mission_counts = {}
     miss_counts = {}
     for key, path in [('amd', args.amd), ('orin', args.orin), ('thor', args.thor)]:
+        mission_counts[key] = count_completed_missions(path)
         miss_counts[key] = count_control_loop_misses(path)
 
     output_dir = os.path.join(args.output_dir, 'comparison')
@@ -1151,6 +1176,12 @@ def main():
         fig = func(platforms)
         fig = save_plot(fig, output_dir, name.lower().replace(' ', '_'))
         figures.append((name, fig))
+
+    # Completed missions chart
+    print('  Generating: Completed Missions')
+    fig = plot_completed_missions(mission_counts)
+    fig = save_plot(fig, output_dir, 'completed_missions')
+    figures.append(('Completed Missions', fig))
 
     # Planner cycle time chart (if planner loop warnings exist)
     platforms_planner = {}

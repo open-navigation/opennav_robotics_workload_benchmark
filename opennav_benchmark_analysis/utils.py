@@ -428,6 +428,33 @@ def parse_planner_loop_times(metrics_filepath):
     }
 
 
+def count_completed_missions(metrics_filepath):
+    """Count navigation goals that succeeded from bt_navigator logs.
+
+    Args:
+        metrics_filepath: Path to system_metrics.json file.
+
+    Returns:
+        int: Number of "Goal succeeded" lines in component container logs.
+    """
+    run_dir = os.path.dirname(os.path.abspath(metrics_filepath))
+    ros_dir = os.path.join(run_dir, 'ros')
+    if not os.path.isdir(ros_dir):
+        return 0
+
+    log_files = glob.glob(os.path.join(ros_dir, 'component_container_isolated_*.log'))
+    if not log_files:
+        return 0
+
+    total = 0
+    for log_file in log_files:
+        with open(log_file, 'r', errors='replace') as f:
+            for line in f:
+                if '[bt_navigator]: Goal succeeded' in line:
+                    total += 1
+    return total
+
+
 def count_control_loop_misses(metrics_filepath):
     """Count control loop rate misses from component container isolated logs.
 

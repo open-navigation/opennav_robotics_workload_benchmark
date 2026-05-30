@@ -30,8 +30,8 @@ from plotly.subplots import make_subplots
 
 from utils import (
     load_run, compute_stats, save_plot, build_html_report, get_metric_label,
-    count_control_loop_misses, parse_planner_loop_times,
-    load_vlm_queries, VLM_OUTCOMES,
+    count_completed_missions, count_control_loop_misses,
+    parse_planner_loop_times, load_vlm_queries, VLM_OUTCOMES,
 )
 
 
@@ -614,7 +614,8 @@ def main():
             fig = save_plot(fig, output_dir, name.lower().replace(' ', '_').replace('&', 'and'))
             figures.append((name, fig))
 
-    # Count control loop misses from ROS logs
+    # Count completed missions and control loop misses from ROS logs
+    completed_missions = count_completed_missions(args.metrics_file)
     control_loop_misses = count_control_loop_misses(args.metrics_file)
 
     # Parse planner loop times from ROS logs
@@ -659,6 +660,8 @@ def main():
     # Compute and format statistics table
     stats_df = compute_stats(df)
     stats_html = (
+        f'<div class="metadata"><strong>Completed Missions:</strong> '
+        f'{completed_missions}</div>\n'
         f'<div class="metadata"><strong>Control Loop Misses (30 Hz target):</strong> '
         f'{control_loop_misses}</div>\n'
     ) + planner_html + vlm_html + stats_df.to_html(

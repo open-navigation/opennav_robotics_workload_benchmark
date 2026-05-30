@@ -18,6 +18,7 @@
 
 import glob
 import os
+import time
 
 
 def detect_platform():
@@ -242,6 +243,8 @@ class JetsonGpuMetrics(GpuMetrics):
         self._nvml_handle = None
         load_candidates = glob.glob('/sys/devices/platform/17000000.ga10b/load')
         load_candidates += glob.glob('/sys/devices/platform/*.gpu/load')
+        load_candidates += glob.glob('/sys/devices/platform/bus@0/17000000.gpu/load')
+        load_candidates += glob.glob('/sys/devices/platform/bus@0/*.gpu/load')
         load_candidates += glob.glob('/sys/devices/gpu.0/load')
         for candidate in sorted(load_candidates):
             if os.path.exists(candidate):
@@ -263,6 +266,10 @@ class JetsonGpuMetrics(GpuMetrics):
         freq_candidates = glob.glob(
             '/sys/devices/platform/17000000.ga10b/devfreq/*/cur_freq')
         freq_candidates += glob.glob('/sys/devices/platform/*.gpu/devfreq/*/cur_freq')
+        freq_candidates += glob.glob(
+            '/sys/devices/platform/bus@0/17000000.gpu/devfreq/*/cur_freq')
+        freq_candidates += glob.glob(
+            '/sys/devices/platform/bus@0/*.gpu/devfreq/*/cur_freq')
         freq_candidates += glob.glob('/sys/class/devfreq/gpu-gpc-*/cur_freq')
         freq_candidates += glob.glob('/sys/class/devfreq/gpu-nvd-*/cur_freq')
         freq_candidates += glob.glob('/sys/devices/gpu.0/devfreq/*/cur_freq')
@@ -404,23 +411,37 @@ class JetsonGpuMetrics(GpuMetrics):
     def collect(self):
         metrics = {}
 
-        # GPU utilization
-        # Orin: sysfs load file (value is 0-1000, divide by 10 for percentage)
-        # Thor: nvidia-smi fallback (discrete GPU has no sysfs load file)
+        # GPU utilization + clock — sub-sample to capture bursty workloads.
+        # The sysfs load file is an instantaneous snapshot; robotics workloads
+        # submit short GPU batches that complete in ms, so a single 1Hz poll
+        # misses most activity. Sub-sample 10x over ~1s and average.
         if self._gpu_load_path:
-            val = self._read_sysfs(self._gpu_load_path)
-            if val is not None:
-                metrics['gpu_util'] = round(val / 10.0, 1)
+            util_readings = []
+            clock_readings = []
+            for _ in range(10):
+                val = self._read_sysfs(self._gpu_load_path)
+                if val is not None:
+                    util_readings.append(val / 10.0)
+                if self._gpu_freq_path:
+                    freq = self._read_sysfs(self._gpu_freq_path)
+                    if freq is not None:
+                        clock_readings.append(freq / 1_000_000)
+                time.sleep(0.1)
+            if util_readings:
+                metrics['gpu_util'] = round(
+                    sum(util_readings) / len(util_readings), 1)
+            if clock_readings:
+                metrics['gpu_clock_mhz'] = round(
+                    sum(clock_readings) / len(clock_readings), 1)
         elif self._nvml_handle:
             metrics.update(self._query_nvml())
 
-        # GPU frequency (in Hz, convert to MHz)
-        # Thor has dual clock domains (gpc + nvd), report all found
-        if self._gpu_freq_path:
+        # GPU frequency for additional clock domains (Thor dual gpc + nvd)
+        if 'gpu_clock_mhz' not in metrics and self._gpu_freq_path:
             val = self._read_sysfs(self._gpu_freq_path)
             if val is not None:
                 metrics['gpu_clock_mhz'] = round(val / 1_000_000, 1)
-            # Report additional clock domains if present (Thor)
+        if len(self._gpu_freq_paths) > 1:
             for i, path in enumerate(self._gpu_freq_paths[1:], 1):
                 val = self._read_sysfs(path)
                 if val is not None:
