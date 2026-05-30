@@ -1,4 +1,4 @@
-# AMD Strix Halo (Ryzen AI Max+) AI workload profile.
+# AMD Strix Halo AI workload profile.
 VLM_EXTRA_RUN_ARGS=(
     --cap-add=SYS_PTRACE
     --device=/dev/kfd

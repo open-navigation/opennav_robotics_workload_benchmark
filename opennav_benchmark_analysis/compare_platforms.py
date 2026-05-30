@@ -42,7 +42,7 @@ PLATFORM_COLORS = {
 }
 
 PLATFORM_ARG_LABELS = {
-    'amd': 'AMD Ryzen AI Max+ 395',
+    'amd': 'AMD Strix Halo',
     'orin': 'NVIDIA Jetson Orin',
     'thor': 'NVIDIA Jetson Thor',
 }
@@ -1004,7 +1004,7 @@ def main():
     parser = argparse.ArgumentParser(
         description='Compare benchmark results across 3 hardware platforms.')
     parser.add_argument('--amd', required=True,
-                        help='Path to AMD Ryzen AI Max+ metrics JSON')
+                        help='Path to AMD Strix Halo metrics JSON')
     parser.add_argument('--orin', required=True,
                         help='Path to Jetson Orin metrics JSON')
     parser.add_argument('--thor', required=True,

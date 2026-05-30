@@ -17,7 +17,7 @@
 """
 Capture system metrics for the robotics workload benchmark.
 
-Auto-detects platform (AMD Ryzen AI Max+, NVIDIA Jetson Orin, Jetson Thor)
+Auto-detects platform (AMD Strix Halo, NVIDIA Jetson Orin, Jetson Thor)
 and captures platform-specific GPU metrics alongside common system metrics.
 
 Usage:

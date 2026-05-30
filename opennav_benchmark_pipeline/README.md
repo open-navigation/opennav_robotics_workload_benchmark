@@ -139,7 +139,7 @@ This generates interactive Plotly charts (CPU, GPU, RAM, thermals, I/O, etc.) an
 
 ### Cross-platform comparison (all 3 platforms)
 
-To compare benchmark results across the AMD Ryzen AI Max+, NVIDIA Jetson Orin, and NVIDIA Jetson Thor platforms, provide each platform's metrics file:
+To compare benchmark results across the AMD Strix Halo, NVIDIA Jetson Orin, and NVIDIA Jetson Thor platforms, provide each platform's metrics file:
 
 ```bash
 cd /path/to/opennav_robotics_workload_benchmark

@@ -181,7 +181,7 @@ class AmdGpuMetrics(GpuMetrics):
         mem_busy = self._read_sysfs(mem_busy_path) if os.path.exists(mem_busy_path) else None
         if mem_busy is not None:
             metrics['mem_busy_percent'] = mem_busy
-            # Ryzen AI Max+ 395: LPDDR5X-7500 with 256-bit bus = ~120 GB/s theoretical max
+            # AMD Strix Halo: LPDDR5X-7500 with 256-bit bus = ~120 GB/s theoretical max
             metrics['mem_bandwidth_gbps'] = round((mem_busy / 100.0) * 120.0, 2)
 
         # NPU (XDNA) - best effort
