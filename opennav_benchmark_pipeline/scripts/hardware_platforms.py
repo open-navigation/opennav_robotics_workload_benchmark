@@ -18,7 +18,6 @@
 
 import glob
 import os
-import time
 
 
 def detect_platform():
@@ -277,6 +276,19 @@ class JetsonGpuMetrics(GpuMetrics):
             self._gpu_freq_paths = sorted(freq_candidates)
             self._gpu_freq_path = self._gpu_freq_paths[0]
 
+        # devfreq trans_stat for accurate GPU utilization on Orin.
+        # The load file is a cached point-in-time snapshot that misses bursty
+        # workloads. trans_stat tracks cumulative time at each frequency,
+        # allowing utilization to be derived from deltas between samples.
+        self._trans_stat_path = None
+        self._prev_trans_stat = None
+        if self._gpu_load_path and self._gpu_freq_path:
+            ts_path = os.path.join(
+                os.path.dirname(self._gpu_freq_path), 'trans_stat')
+            if os.path.exists(ts_path):
+                self._trans_stat_path = ts_path
+                self._prev_trans_stat = self._parse_trans_stat()
+
         # GPU temperature - find thermal zone for GPU
         self._gpu_temp_path = None
         thermal_zones = glob.glob('/sys/class/thermal/thermal_zone*/type')
@@ -318,6 +330,33 @@ class JetsonGpuMetrics(GpuMetrics):
 
         # Theoretical max memory bandwidth by platform
         self._mem_bw_max_gbps = 204.8 if variant == 'jetson_orin' else 273.0
+
+    def _parse_trans_stat(self):
+        """Parse devfreq trans_stat into {freq_hz: time_ms} dict."""
+        if not self._trans_stat_path:
+            return None
+        try:
+            with open(self._trans_stat_path, 'r') as f:
+                lines = f.readlines()
+        except (OSError, ValueError):
+            return None
+        result = {}
+        for line in lines:
+            line = line.strip().lstrip('*').strip()
+            # Lines: "306000000:  0  0  0  ... 1638884"
+            # Last column is total time_ms at this frequency
+            if ':' not in line or 'From' in line or 'Total' in line:
+                continue
+            parts = line.split()
+            if len(parts) < 2:
+                continue
+            try:
+                freq = int(parts[0].rstrip(':'))
+                time_ms = int(parts[-1])
+                result[freq] = time_ms
+            except (ValueError, IndexError):
+                continue
+        return result if result else None
 
     def _query_nvml(self):
         """Query GPU utilization via NVML (fallback for Thor)."""
@@ -420,32 +459,46 @@ class JetsonGpuMetrics(GpuMetrics):
     def collect(self):
         metrics = {}
 
-        # GPU utilization + clock — sub-sample to capture bursty workloads.
-        # The sysfs load file is an instantaneous snapshot; robotics workloads
-        # submit short GPU batches that complete in ms, so a single 1Hz poll
-        # misses most activity. Sub-sample 50x over ~1s and average.
+        # GPU utilization
         if self._gpu_load_path:
-            util_readings = []
-            clock_readings = []
-            for _ in range(50):
+            if self._trans_stat_path:
+                # Derive utilization from devfreq trans_stat (cumulative time
+                # at each frequency). The sysfs load file is a cached snapshot
+                # that misses bursty sub-ms workloads; trans_stat is immune.
+                curr = self._parse_trans_stat()
+                if curr and self._prev_trans_stat:
+                    idle_freq = min(curr.keys())
+                    total_delta = 0
+                    active_delta = 0
+                    weighted_freq = 0
+                    for freq, t in curr.items():
+                        dt = t - self._prev_trans_stat.get(freq, 0)
+                        if dt > 0:
+                            total_delta += dt
+                            if freq != idle_freq:
+                                active_delta += dt
+                            weighted_freq += freq * dt
+                    if total_delta > 0:
+                        metrics['gpu_util'] = round(
+                            active_delta / total_delta * 100, 1)
+                        metrics['gpu_clock_mhz'] = round(
+                            weighted_freq / total_delta / 1_000_000, 1)
+                    else:
+                        # No transitions — GPU fully idle at lowest freq
+                        metrics['gpu_util'] = 0.0
+                        metrics['gpu_clock_mhz'] = round(
+                            idle_freq / 1_000_000, 1)
+                self._prev_trans_stat = curr
+            # Fallback to instantaneous load file if trans_stat unavailable
+            if 'gpu_util' not in metrics:
                 val = self._read_sysfs(self._gpu_load_path)
                 if val is not None:
-                    util_readings.append(val / 10.0)
-                if self._gpu_freq_path:
-                    freq = self._read_sysfs(self._gpu_freq_path)
-                    if freq is not None:
-                        clock_readings.append(freq / 1_000_000)
-                time.sleep(0.02)
-            if util_readings:
-                metrics['gpu_util'] = round(
-                    sum(util_readings) / len(util_readings), 1)
-            if clock_readings:
-                metrics['gpu_clock_mhz'] = round(
-                    sum(clock_readings) / len(clock_readings), 1)
+                    metrics['gpu_util'] = round(val / 10.0, 1)
         elif self._nvml_handle:
             metrics.update(self._query_nvml())
 
-        # GPU frequency for additional clock domains (Thor dual gpc + nvd)
+        # GPU frequency (in Hz, convert to MHz)
+        # Thor has dual clock domains (gpc + nvd), report all found
         if 'gpu_clock_mhz' not in metrics and self._gpu_freq_path:
             val = self._read_sysfs(self._gpu_freq_path)
             if val is not None:
@@ -474,7 +527,7 @@ class JetsonGpuMetrics(GpuMetrics):
                     val_mw = val / 1000.0
                     key = f'power_{label.lower().replace(" ", "_")}_mw'
                     metrics[key] = round(val_mw, 1)
-                    if any(kw in label.lower() for kw in ['total', 'vdd', 'sys', 'vin']):
+                    if any(kw in label.lower() for kw in ['total', 'vdd', 'sys', 'vin', 'unknown']):
                         total_power_mw += val_mw
                         has_power = True
         if hasattr(self, '_power_vi_pairs') and self._power_vi_pairs:

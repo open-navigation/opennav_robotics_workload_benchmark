@@ -720,10 +720,8 @@ def plot_platform_balance_radar(platforms):
     dimensions = [
         'CPU Headroom',
         'GPU Capability',
-        'VRAM Headroom',
+        'Memory Headroom',
         'Clock Speed',
-        'Power Efficiency',
-        'Thermal Headroom',
     ]
 
     fig = go.Figure()
@@ -738,33 +736,20 @@ def plot_platform_balance_radar(platforms):
         # GPU Capability: gpu_util mean (shows it's handling the workload)
         vals['GPU Capability'] = df['gpu_util'].mean() if 'gpu_util' in df.columns else 0
 
-        # VRAM Headroom: % free
+        # Memory Headroom: % free (discrete VRAM on AMD, unified RAM on Jetsons)
         if 'gpu_mem_used_mb' in df.columns and 'gpu_mem_total_mb' in df.columns:
-            vram_total = df['gpu_mem_total_mb'].mean()
-            vram_used = df['gpu_mem_used_mb'].mean()
-            vals['VRAM Headroom'] = ((vram_total - vram_used) / vram_total * 100) if vram_total > 0 else 0
+            mem_total = df['gpu_mem_total_mb'].mean()
+            mem_used = df['gpu_mem_used_mb'].mean()
+            vals['Memory Headroom'] = ((mem_total - mem_used) / mem_total * 100) if mem_total > 0 else 0
+        elif 'ram_used_mb' in df.columns and 'ram_total_mb' in df.columns:
+            mem_total = df['ram_total_mb'].mean()
+            mem_used = df['ram_used_mb'].mean()
+            vals['Memory Headroom'] = ((mem_total - mem_used) / mem_total * 100) if mem_total > 0 else 0
         else:
-            vals['VRAM Headroom'] = 0
+            vals['Memory Headroom'] = 0
 
         # Clock Speed: mean freq in GHz
         vals['Clock Speed'] = df['cpu_freq_ghz'].mean() if 'cpu_freq_ghz' in df.columns else 0
-
-        # Power Efficiency: available GHz-cores per watt
-        power_col = next((c for c in ['gpu_power_w', 'board_power_w'] if c in df.columns), None)
-        if power_col and 'cpu_total' in df.columns:
-            core_cols = [c for c in df.columns if c.startswith('cpu_core_')]
-            num_cores = len(core_cols) if core_cols else 1
-            freq = df['cpu_freq_ghz'].mean() if 'cpu_freq_ghz' in df.columns else 1.0
-            avail = (1 - df['cpu_total'].mean() / 100) * num_cores * freq
-            power = df[power_col].mean()
-            vals['Power Efficiency'] = avail / power if power > 0 else 0
-        else:
-            vals['Power Efficiency'] = 0
-
-        # Thermal Headroom: assume Tmax ~100°C, headroom = 100 - actual
-        cpu_temp = df['cpu_temp'].mean() if 'cpu_temp' in df.columns else 50
-        gpu_temp = df['gpu_temp'].mean() if 'gpu_temp' in df.columns else 50
-        vals['Thermal Headroom'] = 100 - max(cpu_temp, gpu_temp)
 
         raw_values[key] = vals
 
@@ -1153,7 +1138,6 @@ def main():
         ('Peak Core Loading', plot_peak_core_loading),
         ('CPU Core Histogram', plot_cpu_core_histogram),
         ('Core Utilization Percentiles', plot_core_utilization_percentiles),
-        ('Real-Time Stability', plot_realtime_stability),
         ('GPU Comparison', plot_gpu_comparison),
         ('GPU Clock Speed', plot_gpu_clock_comparison),
         ('GPU Effective Throughput', plot_gpu_effective_throughput),
