@@ -1,0 +1,3 @@
+[INFO] [1780093632.832903651] [laserscan_merger]: Subscribed to /scan_front_left
+[INFO] [1780093632.834379424] [laserscan_merger]: Subscribed to /scan_front_right
+[INFO] [1780093632.835742904] [laserscan_merger]: Publishing merged scan on /scan_merged in frame base_link

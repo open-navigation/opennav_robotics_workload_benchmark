@@ -1,0 +1,6 @@
+Detected platform: jetson_orin
+Writing metrics to: /home/opennav/opennav_robotics_workload_benchmark/opennav_benchmark_logs/run_1780093628/system_metrics.json
+Capturing metrics every 1s for 900s...
+Warning: cannot read /sys/class/thermal/thermal_zone1/temp: can't concat NoneType to bytes
+Received signal 15, shutting down...
+Metrics capture complete. 899 samples written to /home/opennav/opennav_robotics_workload_benchmark/opennav_benchmark_logs/run_1780093628/system_metrics.json

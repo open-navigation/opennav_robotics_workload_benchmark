@@ -1,0 +1,20 @@
+1780094682.5909052 [INFO] [launch]: All log files can be found below /root/.ros/log/2026-05-29-22-44-42-589387-opennav-orin-7
+1780094682.5911293 [INFO] [launch]: Default logging verbosity is set to INFO
+1780094684.5857251 [INFO] [laserscan_merger.py-1]: process started with pid [39]
+1780094684.5860455 [INFO] [component_container_isolated-2]: process started with pid [40]
+1780094684.5862463 [INFO] [vlm_node-3]: process started with pid [41]
+1780094684.5863681 [INFO] [robot_mission_runner-4]: process started with pid [42]
+1780094684.7191970 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/map_server' in container '/nav2_container'
+1780094684.7566974 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/amcl' in container '/nav2_container'
+1780094684.7774284 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/lifecycle_manager_localization' in container '/nav2_container'
+1780094684.8639629 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/controller_server' in container '/nav2_container'
+1780094684.8839765 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/smoother_server' in container '/nav2_container'
+1780094684.9172282 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/planner_server' in container '/nav2_container'
+1780094684.9345224 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/route_server' in container '/nav2_container'
+1780094684.9529545 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/behavior_server' in container '/nav2_container'
+1780094684.9805517 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/bt_navigator' in container '/nav2_container'
+1780094684.9988337 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/waypoint_follower' in container '/nav2_container'
+1780094685.0131085 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/velocity_smoother' in container '/nav2_container'
+1780094685.0321965 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/collision_monitor' in container '/nav2_container'
+1780094685.0516603 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/docking_server' in container '/nav2_container'
+1780094685.0657861 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/lifecycle_manager_navigation' in container '/nav2_container'

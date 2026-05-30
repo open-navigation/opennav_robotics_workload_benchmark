@@ -1,0 +1,4 @@
+Detected platform: jetson_thor
+Writing metrics to: /home/opennav/opennav_robotics_workload_benchmark/opennav_benchmark_logs/run_1780092353/system_metrics.json
+Capturing metrics every 1s for 900s...
+Metrics capture complete. 900 samples written to /home/opennav/opennav_robotics_workload_benchmark/opennav_benchmark_logs/run_1780092353/system_metrics.json
