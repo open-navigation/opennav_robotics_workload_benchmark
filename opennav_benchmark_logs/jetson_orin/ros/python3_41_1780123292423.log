@@ -1,0 +1,230 @@
+[INFO] [1780123292.641949470] [vlm_node]: Subscribed to image topic: /camera_front/image
+[INFO] [1780123298.748311501] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123301.035450334] [vlm_node]: VLM request failed on attempt 1: Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123301.036634491] [vlm_node]: VLM_QUERY|QueryBool|error|2.29|1|Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123301.056133664] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123302.345394788] [vlm_node]: VLM request failed on attempt 1: Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123302.346389927] [vlm_node]: VLM_QUERY|QueryBool|error|1.29|1|Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123302.365611027] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123303.643566197] [vlm_node]: VLM request failed on attempt 1: Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123303.646818006] [vlm_node]: VLM_QUERY|QueryBool|error|1.28|1|Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123303.665944710] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123304.907760956] [vlm_node]: VLM request failed on attempt 1: Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123304.908543525] [vlm_node]: VLM_QUERY|QueryBool|error|1.25|1|Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123304.935556046] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123306.311234091] [vlm_node]: VLM request failed on attempt 1: Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123306.314709861] [vlm_node]: VLM_QUERY|QueryBool|error|1.38|1|Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123306.336460457] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123307.701317400] [vlm_node]: VLM request failed on attempt 1: Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123307.704730676] [vlm_node]: VLM_QUERY|QueryBool|error|1.37|1|Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123307.724627502] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123309.049058991] [vlm_node]: VLM request failed on attempt 1: Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123309.050684192] [vlm_node]: VLM_QUERY|QueryBool|error|1.33|1|Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123309.067491413] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123310.447096897] [vlm_node]: VLM request failed on attempt 1: Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123310.448040805] [vlm_node]: VLM_QUERY|QueryBool|error|1.38|1|Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123310.468686698] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123311.766426561] [vlm_node]: VLM request failed on attempt 1: Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123311.767811608] [vlm_node]: VLM_QUERY|QueryBool|error|1.30|1|Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123311.793424076] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123313.074549979] [vlm_node]: VLM request failed on attempt 1: Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123313.075330692] [vlm_node]: VLM_QUERY|QueryBool|error|1.28|1|Error code: 503 - {'error': {'message': 'Loading model', 'type': 'unavailable_error', 'code': 503}}
+[INFO] [1780123313.100022292] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780123317.153096596] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780123333.974566619] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780123334.080135179] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123374.394654577] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123374.395460890] [vlm_node]: VLM_QUERY|QueryBool|error|61.30|1|Request timed out.
+[INFO] [1780123374.402968099] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123408.542808666] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123408.543683105] [vlm_node]: VLM_QUERY|QueryBool|error|91.39|1|Request timed out.
+[INFO] [1780123408.550169355] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123425.314716807] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123425.317315198] [vlm_node]: VLM_QUERY|QueryBool|error|91.34|1|Request timed out.
+[INFO] [1780123425.321638117] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123425.522701728] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123425.523448747] [vlm_node]: VLM_QUERY|QueryBool|error|91.44|1|Request timed out.
+[INFO] [1780123425.528194438] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123465.743321828] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123465.744284042] [vlm_node]: VLM_QUERY|QueryBool|error|91.34|1|Request timed out.
+[INFO] [1780123465.754398449] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123499.858711199] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123499.859530408] [vlm_node]: VLM_QUERY|QueryBool|error|91.31|1|Request timed out.
+[INFO] [1780123499.864074252] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123516.806776796] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123516.807743330] [vlm_node]: VLM_QUERY|QueryBool|error|91.49|1|Request timed out.
+[INFO] [1780123516.815619339] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123517.095481850] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123517.098925948] [vlm_node]: VLM_QUERY|QueryBool|error|91.57|1|Request timed out.
+[INFO] [1780123517.104731965] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123557.266787513] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123557.267583555] [vlm_node]: VLM_QUERY|QueryBool|error|91.51|1|Request timed out.
+[INFO] [1780123557.271630582] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123591.334962434] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123591.335796556] [vlm_node]: VLM_QUERY|QueryBool|error|91.47|1|Request timed out.
+[INFO] [1780123591.341078687] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123608.234691859] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123608.235562971] [vlm_node]: VLM_QUERY|QueryBool|error|91.42|1|Request timed out.
+[INFO] [1780123608.256220725] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123608.474722137] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123608.475534884] [vlm_node]: VLM_QUERY|QueryBool|error|91.37|1|Request timed out.
+[INFO] [1780123608.488817826] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123648.739267569] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123648.740082044] [vlm_node]: VLM_QUERY|QueryBool|error|91.47|1|Request timed out.
+[INFO] [1780123648.754452609] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123682.662742307] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123682.663578285] [vlm_node]: VLM_QUERY|QueryBool|error|91.32|1|Request timed out.
+[INFO] [1780123682.669318903] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123699.734645346] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123699.735409422] [vlm_node]: VLM_QUERY|QueryBool|error|91.48|1|Request timed out.
+[INFO] [1780123699.743549050] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123699.978711391] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123699.979531785] [vlm_node]: VLM_QUERY|QueryBool|error|91.49|1|Request timed out.
+[INFO] [1780123699.983872184] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123740.254724819] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123740.255521214] [vlm_node]: VLM_QUERY|QueryBool|error|91.50|1|Request timed out.
+[INFO] [1780123740.260724535] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123774.142676999] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123774.143505202] [vlm_node]: VLM_QUERY|QueryBool|error|91.48|1|Request timed out.
+[INFO] [1780123774.160036937] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123791.058077268] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123791.058875455] [vlm_node]: VLM_QUERY|QueryBool|error|91.32|1|Request timed out.
+[INFO] [1780123791.064601420] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123791.578753701] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123791.579651470] [vlm_node]: VLM_QUERY|QueryBool|error|91.60|1|Request timed out.
+[INFO] [1780123791.586523869] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123831.778890283] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123831.780913528] [vlm_node]: VLM_QUERY|QueryBool|error|91.52|1|Request timed out.
+[INFO] [1780123831.786211185] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780123865.574928869] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123865.575833678] [vlm_node]: VLM_QUERY|QueryBool|error|91.42|1|Request timed out.
+[INFO] [1780123865.581953939] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123882.430782367] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123882.431803494] [vlm_node]: VLM_QUERY|QueryBool|error|91.37|1|Request timed out.
+[INFO] [1780123882.447471129] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123883.128619346] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123883.129750102] [vlm_node]: VLM_QUERY|QueryBool|error|91.54|1|Request timed out.
+[INFO] [1780123883.136363855] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123923.329506071] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123923.330545853] [vlm_node]: VLM_QUERY|QueryBool|error|91.54|1|Request timed out.
+[INFO] [1780123923.347819754] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123957.074787441] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123957.075740153] [vlm_node]: VLM_QUERY|QueryBool|error|91.49|1|Request timed out.
+[INFO] [1780123957.091461007] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123973.841529409] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123973.842303181] [vlm_node]: VLM_QUERY|QueryBool|error|91.40|1|Request timed out.
+[INFO] [1780123973.849518233] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780123974.620721854] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780123974.621769892] [vlm_node]: VLM_QUERY|QueryBool|error|91.49|1|Request timed out.
+[INFO] [1780123974.628355391] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124014.607428253] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780124014.608472451] [vlm_node]: VLM_QUERY|QueryBool|error|91.26|1|Request timed out.
+[INFO] [1780124014.613257164] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124048.480712608] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780124048.481609386] [vlm_node]: VLM_QUERY|QueryBool|error|91.39|1|Request timed out.
+[INFO] [1780124048.486684045] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124065.254788567] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780124065.255756735] [vlm_node]: VLM_QUERY|QueryBool|error|91.41|1|Request timed out.
+[INFO] [1780124065.263324932] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124065.974722871] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780124065.975516132] [vlm_node]: VLM_QUERY|QueryBool|error|91.35|1|Request timed out.
+[INFO] [1780124065.981706571] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124106.054676856] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780124106.055459653] [vlm_node]: VLM_QUERY|QueryBool|error|91.44|1|Request timed out.
+[INFO] [1780124106.070139036] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124139.784057886] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780124139.785012870] [vlm_node]: VLM_QUERY|QueryBool|error|91.30|1|Request timed out.
+[INFO] [1780124139.793046753] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124156.579030808] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780124156.579889443] [vlm_node]: VLM_QUERY|QueryBool|error|91.32|1|Request timed out.
+[INFO] [1780124156.584664398] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124157.535105437] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780124157.535914121] [vlm_node]: VLM_QUERY|QueryBool|error|91.55|1|Request timed out.
+[INFO] [1780124157.538485450] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124197.350882054] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780124197.351883374] [vlm_node]: VLM_QUERY|QueryBool|error|91.28|1|Request timed out.
+[INFO] [1780124197.367007645] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124217.894346118] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124217.895685413] [vlm_node]: VLM_QUERY|QueryBool|error|61.31|1|Connection error.
+[INFO] [1780124217.901446937] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124218.888323944] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124218.890261209] [vlm_node]: VLM_QUERY|QueryBool|error|61.35|1|Connection error.
+[INFO] [1780124218.894928967] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124219.212746854] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124219.214777877] [vlm_node]: VLM_QUERY|QueryBool|error|1.31|1|Connection error.
+[INFO] [1780124219.226564886] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124220.279329090] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124220.281206772] [vlm_node]: VLM_QUERY|QueryBool|error|1.39|1|Connection error.
+[INFO] [1780124220.290773931] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124220.459277249] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124220.460923353] [vlm_node]: VLM_QUERY|QueryBool|error|1.24|1|Connection error.
+[INFO] [1780124220.470573518] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124221.488770855] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124221.490237059] [vlm_node]: VLM_QUERY|QueryBool|error|1.20|1|Connection error.
+[INFO] [1780124221.497731148] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124221.843332105] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124221.844459629] [vlm_node]: VLM_QUERY|QueryBool|error|1.38|1|Connection error.
+[INFO] [1780124221.849539825] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124222.829582222] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124222.831474336] [vlm_node]: VLM_QUERY|QueryBool|error|1.33|1|Connection error.
+[INFO] [1780124222.841386575] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124223.065315008] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124223.066521570] [vlm_node]: VLM_QUERY|QueryBool|error|1.22|1|Connection error.
+[INFO] [1780124223.075458536] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124224.255641629] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[WARN] [1780124224.259679354] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124224.262294523] [vlm_node]: VLM_QUERY|QueryBool|error|1.19|1|Connection error.
+[INFO] [1780124224.270042046] [vlm_node]: VLM_QUERY|QueryBool|error|1.42|1|Connection error.
+[INFO] [1780124224.278198007] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780124224.280652571] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124225.467331092] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124225.468731090] [vlm_node]: VLM_QUERY|QueryBool|error|1.20|1|Connection error.
+[INFO] [1780124225.474584739] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124225.555278454] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124225.556844368] [vlm_node]: VLM_QUERY|QueryBool|error|85.76|1|Connection error.
+[INFO] [1780124225.564800462] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124225.775126668] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124225.776215825] [vlm_node]: VLM_QUERY|QueryBool|error|1.50|1|Connection error.
+[INFO] [1780124225.781778506] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124226.788744958] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124226.789628297] [vlm_node]: VLM_QUERY|QueryBool|error|1.32|1|Connection error.
+[INFO] [1780124226.794549073] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124226.888833913] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124226.889784737] [vlm_node]: VLM_QUERY|QueryBool|error|29.52|1|Connection error.
+[INFO] [1780124226.893749409] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124226.949849195] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124226.951696830] [vlm_node]: VLM_QUERY|QueryBool|error|1.39|1|Connection error.
+[INFO] [1780124226.961467088] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124227.207784002] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124227.208627373] [vlm_node]: VLM_QUERY|QueryBool|error|1.43|1|Connection error.
+[INFO] [1780124227.217326713] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124228.131265962] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124228.132268497] [vlm_node]: VLM_QUERY|QueryBool|error|1.24|1|Connection error.
+[INFO] [1780124228.138129602] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124228.177592993] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124228.178679879] [vlm_node]: VLM_QUERY|QueryBool|error|1.38|1|Connection error.
+[INFO] [1780124228.183799210] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124228.378200685] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124228.380208188] [vlm_node]: VLM_QUERY|QueryBool|error|1.42|1|Connection error.
+[INFO] [1780124228.388780939] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124228.679031472] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124228.680222675] [vlm_node]: VLM_QUERY|QueryBool|error|1.47|1|Connection error.
+[INFO] [1780124228.687546688] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124229.394791452] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124229.395661223] [vlm_node]: VLM_QUERY|QueryBool|error|1.21|1|Connection error.
+[INFO] [1780124229.401411131] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780124229.420459851] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780124229.421500082] [vlm_node]: VLM_QUERY|QueryBool|error|1.28|1|Connection error.
+[INFO] [1780124229.428899933] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780124229.883749179] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[ERROR] [1780124229.885785641] [vlm_node.action_server]: Error raised in execute callback: Failed to publish feedback with an action server: feedback publisher is invalid, at ./src/rcl_action/action_server.c:1002
+[WARN] [1780124229.896840700] [vlm_node.action_server]: Goal state not set, assuming aborted. Goal ID: [ 82  91   9 141  57  46 246 249 232 184  14 154  87  70  48 146]
+[WARN] [1780124229.965094366] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[ERROR] [1780124229.966973745] [vlm_node.action_server]: Error raised in execute callback: Failed to publish feedback with an action server: feedback publisher is invalid, at ./src/rcl_action/action_server.c:1002
+[WARN] [1780124229.975815609] [vlm_node.action_server]: Goal state not set, assuming aborted. Goal ID: [151 174 154 250 234   5 189 208  20  84  94 211 178 163  74 190]
+[WARN] [1780124230.739986637] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[ERROR] [1780124230.742297205] [vlm_node.action_server]: Error raised in execute callback: Failed to publish feedback with an action server: feedback publisher is invalid, at ./src/rcl_action/action_server.c:1002
+[WARN] [1780124230.752116582] [vlm_node.action_server]: Goal state not set, assuming aborted. Goal ID: [130 222 153  32  43  58  79  27 201 144 172  13 244   1 154 120]
+[WARN] [1780124230.833030900] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[ERROR] [1780124230.835230302] [vlm_node.action_server]: Error raised in execute callback: Failed to publish feedback with an action server: feedback publisher is invalid, at ./src/rcl_action/action_server.c:1002
+[WARN] [1780124230.844867667] [vlm_node.action_server]: Goal state not set, assuming aborted. Goal ID: [126  90  22  87  62 215   6  88 118 157  64 110  80 162 248  37]

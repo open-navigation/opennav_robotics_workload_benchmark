@@ -719,7 +719,9 @@ def plot_platform_balance_radar(platforms):
     # Define dimensions and how to compute normalized 0-1 scores (higher = better)
     dimensions = [
         'CPU Headroom',
+        'CPU Capability',
         'GPU Capability',
+        'Memory Capability',
         'Memory Headroom',
         'Clock Speed',
     ]
@@ -733,8 +735,17 @@ def plot_platform_balance_radar(platforms):
         # CPU Headroom: 100 - cpu_total (higher = more room)
         vals['CPU Headroom'] = 100 - df['cpu_total'].mean() if 'cpu_total' in df.columns else 0
 
+        # CPU Capability: cores x GHz (raw compute throughput)
+        core_cols = [c for c in df.columns if c.startswith('cpu_core_')]
+        num_cores = len(core_cols) if core_cols else 1
+        freq = df['cpu_freq_ghz'].mean() if 'cpu_freq_ghz' in df.columns else 1.0
+        vals['CPU Capability'] = num_cores * freq
+
         # GPU Capability: gpu_util mean (shows it's handling the workload)
         vals['GPU Capability'] = df['gpu_util'].mean() if 'gpu_util' in df.columns else 0
+
+        # Memory Capability: total RAM in GB
+        vals['Memory Capability'] = df['ram_total_mb'].mean() / 1000.0 if 'ram_total_mb' in df.columns else 0
 
         # Memory Headroom: % free (discrete VRAM on AMD, unified RAM on Jetsons)
         if 'gpu_mem_used_mb' in df.columns and 'gpu_mem_total_mb' in df.columns:
@@ -898,8 +909,6 @@ def plot_summary_bars(platforms):
         'cpu_total', 'gpu_util', 'ram_percent',
         'cpu_temp', 'gpu_temp',
     ]
-    # Add power metric (varies by platform)
-    power_metrics = ['gpu_power_w', 'board_power_w']
     # Add memory bandwidth if available
     bw_metrics = ['mem_busy_percent', 'mem_bandwidth_gbps']
 
@@ -909,10 +918,6 @@ def plot_summary_bars(platforms):
         all_metrics.update(df.columns)
 
     metrics_to_plot = [m for m in key_metrics if m in all_metrics]
-    for m in power_metrics:
-        if m in all_metrics:
-            metrics_to_plot.append(m)
-            break
     for m in bw_metrics:
         if m in all_metrics:
             metrics_to_plot.append(m)
@@ -1141,8 +1146,6 @@ def main():
         ('GPU Comparison', plot_gpu_comparison),
         ('GPU Clock Speed', plot_gpu_clock_comparison),
         ('GPU Effective Throughput', plot_gpu_effective_throughput),
-        ('GPU Utilization Distribution', plot_gpu_util_distribution),
-        ('GPU Memory', plot_gpu_memory),
         ('GPU Memory Headroom', plot_gpu_memory_headroom),
         ('Performance Per Watt', plot_performance_per_watt),
         ('Power Comparison', plot_power_comparison),

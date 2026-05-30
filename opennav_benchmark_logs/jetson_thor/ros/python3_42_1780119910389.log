@@ -1,0 +1,210 @@
+[WARN] [1780119910.418698739] [rcl.logging_rosout]: Publisher already registered for node name: 'robot_mission_runner'. If this is due to multiple nodes with the same name then all logs for the logger named 'robot_mission_runner' will go out over the existing publisher. As soon as any node with that name is destructed it will unregister the publisher, preventing any further logs for that name from being published on the rosout topic.
+[INFO] [1780119910.721855494] [robot_mission_runner]: Sending initial pose...
+[INFO] [1780119910.722410933] [robot_mission_runner]: Publishing Initial Pose
+[INFO] [1780119913.723123931] [robot_mission_runner]: Waiting for Nav2 to become active...
+[INFO] [1780119915.728271990] [robot_mission_runner]: Nav2 is ready for use!
+[INFO] [1780119915.728591012] [robot_mission_runner]: Nav2 up, picking benchmark node started!
+[INFO] [1780119915.743647493] [robot_mission_runner]: Waiting for 'UndockRobot' action server
+[INFO] [1780119915.744497703] [robot_mission_runner]: Undocking from dock of type: simple_charging_dock...
+[INFO] [1780119915.748048879] [robot_mission_runner]: Backing up 0.5 m at 0.4 m/s....
+[INFO] [1780119917.251136179] [robot_mission_runner]: Picking from {'x': -8.0, 'y': -52.55, 'yaw': 1.5708}, dropping at {'x': -35.5, 'y': -36.7, 'yaw': 1.5708}...
+[INFO] [1780119917.251745278] [robot_mission_runner]: Navigating to pick, attempt 1/3...
+[INFO] [1780119917.279124178] [robot_mission_runner]: Navigating to goal: -8.0 -52.55...
+[INFO] [1780119922.402155206] [robot_mission_runner]: Pose: (61.88, 35.90), Elapsed: 5s, ETA: 578s, Dist remaining: 146.33m
+[INFO] [1780119927.424042222] [robot_mission_runner]: Pose: (59.88, 31.34), Elapsed: 10s, ETA: 94s, Dist remaining: 141.10m
+[INFO] [1780119932.449067927] [robot_mission_runner]: Pose: (60.05, 23.83), Elapsed: 15s, ETA: 89s, Dist remaining: 133.74m
+[INFO] [1780119937.479807187] [robot_mission_runner]: Pose: (60.02, 16.30), Elapsed: 20s, ETA: 84s, Dist remaining: 126.23m
+[INFO] [1780119942.499162913] [robot_mission_runner]: Pose: (59.92, 8.78), Elapsed: 25s, ETA: 79s, Dist remaining: 118.67m
+[INFO] [1780119947.525161652] [robot_mission_runner]: Pose: (54.51, 4.37), Elapsed: 30s, ETA: 74s, Dist remaining: 111.21m
+[INFO] [1780119952.551566723] [robot_mission_runner]: Pose: (46.96, 4.42), Elapsed: 35s, ETA: 69s, Dist remaining: 103.70m
+[INFO] [1780119957.580303161] [robot_mission_runner]: Pose: (39.44, 4.34), Elapsed: 40s, ETA: 64s, Dist remaining: 96.12m
+[INFO] [1780119962.602182888] [robot_mission_runner]: Pose: (31.90, 4.31), Elapsed: 45s, ETA: 58s, Dist remaining: 88.14m
+[INFO] [1780119967.623689081] [robot_mission_runner]: Pose: (24.38, 4.31), Elapsed: 50s, ETA: 54s, Dist remaining: 81.13m
+[INFO] [1780119972.650801572] [robot_mission_runner]: Pose: (16.85, 4.39), Elapsed: 55s, ETA: 48s, Dist remaining: 73.49m
+[INFO] [1780119977.669887448] [robot_mission_runner]: Pose: (9.35, 4.37), Elapsed: 60s, ETA: 43s, Dist remaining: 65.42m
+[INFO] [1780119982.698938077] [robot_mission_runner]: Pose: (3.59, -0.10), Elapsed: 65s, ETA: 38s, Dist remaining: 58.19m
+[INFO] [1780119987.725798122] [robot_mission_runner]: Pose: (-1.04, -5.96), Elapsed: 70s, ETA: 33s, Dist remaining: 50.72m
+[INFO] [1780119992.744739648] [robot_mission_runner]: Pose: (-1.23, -13.47), Elapsed: 75s, ETA: 28s, Dist remaining: 43.24m
+[INFO] [1780119997.767183652] [robot_mission_runner]: Pose: (-1.22, -20.97), Elapsed: 80s, ETA: 23s, Dist remaining: 35.63m
+[INFO] [1780120002.786866066] [robot_mission_runner]: Pose: (-1.11, -28.50), Elapsed: 85s, ETA: 18s, Dist remaining: 28.37m
+[INFO] [1780120007.806357208] [robot_mission_runner]: Pose: (-1.11, -36.00), Elapsed: 90s, ETA: 13s, Dist remaining: 20.78m
+[INFO] [1780120012.829083101] [robot_mission_runner]: Pose: (-1.11, -43.54), Elapsed: 95s, ETA: 8s, Dist remaining: 13.31m
+[INFO] [1780120017.855209646] [robot_mission_runner]: Pose: (-4.43, -49.85), Elapsed: 100s, ETA: 3s, Dist remaining: 5.35m
+[INFO] [1780120022.873401907] [robot_mission_runner]: Pose: (-7.89, -52.28), Elapsed: 105s, ETA: 3s, Dist remaining: 1.08m
+[INFO] [1780120024.788069455] [robot_mission_runner]: Navigation result: SUCCEEDED
+[INFO] [1780120034.789182223] [robot_mission_runner]: Navigating to drop, attempt 1/3...
+[INFO] [1780120034.809738373] [robot_mission_runner]: Navigating to goal: -35.5 -36.7...
+[INFO] [1780120039.932360090] [robot_mission_runner]: Pose: (-11.40, -50.66), Elapsed: 5s, ETA: 23s, Dist remaining: 34.77m
+[INFO] [1780120044.956771495] [robot_mission_runner]: Pose: (-18.93, -50.59), Elapsed: 10s, ETA: 18s, Dist remaining: 27.37m
+[INFO] [1780120049.977336188] [robot_mission_runner]: Pose: (-26.46, -50.55), Elapsed: 15s, ETA: 13s, Dist remaining: 19.75m
+[INFO] [1780120054.998590496] [robot_mission_runner]: Pose: (-33.24, -48.24), Elapsed: 20s, ETA: 8s, Dist remaining: 12.01m
+[INFO] [1780120060.023751694] [robot_mission_runner]: Pose: (-34.46, -41.00), Elapsed: 25s, ETA: 3s, Dist remaining: 4.50m
+[INFO] [1780120064.143009302] [robot_mission_runner]: Navigation result: SUCCEEDED
+[INFO] [1780120074.144228577] [robot_mission_runner]: Mission 1 completed.
+[INFO] [1780120074.144960485] [robot_mission_runner]: Picking from {'x': 39.0, 'y': 26.65, 'yaw': -1.5708}, dropping at {'x': -17.5, 'y': 0.18, 'yaw': -1.5708}...
+[INFO] [1780120074.145176734] [robot_mission_runner]: Navigating to pick, attempt 1/3...
+[INFO] [1780120074.177545844] [robot_mission_runner]: Navigating to goal: 39.0 26.65...
+[INFO] [1780120079.296464545] [robot_mission_runner]: Pose: (-35.38, -37.51), Elapsed: 5s, ETA: 717s, Dist remaining: 157.24m
+[INFO] [1780120084.317473994] [robot_mission_runner]: Pose: (-35.40, -38.61), Elapsed: 10s, ETA: 888s, Dist remaining: 156.00m
+[INFO] [1780120089.337149609] [robot_mission_runner]: Pose: (-34.87, -39.09), Elapsed: 15s, ETA: 249s, Dist remaining: 153.82m
+[INFO] [1780120094.353338318] [robot_mission_runner]: Pose: (-34.37, -45.82), Elapsed: 20s, ETA: 98s, Dist remaining: 147.41m
+[INFO] [1780120099.391409111] [robot_mission_runner]: Pose: (-29.10, -50.45), Elapsed: 25s, ETA: 93s, Dist remaining: 139.67m
+[INFO] [1780120104.412280660] [robot_mission_runner]: Pose: (-21.59, -50.46), Elapsed: 30s, ETA: 88s, Dist remaining: 132.07m
+[INFO] [1780120109.435294364] [robot_mission_runner]: Pose: (-14.04, -50.48), Elapsed: 35s, ETA: 83s, Dist remaining: 124.52m
+[INFO] [1780120114.454850299] [robot_mission_runner]: Pose: (-6.52, -50.44), Elapsed: 40s, ETA: 78s, Dist remaining: 117.22m
+[INFO] [1780120119.482346962] [robot_mission_runner]: Pose: (-0.64, -46.06), Elapsed: 45s, ETA: 72s, Dist remaining: 109.45m
+[INFO] [1780120124.516118553] [robot_mission_runner]: Pose: (0.66, -38.87), Elapsed: 50s, ETA: 68s, Dist remaining: 102.09m
+[INFO] [1780120129.536678904] [robot_mission_runner]: Pose: (0.66, -31.34), Elapsed: 55s, ETA: 63s, Dist remaining: 94.50m
+[INFO] [1780120134.554403853] [robot_mission_runner]: Pose: (0.61, -23.81), Elapsed: 60s, ETA: 58s, Dist remaining: 87.08m
+[INFO] [1780120139.572075024] [robot_mission_runner]: Pose: (0.60, -16.30), Elapsed: 65s, ETA: 53s, Dist remaining: 79.58m
+[INFO] [1780120144.595672235] [robot_mission_runner]: Pose: (0.52, -8.78), Elapsed: 70s, ETA: 47s, Dist remaining: 71.79m
+[INFO] [1780120149.617719266] [robot_mission_runner]: Pose: (0.56, -1.27), Elapsed: 75s, ETA: 43s, Dist remaining: 64.52m
+[INFO] [1780120154.640553003] [robot_mission_runner]: Pose: (0.45, 6.29), Elapsed: 80s, ETA: 38s, Dist remaining: 57.22m
+[INFO] [1780120159.659002386] [robot_mission_runner]: Pose: (0.46, 13.80), Elapsed: 85s, ETA: 33s, Dist remaining: 49.76m
+[INFO] [1780120164.678770719] [robot_mission_runner]: Pose: (0.47, 21.33), Elapsed: 90s, ETA: 28s, Dist remaining: 42.37m
+[INFO] [1780120169.712028896] [robot_mission_runner]: Pose: (5.18, 26.47), Elapsed: 95s, ETA: 23s, Dist remaining: 34.51m
+[INFO] [1780120174.734640110] [robot_mission_runner]: Pose: (12.68, 26.51), Elapsed: 100s, ETA: 18s, Dist remaining: 27.14m
+[INFO] [1780120179.755951771] [robot_mission_runner]: Pose: (20.23, 26.54), Elapsed: 105s, ETA: 13s, Dist remaining: 19.63m
+[INFO] [1780120184.773236822] [robot_mission_runner]: Pose: (27.76, 26.52), Elapsed: 110s, ETA: 8s, Dist remaining: 12.08m
+[INFO] [1780120189.793756258] [robot_mission_runner]: Pose: (35.26, 26.06), Elapsed: 115s, ETA: 3s, Dist remaining: 4.54m
+[INFO] [1780120194.808864773] [robot_mission_runner]: Pose: (38.65, 26.67), Elapsed: 120s, ETA: 2s, Dist remaining: 1.08m
+[INFO] [1780120197.121976247] [robot_mission_runner]: Navigation result: SUCCEEDED
+[INFO] [1780120207.122696717] [robot_mission_runner]: Navigating to drop, attempt 1/3...
+[INFO] [1780120207.145038927] [robot_mission_runner]: Navigating to goal: -17.5 0.18...
+[INFO] [1780120212.274094537] [robot_mission_runner]: Pose: (36.61, 25.87), Elapsed: 5s, ETA: 64s, Dist remaining: 82.39m
+[INFO] [1780120217.290915897] [robot_mission_runner]: Pose: (29.20, 26.49), Elapsed: 10s, ETA: 49s, Dist remaining: 74.88m
+[INFO] [1780120222.312275505] [robot_mission_runner]: Pose: (21.69, 26.46), Elapsed: 15s, ETA: 45s, Dist remaining: 67.56m
+[INFO] [1780120227.335783491] [robot_mission_runner]: Pose: (14.16, 26.47), Elapsed: 20s, ETA: 39s, Dist remaining: 59.66m
+[INFO] [1780120232.362256953] [robot_mission_runner]: Pose: (6.61, 26.46), Elapsed: 25s, ETA: 34s, Dist remaining: 52.31m
+[INFO] [1780120237.398687268] [robot_mission_runner]: Pose: (-0.90, 26.90), Elapsed: 30s, ETA: 29s, Dist remaining: 44.89m
+[INFO] [1780120242.417430517] [robot_mission_runner]: Pose: (-8.31, 27.70), Elapsed: 35s, ETA: 24s, Dist remaining: 36.96m
+[INFO] [1780120247.434769725] [robot_mission_runner]: Pose: (-15.81, 27.73), Elapsed: 40s, ETA: 19s, Dist remaining: 29.44m
+[INFO] [1780120252.460168129] [robot_mission_runner]: Pose: (-18.56, 21.50), Elapsed: 45s, ETA: 14s, Dist remaining: 22.15m
+[INFO] [1780120257.678999808] [robot_mission_runner]: Pose: (-19.68, 13.87), Elapsed: 50s, ETA: 9s, Dist remaining: 14.14m
+[INFO] [1780120262.698102830] [robot_mission_runner]: Pose: (-18.59, 6.60), Elapsed: 55s, ETA: 4s, Dist remaining: 7.02m
+[INFO] [1780120267.719868080] [robot_mission_runner]: Pose: (-17.65, 0.71), Elapsed: 60s, ETA: 0s, Dist remaining: 0.57m
+[INFO] [1780120268.441002520] [robot_mission_runner]: Navigation result: SUCCEEDED
+[INFO] [1780120278.442312012] [robot_mission_runner]: Mission 2 completed.
+[INFO] [1780120278.443072399] [robot_mission_runner]: Picking from {'x': 50.0, 'y': -50.7, 'yaw': 1.5708}, dropping at {'x': -11.5, 'y': -27.17, 'yaw': 1.5708}...
+[INFO] [1780120278.443592972] [robot_mission_runner]: Navigating to pick, attempt 1/3...
+[INFO] [1780120278.463685515] [robot_mission_runner]: Navigating to goal: 50.0 -50.7...
+[INFO] [1780120283.587478781] [robot_mission_runner]: Pose: (-18.44, -2.97), Elapsed: 5s, ETA: 82s, Dist remaining: 114.51m
+[INFO] [1780120288.607378583] [robot_mission_runner]: Pose: (-18.46, -10.49), Elapsed: 10s, ETA: 71s, Dist remaining: 107.28m
+[INFO] [1780120293.628849361] [robot_mission_runner]: Pose: (-18.48, -18.01), Elapsed: 15s, ETA: 66s, Dist remaining: 99.78m
+[INFO] [1780120298.656081760] [robot_mission_runner]: Pose: (-19.17, -25.33), Elapsed: 20s, ETA: 61s, Dist remaining: 91.85m
+[INFO] [1780120303.672831042] [robot_mission_runner]: Pose: (-18.49, -32.73), Elapsed: 25s, ETA: 56s, Dist remaining: 84.33m
+[INFO] [1780120308.699987493] [robot_mission_runner]: Pose: (-19.67, -40.12), Elapsed: 30s, ETA: 51s, Dist remaining: 76.85m
+[INFO] [1780120313.715140913] [robot_mission_runner]: Pose: (-17.73, -47.31), Elapsed: 35s, ETA: 46s, Dist remaining: 69.46m
+[INFO] [1780120318.738334418] [robot_mission_runner]: Pose: (-11.31, -50.35), Elapsed: 40s, ETA: 41s, Dist remaining: 62.02m
+[INFO] [1780120323.766766442] [robot_mission_runner]: Pose: (-3.76, -50.27), Elapsed: 45s, ETA: 36s, Dist remaining: 54.41m
+[INFO] [1780120328.789553702] [robot_mission_runner]: Pose: (3.77, -50.22), Elapsed: 50s, ETA: 31s, Dist remaining: 46.81m
+[INFO] [1780120333.812165175] [robot_mission_runner]: Pose: (11.29, -50.31), Elapsed: 55s, ETA: 26s, Dist remaining: 39.51m
+[INFO] [1780120338.841148648] [robot_mission_runner]: Pose: (18.83, -50.34), Elapsed: 60s, ETA: 21s, Dist remaining: 31.89m
+[INFO] [1780120343.870682177] [robot_mission_runner]: Pose: (26.37, -50.27), Elapsed: 65s, ETA: 16s, Dist remaining: 24.52m
+[INFO] [1780120348.887487463] [robot_mission_runner]: Pose: (33.90, -50.35), Elapsed: 70s, ETA: 11s, Dist remaining: 16.95m
+[INFO] [1780120353.919402604] [robot_mission_runner]: Pose: (41.39, -49.57), Elapsed: 75s, ETA: 6s, Dist remaining: 9.51m
+[INFO] [1780120358.936226974] [robot_mission_runner]: Pose: (48.16, -50.12), Elapsed: 80s, ETA: 2s, Dist remaining: 2.53m
+[INFO] [1780120363.885188497] [robot_mission_runner]: Navigation result: SUCCEEDED
+[INFO] [1780120373.886261076] [robot_mission_runner]: Navigating to drop, attempt 1/3...
+[INFO] [1780120373.949102446] [robot_mission_runner]: Navigating to goal: -11.5 -27.17...
+[INFO] [1780120379.083217635] [robot_mission_runner]: Pose: (47.77, -49.67), Elapsed: 5s, ETA: 59s, Dist remaining: 79.50m
+[INFO] [1780120384.100728492] [robot_mission_runner]: Pose: (40.29, -49.77), Elapsed: 10s, ETA: 47s, Dist remaining: 71.86m
+[INFO] [1780120389.123757965] [robot_mission_runner]: Pose: (32.79, -50.38), Elapsed: 15s, ETA: 42s, Dist remaining: 64.20m
+[INFO] [1780120394.142044339] [robot_mission_runner]: Pose: (25.27, -50.38), Elapsed: 20s, ETA: 37s, Dist remaining: 56.85m
+[INFO] [1780120399.166342006] [robot_mission_runner]: Pose: (17.73, -50.40), Elapsed: 25s, ETA: 33s, Dist remaining: 49.65m
+[INFO] [1780120404.195608294] [robot_mission_runner]: Pose: (10.18, -50.40), Elapsed: 30s, ETA: 27s, Dist remaining: 41.77m
+[INFO] [1780120409.212191820] [robot_mission_runner]: Pose: (2.67, -50.23), Elapsed: 35s, ETA: 22s, Dist remaining: 34.16m
+[INFO] [1780120414.229325514] [robot_mission_runner]: Pose: (-4.83, -50.21), Elapsed: 40s, ETA: 17s, Dist remaining: 26.38m
+[INFO] [1780120419.248733103] [robot_mission_runner]: Pose: (-10.34, -45.80), Elapsed: 45s, ETA: 12s, Dist remaining: 18.88m
+[INFO] [1780120424.266414819] [robot_mission_runner]: Pose: (-10.48, -38.28), Elapsed: 50s, ETA: 7s, Dist remaining: 11.37m
+[INFO] [1780120429.292332230] [robot_mission_runner]: Pose: (-10.48, -30.74), Elapsed: 55s, ETA: 2s, Dist remaining: 3.76m
+[INFO] [1780120433.016132536] [robot_mission_runner]: Navigation result: SUCCEEDED
+[INFO] [1780120443.016887488] [robot_mission_runner]: Mission 3 completed.
+[INFO] [1780120443.017316668] [robot_mission_runner]: Picking from {'x': 38.1, 'y': -60.0, 'yaw': 3.1416}, dropping at {'x': -33.5, 'y': -22.4, 'yaw': -1.5708}...
+[INFO] [1780120443.017529027] [robot_mission_runner]: Navigating to pick, attempt 1/3...
+[INFO] [1780120443.070806581] [robot_mission_runner]: Navigating to goal: 38.1 -60.0...
+[INFO] [1780120448.201788684] [robot_mission_runner]: Pose: (-11.47, -27.20), Elapsed: 5s, ETA: 0s, Dist remaining: 0.00m
+[INFO] [1780120453.219948036] [robot_mission_runner]: Pose: (-11.38, -27.96), Elapsed: 10s, ETA: 632s, Dist remaining: 74.64m
+[INFO] [1780120458.240046270] [robot_mission_runner]: Pose: (-10.38, -28.96), Elapsed: 15s, ETA: 76s, Dist remaining: 71.31m
+[INFO] [1780120463.263100061] [robot_mission_runner]: Pose: (-10.47, -36.14), Elapsed: 20s, ETA: 42s, Dist remaining: 64.24m
+[INFO] [1780120468.282434048] [robot_mission_runner]: Pose: (-10.37, -43.67), Elapsed: 25s, ETA: 37s, Dist remaining: 56.85m
+[INFO] [1780120473.307756469] [robot_mission_runner]: Pose: (-7.25, -50.02), Elapsed: 30s, ETA: 32s, Dist remaining: 48.92m
+[INFO] [1780120478.324523533] [robot_mission_runner]: Pose: (0.11, -50.90), Elapsed: 35s, ETA: 27s, Dist remaining: 41.48m
+[INFO] [1780120483.344725373] [robot_mission_runner]: Pose: (7.64, -50.85), Elapsed: 40s, ETA: 22s, Dist remaining: 34.20m
+[INFO] [1780120488.362245008] [robot_mission_runner]: Pose: (15.15, -50.81), Elapsed: 45s, ETA: 18s, Dist remaining: 27.10m
+[INFO] [1780120493.389651142] [robot_mission_runner]: Pose: (20.38, -54.14), Elapsed: 50s, ETA: 13s, Dist remaining: 19.92m
+[INFO] [1780120498.425647586] [robot_mission_runner]: Pose: (26.38, -58.21), Elapsed: 55s, ETA: 8s, Dist remaining: 12.92m
+[INFO] [1780120503.448294133] [robot_mission_runner]: Pose: (33.75, -59.45), Elapsed: 60s, ETA: 3s, Dist remaining: 5.19m
+[INFO] [1780120508.466628969] [robot_mission_runner]: Pose: (37.32, -60.37), Elapsed: 65s, ETA: 2s, Dist remaining: 0.86m
+[INFO] [1780120513.483966300] [robot_mission_runner]: Pose: (37.55, -60.77), Elapsed: 70s, ETA: 24s, Dist remaining: 1.79m
+[INFO] [1780120518.503388267] [robot_mission_runner]: Pose: (37.80, -60.94), Elapsed: 75s, ETA: 27s, Dist remaining: 1.89m
+[INFO] [1780120523.528672469] [robot_mission_runner]: Pose: (38.12, -61.02), Elapsed: 80s, ETA: 43s, Dist remaining: 2.20m
+[INFO] [1780120528.548069534] [robot_mission_runner]: Pose: (38.67, -60.69), Elapsed: 85s, ETA: 7s, Dist remaining: 1.52m
+[INFO] [1780120532.067340009] [robot_mission_runner]: Navigation result: SUCCEEDED
+[INFO] [1780120542.068101619] [robot_mission_runner]: Navigating to drop, attempt 1/3...
+[INFO] [1780120542.088077611] [robot_mission_runner]: Navigating to goal: -33.5 -22.4...
+[INFO] [1780120547.211706129] [robot_mission_runner]: Pose: (33.80, -58.44), Elapsed: 5s, ETA: 65s, Dist remaining: 97.87m
+[INFO] [1780120552.240418221] [robot_mission_runner]: Pose: (27.91, -53.79), Elapsed: 10s, ETA: 59s, Dist remaining: 89.94m
+[INFO] [1780120557.269441829] [robot_mission_runner]: Pose: (21.41, -50.38), Elapsed: 15s, ETA: 54s, Dist remaining: 82.47m
+[INFO] [1780120562.291379157] [robot_mission_runner]: Pose: (13.87, -50.28), Elapsed: 20s, ETA: 50s, Dist remaining: 75.01m
+[INFO] [1780120567.309149070] [robot_mission_runner]: Pose: (6.36, -50.28), Elapsed: 25s, ETA: 44s, Dist remaining: 67.37m
+[INFO] [1780120572.327753319] [robot_mission_runner]: Pose: (-1.15, -50.27), Elapsed: 30s, ETA: 40s, Dist remaining: 60.10m
+[INFO] [1780120577.346000933] [robot_mission_runner]: Pose: (-8.70, -50.28), Elapsed: 35s, ETA: 34s, Dist remaining: 52.42m
+[INFO] [1780120582.365134987] [robot_mission_runner]: Pose: (-16.23, -50.27), Elapsed: 40s, ETA: 29s, Dist remaining: 44.93m
+[INFO] [1780120587.387916194] [robot_mission_runner]: Pose: (-23.73, -50.29), Elapsed: 45s, ETA: 24s, Dist remaining: 37.41m
+[INFO] [1780120592.411636032] [robot_mission_runner]: Pose: (-31.15, -49.61), Elapsed: 50s, ETA: 19s, Dist remaining: 29.54m
+[INFO] [1780120597.439179631] [robot_mission_runner]: Pose: (-34.33, -43.44), Elapsed: 55s, ETA: 14s, Dist remaining: 22.11m
+[INFO] [1780120602.457887752] [robot_mission_runner]: Pose: (-34.35, -35.91), Elapsed: 60s, ETA: 9s, Dist remaining: 14.57m
+[INFO] [1780120607.482572581] [robot_mission_runner]: Pose: (-34.28, -28.39), Elapsed: 65s, ETA: 4s, Dist remaining: 6.99m
+[INFO] [1780120612.507753666] [robot_mission_runner]: Pose: (-34.37, -23.44), Elapsed: 70s, ETA: 6s, Dist remaining: 2.04m
+[INFO] [1780120617.526819705] [robot_mission_runner]: Pose: (-34.65, -22.52), Elapsed: 75s, ETA: 18s, Dist remaining: 2.19m
+[INFO] [1780120622.551701767] [robot_mission_runner]: Pose: (-33.85, -22.51), Elapsed: 80s, ETA: 4s, Dist remaining: 1.53m
+[INFO] [1780120625.503555193] [robot_mission_runner]: Navigation result: SUCCEEDED
+[INFO] [1780120635.504842424] [robot_mission_runner]: Mission 4 completed.
+[INFO] [1780120635.505656243] [robot_mission_runner]: Picking from {'x': 9.0, 'y': -52.55, 'yaw': 1.5708}, dropping at {'x': -41.5, 'y': -8.1, 'yaw': -1.5708}...
+[INFO] [1780120635.506188824] [robot_mission_runner]: Navigating to pick, attempt 1/3...
+[INFO] [1780120635.549853527] [robot_mission_runner]: Navigating to goal: 9.0 -52.55...
+[INFO] [1780120640.670389885] [robot_mission_runner]: Pose: (-34.26, -26.99), Elapsed: 5s, ETA: 43s, Dist remaining: 65.59m
+[INFO] [1780120645.690727013] [robot_mission_runner]: Pose: (-34.37, -34.50), Elapsed: 10s, ETA: 38s, Dist remaining: 58.04m
+[INFO] [1780120650.716815091] [robot_mission_runner]: Pose: (-34.35, -42.06), Elapsed: 15s, ETA: 33s, Dist remaining: 50.12m
+[INFO] [1780120655.734968239] [robot_mission_runner]: Pose: (-32.29, -48.88), Elapsed: 20s, ETA: 28s, Dist remaining: 42.53m
+[INFO] [1780120660.754667237] [robot_mission_runner]: Pose: (-25.13, -50.33), Elapsed: 25s, ETA: 23s, Dist remaining: 35.04m
+[INFO] [1780120665.779105803] [robot_mission_runner]: Pose: (-17.60, -50.32), Elapsed: 30s, ETA: 18s, Dist remaining: 27.40m
+[INFO] [1780120670.802786359] [robot_mission_runner]: Pose: (-10.09, -50.63), Elapsed: 35s, ETA: 13s, Dist remaining: 20.09m
+[INFO] [1780120675.830861495] [robot_mission_runner]: Pose: (-2.54, -50.62), Elapsed: 40s, ETA: 8s, Dist remaining: 12.64m
+[INFO] [1780120680.849928051] [robot_mission_runner]: Pose: (4.97, -50.99), Elapsed: 45s, ETA: 3s, Dist remaining: 5.05m
+[INFO] [1780120685.867231057] [robot_mission_runner]: Pose: (8.71, -52.52), Elapsed: 50s, ETA: 2s, Dist remaining: 1.03m
+[INFO] [1780120687.779178407] [robot_mission_runner]: Navigation result: SUCCEEDED
+[INFO] [1780120697.779832105] [robot_mission_runner]: Navigating to drop, attempt 1/3...
+[INFO] [1780120697.796996566] [robot_mission_runner]: Navigating to goal: -41.5 -8.1...
+[INFO] [1780120702.925980029] [robot_mission_runner]: Pose: (5.72, -50.22), Elapsed: 5s, ETA: 59s, Dist remaining: 89.12m
+[INFO] [1780120707.947091624] [robot_mission_runner]: Pose: (-1.83, -50.24), Elapsed: 10s, ETA: 54s, Dist remaining: 81.56m
+[INFO] [1780120712.964128595] [robot_mission_runner]: Pose: (-9.35, -50.26), Elapsed: 15s, ETA: 49s, Dist remaining: 74.04m
+[INFO] [1780120717.984110913] [robot_mission_runner]: Pose: (-16.88, -50.29), Elapsed: 20s, ETA: 44s, Dist remaining: 66.65m
+[INFO] [1780120723.002289137] [robot_mission_runner]: Pose: (-24.40, -50.28), Elapsed: 25s, ETA: 39s, Dist remaining: 58.80m
+[INFO] [1780120728.020820754] [robot_mission_runner]: Pose: (-31.91, -50.28), Elapsed: 30s, ETA: 34s, Dist remaining: 51.21m
+[INFO] [1780120733.246449476] [robot_mission_runner]: Pose: (-39.57, -49.55), Elapsed: 35s, ETA: 29s, Dist remaining: 43.63m
+[INFO] [1780120738.268192015] [robot_mission_runner]: Pose: (-42.38, -43.00), Elapsed: 40s, ETA: 23s, Dist remaining: 35.89m
+[INFO] [1780120743.292632206] [robot_mission_runner]: Pose: (-42.38, -35.45), Elapsed: 45s, ETA: 18s, Dist remaining: 28.41m
+[INFO] [1780120748.319904939] [robot_mission_runner]: Pose: (-42.21, -27.93), Elapsed: 50s, ETA: 13s, Dist remaining: 20.77m
+[INFO] [1780120753.340932090] [robot_mission_runner]: Pose: (-42.24, -20.40), Elapsed: 55s, ETA: 8s, Dist remaining: 13.20m
+[INFO] [1780120758.362048924] [robot_mission_runner]: Pose: (-42.15, -12.89), Elapsed: 60s, ETA: 3s, Dist remaining: 5.74m
+[INFO] [1780120763.384074050] [robot_mission_runner]: Pose: (-41.48, -8.92), Elapsed: 65s, ETA: 4s, Dist remaining: 1.89m
+[INFO] [1780120768.403720538] [robot_mission_runner]: Pose: (-41.04, -8.87), Elapsed: 70s, ETA: 63s, Dist remaining: 0.94m
+[INFO] [1780120773.421405088] [robot_mission_runner]: Pose: (-40.74, -8.62), Elapsed: 75s, ETA: 39s, Dist remaining: 1.87m
+[INFO] [1780120778.440989240] [robot_mission_runner]: Pose: (-40.59, -8.37), Elapsed: 80s, ETA: 25s, Dist remaining: 1.96m
+[INFO] [1780120783.659416805] [robot_mission_runner]: Pose: (-40.54, -8.15), Elapsed: 85s, ETA: 35s, Dist remaining: 2.13m
+[INFO] [1780120788.676874170] [robot_mission_runner]: Pose: (-40.58, -7.77), Elapsed: 90s, ETA: 18s, Dist remaining: 1.94m
+[INFO] [1780120793.700307750] [robot_mission_runner]: Pose: (-40.96, -7.26), Elapsed: 95s, ETA: 12s, Dist remaining: 2.03m
+[INFO] [1780120797.919009147] [robot_mission_runner]: Navigation result: SUCCEEDED
+[INFO] [1780120807.920343600] [robot_mission_runner]: Mission 5 completed.
+[INFO] [1780120807.921065712] [robot_mission_runner]: Picking from {'x': 5.05, 'y': -59.6, 'yaw': 3.1416}, dropping at {'x': -17.5, 'y': 0.18, 'yaw': -1.5708}...
+[INFO] [1780120807.921593375] [robot_mission_runner]: Navigating to pick, attempt 1/3...
+[INFO] [1780120807.950257105] [robot_mission_runner]: Navigating to goal: 5.05 -59.6...
+[INFO] [1780120813.069449687] [robot_mission_runner]: Pose: (-42.17, -11.14), Elapsed: 5s, ETA: 61s, Dist remaining: 88.69m
+[INFO] [1780120818.091019239] [robot_mission_runner]: Pose: (-42.22, -18.67), Elapsed: 10s, ETA: 54s, Dist remaining: 81.06m
+[INFO] [1780120823.110183693] [robot_mission_runner]: Pose: (-42.26, -26.20), Elapsed: 15s, ETA: 49s, Dist remaining: 73.77m
+[INFO] [1780120828.137518457] [robot_mission_runner]: Pose: (-42.37, -33.74), Elapsed: 20s, ETA: 43s, Dist remaining: 65.87m
+[INFO] [1780120833.159634749] [robot_mission_runner]: Pose: (-42.42, -41.27), Elapsed: 25s, ETA: 38s, Dist remaining: 57.96m
+[INFO] [1780120838.179623294] [robot_mission_runner]: Pose: (-40.91, -48.39), Elapsed: 30s, ETA: 33s, Dist remaining: 50.79m
+[INFO] [1780120843.199088190] [robot_mission_runner]: Pose: (-33.97, -50.34), Elapsed: 35s, ETA: 28s, Dist remaining: 42.83m
