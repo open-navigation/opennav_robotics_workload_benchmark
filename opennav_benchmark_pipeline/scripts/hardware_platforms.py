@@ -423,11 +423,11 @@ class JetsonGpuMetrics(GpuMetrics):
         # GPU utilization + clock — sub-sample to capture bursty workloads.
         # The sysfs load file is an instantaneous snapshot; robotics workloads
         # submit short GPU batches that complete in ms, so a single 1Hz poll
-        # misses most activity. Sub-sample 10x over ~1s and average.
+        # misses most activity. Sub-sample 50x over ~1s and average.
         if self._gpu_load_path:
             util_readings = []
             clock_readings = []
-            for _ in range(10):
+            for _ in range(50):
                 val = self._read_sysfs(self._gpu_load_path)
                 if val is not None:
                     util_readings.append(val / 10.0)
@@ -435,7 +435,7 @@ class JetsonGpuMetrics(GpuMetrics):
                     freq = self._read_sysfs(self._gpu_freq_path)
                     if freq is not None:
                         clock_readings.append(freq / 1_000_000)
-                time.sleep(0.1)
+                time.sleep(0.02)
             if util_readings:
                 metrics['gpu_util'] = round(
                     sum(util_readings) / len(util_readings), 1)

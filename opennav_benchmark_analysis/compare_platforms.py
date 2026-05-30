@@ -808,18 +808,18 @@ def plot_single_thread_headroom(platforms):
         if not core_cols or 'cpu_freq_ghz' not in df.columns:
             continue
 
-        # p99 of per-core utilization = worst-case single-core loading
-        all_core_values = df[core_cols].values.flatten()
-        p99_util = np.percentile(all_core_values, 99)
+        # Least-loaded core per sample = best candidate for a new RT thread
+        min_core_util = df[core_cols].min(axis=1)
+        median_min_util = min_core_util.median()
         mean_freq = df['cpu_freq_ghz'].mean()
 
-        # Available single-thread GHz = (100 - p99_util)% of clock speed
-        avail_ghz = (100 - p99_util) / 100.0 * mean_freq
+        # Available single-thread GHz on the least-loaded core
+        avail_ghz = (100 - median_min_util) / 100.0 * mean_freq
 
         fig.add_trace(go.Bar(
             x=[label], y=[avail_ghz],
             marker_color=color,
-            text=[f'{avail_ghz:.2f} GHz\n(p99 core: {p99_util:.0f}% @ {mean_freq:.1f} GHz)'],
+            text=[f'{avail_ghz:.2f} GHz\n(best core: {median_min_util:.0f}% @ {mean_freq:.1f} GHz)'],
             textposition='outside',
             showlegend=False,
         ))
@@ -1039,7 +1039,6 @@ def build_comparison_table(platforms):
         'gpu_mem_used_mb', 'ram_percent', 'swap_percent',
         'cpu_temp', 'gpu_temp',
         'gpu_power_w', 'board_power_w',
-        'mem_busy_percent', 'mem_bandwidth_gbps',
         'load_1m', 'process_count',
         'disk_read_rate_mbps', 'disk_write_rate_mbps',
         'net_sent_rate_mbps', 'net_recv_rate_mbps',
@@ -1165,7 +1164,6 @@ def main():
         ('Power Comparison', plot_power_comparison),
         ('Thermal Comparison', plot_thermal_comparison),
         ('Thermal Runway', plot_thermal_runway),
-        ('Memory Bandwidth', plot_memory_bandwidth_comparison),
         ('RAM Comparison', plot_ram_comparison),
         ('Summary Bar Charts', plot_summary_bars),
     ]

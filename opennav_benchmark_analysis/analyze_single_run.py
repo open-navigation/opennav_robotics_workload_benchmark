@@ -595,7 +595,6 @@ def main():
         ('CPU Core Distribution', plot_cpu_core_distribution),
         ('GPU Utilization', plot_gpu_utilization),
         ('RAM Usage', plot_ram_usage),
-        ('Memory Bandwidth', plot_memory_bandwidth),
         ('Power & Thermal', plot_power_thermal),
         ('CPU GPU Correlation', plot_cpu_gpu_correlation),
         ('Power Efficiency', plot_power_efficiency),
