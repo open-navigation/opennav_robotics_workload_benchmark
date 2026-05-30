@@ -29,7 +29,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from utils import (
-    load_run, compute_stats, save_plot, build_html_report, get_metric_label
+    load_run, compute_stats, save_plot, build_html_report, get_metric_label,
+    count_control_loop_misses, load_vlm_queries, VLM_OUTCOMES,
 )
 
 
@@ -612,9 +613,41 @@ def main():
             fig = save_plot(fig, output_dir, name.lower().replace(' ', '_').replace('&', 'and'))
             figures.append((name, fig))
 
+    # Count control loop misses from ROS logs
+    control_loop_misses = count_control_loop_misses(args.metrics_file)
+
+    # Parse VLM query outcomes from ROS logs
+    vlm_data = load_vlm_queries(args.metrics_file)
+    vlm_html = ''
+    if vlm_data:
+        s = vlm_data['summary']
+        print(f'  VLM Queries: {s["total"]} total — '
+              + ', '.join(f'{o}: {s[o]}' for o in VLM_OUTCOMES if s[o] > 0))
+        if s.get('mean_success_duration_sec'):
+            print(f'  VLM Success Duration: mean={s["mean_success_duration_sec"]:.1f}s, '
+                  f'p95={s["p95_success_duration_sec"]:.1f}s')
+        vlm_html = (
+            '<div class="metadata"><strong>VLM Query Summary:</strong> '
+            f'{s["total"]} total'
+        )
+        for o in VLM_OUTCOMES:
+            if s[o] > 0:
+                vlm_html += f' &nbsp;|&nbsp; {o}: {s[o]}'
+        if s.get('mean_success_duration_sec'):
+            vlm_html += (
+                f' &nbsp;|&nbsp; mean success duration: {s["mean_success_duration_sec"]:.1f}s'
+                f', p95: {s["p95_success_duration_sec"]:.1f}s'
+            )
+        vlm_html += '</div>\n'
+    else:
+        print('  VLM Queries: no VLM_QUERY log lines found')
+
     # Compute and format statistics table
     stats_df = compute_stats(df)
-    stats_html = stats_df.to_html(
+    stats_html = (
+        f'<div class="metadata"><strong>Control Loop Misses (30 Hz target):</strong> '
+        f'{control_loop_misses}</div>\n'
+    ) + vlm_html + stats_df.to_html(
         classes='stats-table',
         float_format=lambda x: f'{x:.2f}',
     )

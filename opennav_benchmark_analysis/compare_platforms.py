@@ -31,7 +31,7 @@ from plotly.subplots import make_subplots
 
 from utils import (
     load_run, compute_stats, save_plot, build_html_report, get_metric_label,
-    PLATFORM_LABELS
+    count_control_loop_misses, load_vlm_queries, VLM_OUTCOMES, PLATFORM_LABELS
 )
 
 # Vibrant colors matching Plotly's default colorful palette
@@ -959,6 +959,29 @@ def plot_summary_bars(platforms):
     return fig
 
 
+def plot_control_loop_misses(miss_counts):
+    """Bar chart of control loop rate misses per platform."""
+    fig = go.Figure()
+
+    for key, count in miss_counts.items():
+        fig.add_trace(go.Bar(
+            x=[PLATFORM_ARG_LABELS[key]],
+            y=[count],
+            marker_color=PLATFORM_COLORS[key],
+            text=[str(count)],
+            textposition='outside',
+            showlegend=False,
+        ))
+
+    fig.update_layout(
+        title='Control Loop Misses (30 Hz Target) — Lower Is Better',
+        yaxis_title='Number of Misses',
+        template='plotly',
+        height=500,
+    )
+    return fig
+
+
 def build_comparison_table(platforms):
     """Build side-by-side stats table for all platforms.
 
@@ -1000,6 +1023,43 @@ def build_comparison_table(platforms):
     return table_df.to_html(index=False, classes='stats-table')
 
 
+OUTCOME_COLORS = {
+    'success': '#00CC96',
+    'error': '#EF553B',
+    'cancelled': '#FFA15A',
+    'retries_exhausted': '#AB63FA',
+    'no_image': '#B6E880',
+    'stale_image': '#FF97FF',
+    'encode_failed': '#FECB52',
+}
+
+
+def plot_vlm_comparison(platforms_vlm):
+    """Grouped bar chart of VLM query outcomes per platform."""
+    fig = go.Figure()
+
+    platform_names = [PLATFORM_ARG_LABELS[k] for k in platforms_vlm]
+    for outcome in VLM_OUTCOMES:
+        counts = [platforms_vlm[k]['summary'][outcome] for k in platforms_vlm]
+        if any(c > 0 for c in counts):
+            fig.add_trace(go.Bar(
+                name=outcome,
+                x=platform_names,
+                y=counts,
+                marker_color=OUTCOME_COLORS.get(outcome, '#636EFA'),
+            ))
+
+    fig.update_layout(
+        title='VLM Query Outcomes',
+        xaxis_title='Platform',
+        yaxis_title='Query Count',
+        barmode='group',
+        template='plotly',
+        legend=dict(x=0.01, y=0.99),
+    )
+    return fig
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Compare benchmark results across 3 hardware platforms.')
@@ -1026,6 +1086,11 @@ def main():
             sys.exit(1)
         platforms[key] = (meta, df)
         print(f'  Samples: {len(df)}, Platform in file: {meta["platform_label"]}')
+
+    # Count control loop misses from ROS logs for each platform
+    miss_counts = {}
+    for key, path in [('amd', args.amd), ('orin', args.orin), ('thor', args.thor)]:
+        miss_counts[key] = count_control_loop_misses(path)
 
     output_dir = os.path.join(args.output_dir, 'comparison')
     os.makedirs(output_dir, exist_ok=True)
@@ -1063,6 +1128,24 @@ def main():
         fig = func(platforms)
         fig = save_plot(fig, output_dir, name.lower().replace(' ', '_'))
         figures.append((name, fig))
+
+    # Control loop misses chart (different signature — uses miss_counts)
+    print('  Generating: Control Loop Misses')
+    fig = plot_control_loop_misses(miss_counts)
+    fig = save_plot(fig, output_dir, 'control_loop_misses')
+    figures.append(('Control Loop Misses', fig))
+
+    # VLM query outcomes chart (if VLM logs exist)
+    platforms_vlm = {}
+    for key, path in [('amd', args.amd), ('orin', args.orin), ('thor', args.thor)]:
+        vlm_data = load_vlm_queries(path)
+        if vlm_data:
+            platforms_vlm[key] = vlm_data
+    if platforms_vlm:
+        print('  Generating: VLM Query Outcomes')
+        fig = plot_vlm_comparison(platforms_vlm)
+        fig = save_plot(fig, output_dir, 'vlm_query_outcomes')
+        figures.append(('VLM Query Outcomes', fig))
 
     # Build tables
     efficiency_html = build_efficiency_table(platforms)

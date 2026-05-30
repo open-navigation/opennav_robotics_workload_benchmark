@@ -16,8 +16,10 @@
 
 """Shared utilities for benchmark analysis: data loading, statistics, and plotting."""
 
+import glob
 import json
 import os
+import re
 
 import numpy as np
 import pandas as pd
@@ -303,3 +305,102 @@ def build_html_report(figures, stats_html, title, output_path):
 def get_metric_label(metric):
     """Get a human-readable label for a metric name."""
     return METRIC_LABELS.get(metric, metric)
+
+
+# Valid VLM query outcome values
+VLM_OUTCOMES = [
+    'success', 'error', 'cancelled', 'retries_exhausted',
+    'no_image', 'stale_image', 'encode_failed',
+]
+
+
+def load_vlm_queries(metrics_filepath):
+    """Parse VLM_QUERY lines from vlm_node ROS logs.
+
+    Searches for VLM_QUERY log lines in the ros/ directory sibling to the
+    given system_metrics.json file. Each line has the format:
+        VLM_QUERY|<action_type>|<outcome>|<duration_sec>|<attempts>|<error>
+
+    Args:
+        metrics_filepath: Path to system_metrics.json file.
+
+    Returns:
+        dict with 'queries' (list of dicts) and 'summary' (outcome counts
+        and duration stats), or None if no VLM logs found.
+    """
+    run_dir = os.path.dirname(os.path.abspath(metrics_filepath))
+    ros_dir = os.path.join(run_dir, 'ros')
+    if not os.path.isdir(ros_dir):
+        return None
+
+    log_files = glob.glob(os.path.join(ros_dir, 'python3_*.log'))
+    if not log_files:
+        return None
+
+    vlm_pattern = re.compile(
+        r'VLM_QUERY\|([^|]+)\|([^|]+)\|([\d.]+)\|(\d+)\|(.*)')
+
+    queries = []
+    for log_file in log_files:
+        with open(log_file, 'r', errors='replace') as f:
+            for line in f:
+                m = vlm_pattern.search(line)
+                if m:
+                    queries.append({
+                        'action_type': m.group(1),
+                        'outcome': m.group(2),
+                        'duration_sec': float(m.group(3)),
+                        'attempts': int(m.group(4)),
+                        'error': m.group(5) or '',
+                    })
+
+    if not queries:
+        return None
+
+    # Build summary
+    summary = {'total': len(queries)}
+    for outcome in VLM_OUTCOMES:
+        summary[outcome] = sum(1 for q in queries if q['outcome'] == outcome)
+
+    durations = [q['duration_sec'] for q in queries]
+    success_durations = [q['duration_sec'] for q in queries if q['outcome'] == 'success']
+    summary['mean_duration_sec'] = round(np.mean(durations), 2) if durations else 0
+    summary['mean_success_duration_sec'] = (
+        round(np.mean(success_durations), 2) if success_durations else 0)
+    summary['p95_success_duration_sec'] = (
+        round(np.percentile(success_durations, 95), 2) if success_durations else 0)
+
+    return {'queries': queries, 'summary': summary}
+
+
+def count_control_loop_misses(metrics_filepath):
+    """Count control loop rate misses from component container isolated logs.
+
+    Searches for ROS log files in the ros/ directory sibling to the given
+    system_metrics.json file and counts lines matching the Nav2 controller
+    server's "Control loop missed its desired rate" warning.
+
+    Args:
+        metrics_filepath: Path to system_metrics.json file.
+
+    Returns:
+        int: Total number of control loop misses across all matching log files.
+    """
+    run_dir = os.path.dirname(os.path.abspath(metrics_filepath))
+    ros_dir = os.path.join(run_dir, 'ros')
+    if not os.path.isdir(ros_dir):
+        return 0
+
+    pattern = os.path.join(ros_dir, 'component_container_isolated_*.log')
+    log_files = glob.glob(pattern)
+    if not log_files:
+        return 0
+
+    miss_pattern = re.compile(r'Control loop missed its desired rate')
+    total = 0
+    for log_file in log_files:
+        with open(log_file, 'r', errors='replace') as f:
+            for line in f:
+                if miss_pattern.search(line):
+                    total += 1
+    return total

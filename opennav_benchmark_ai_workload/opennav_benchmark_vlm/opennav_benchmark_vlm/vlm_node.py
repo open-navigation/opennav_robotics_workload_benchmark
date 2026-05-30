@@ -1,4 +1,5 @@
 import threading
+import time
 
 import rclpy
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
@@ -129,18 +130,24 @@ class VLMNode(Node):
 
     def _exec_bool(self, goal_handle):
         """ActionServer execute callback for QueryBool — delegates to the shared retry loop."""
-        return self._execute(goal_handle, BoolParser(), QueryBool.Result, QueryBool.Feedback)
+        return self._execute(goal_handle, BoolParser(), QueryBool.Result, QueryBool.Feedback, 'QueryBool')
 
     def _exec_int(self, goal_handle):
         """ActionServer execute callback for QueryInt — delegates to the shared retry loop."""
-        return self._execute(goal_handle, IntParser(), QueryInt.Result, QueryInt.Feedback)
+        return self._execute(goal_handle, IntParser(), QueryInt.Result, QueryInt.Feedback, 'QueryInt')
 
     def _exec_string(self, goal_handle):
         """ActionServer execute callback for QueryString — delegates to the shared retry loop."""
-        return self._execute(goal_handle, StringParser(), QueryString.Result, QueryString.Feedback)
+        return self._execute(goal_handle, StringParser(), QueryString.Result, QueryString.Feedback, 'QueryString')
 
-    def _execute(self, goal_handle, parser, result_cls, feedback_cls):
+    def _log_query(self, action_type, outcome, duration, attempts, error=''):
+        """Log a structured VLM query outcome line for post-run analysis."""
+        self.get_logger().info(
+            f'VLM_QUERY|{action_type}|{outcome}|{duration:.2f}|{attempts}|{error}')
+
+    def _execute(self, goal_handle, parser, result_cls, feedback_cls, action_type):
         """Run the type-enforced VLM query loop: resolve image, prompt the VLM, parse, retry up to max_retries."""
+        t_start = time.monotonic()
         self.get_logger().info(f'Goal received with prompt: {goal_handle.request.prompt}')
         goal = goal_handle.request
         result = result_cls()
@@ -151,6 +158,7 @@ class VLMNode(Node):
         if img_msg is None:
             self._publish_feedback(goal_handle, feedback_cls, 'no image available')
             self.get_logger().warn('Action goal aborted: no image available.')
+            self._log_query(action_type, 'no_image', time.monotonic() - t_start, 0)
             goal_handle.abort()
             return result
 
@@ -161,6 +169,7 @@ class VLMNode(Node):
                 msg = f'image is stale ({age:.2f}s > {self._max_image_age:.2f}s)'
                 self._publish_feedback(goal_handle, feedback_cls, msg)
                 self.get_logger().warn(f'Action goal aborted: {msg}.')
+                self._log_query(action_type, 'stale_image', time.monotonic() - t_start, 0)
                 goal_handle.abort()
                 return result
 
@@ -169,6 +178,7 @@ class VLMNode(Node):
         except Exception as e:
             self.get_logger().warn(f'Image encode failed: {e}')
             self._publish_feedback(goal_handle, feedback_cls, f'image encode failed: {e}')
+            self._log_query(action_type, 'encode_failed', time.monotonic() - t_start, 0, str(e))
             goal_handle.abort()
             return result
 
@@ -189,6 +199,7 @@ class VLMNode(Node):
         for attempt in range(1, self._max_retries + 1):
             if goal_handle.is_cancel_requested:
                 goal_handle.canceled()
+                self._log_query(action_type, 'cancelled', time.monotonic() - t_start, attempt)
                 return result
 
             self._publish_feedback(
@@ -204,6 +215,7 @@ class VLMNode(Node):
                     goal_handle, feedback_cls,
                     f'attempt {attempt}/{self._max_retries}: request failed: {e}',
                 )
+                self._log_query(action_type, 'error', time.monotonic() - t_start, attempt, str(e))
                 goal_handle.abort()
                 return result
 
@@ -216,6 +228,7 @@ class VLMNode(Node):
                     result.success = True
                 goal_handle.succeed()
                 self.get_logger().info(f'Completed prompt: "{goal_handle.request.prompt}" with response: {result.value}')
+                self._log_query(action_type, 'success', time.monotonic() - t_start, attempt)
                 return result
 
             self._publish_feedback(
@@ -228,6 +241,7 @@ class VLMNode(Node):
 
         self.get_logger().warn(
             f'VLM retries exhausted ({self._max_retries}); last raw response: {last_raw!r}')
+        self._log_query(action_type, 'retries_exhausted', time.monotonic() - t_start, self._max_retries)
         goal_handle.abort()
         return result
 
