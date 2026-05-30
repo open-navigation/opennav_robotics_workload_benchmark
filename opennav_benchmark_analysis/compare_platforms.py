@@ -31,7 +31,8 @@ from plotly.subplots import make_subplots
 
 from utils import (
     load_run, compute_stats, save_plot, build_html_report, get_metric_label,
-    count_control_loop_misses, load_vlm_queries, VLM_OUTCOMES, PLATFORM_LABELS
+    count_control_loop_misses, parse_planner_loop_times,
+    load_vlm_queries, VLM_OUTCOMES, PLATFORM_LABELS
 )
 
 # Vibrant colors matching Plotly's default colorful palette
@@ -959,6 +960,28 @@ def plot_summary_bars(platforms):
     return fig
 
 
+def plot_planner_cycle_times(platforms_planner):
+    """Box plot of planner cycle time distributions per platform."""
+    fig = go.Figure()
+
+    for key, data in platforms_planner.items():
+        times_ms = [t * 1000 for t in data['times_sec']]
+        fig.add_trace(go.Box(
+            y=times_ms,
+            name=PLATFORM_ARG_LABELS[key],
+            marker_color=PLATFORM_COLORS[key],
+            boxmean=True,
+        ))
+
+    fig.update_layout(
+        title='Planner Cycle Time Distribution — Lower Is Better',
+        yaxis_title='Cycle Time (ms)',
+        template='plotly',
+        height=500,
+    )
+    return fig
+
+
 def plot_control_loop_misses(miss_counts):
     """Bar chart of control loop rate misses per platform."""
     fig = go.Figure()
@@ -1128,6 +1151,18 @@ def main():
         fig = func(platforms)
         fig = save_plot(fig, output_dir, name.lower().replace(' ', '_'))
         figures.append((name, fig))
+
+    # Planner cycle time chart (if planner loop warnings exist)
+    platforms_planner = {}
+    for key, path in [('amd', args.amd), ('orin', args.orin), ('thor', args.thor)]:
+        planner_data = parse_planner_loop_times(path)
+        if planner_data:
+            platforms_planner[key] = planner_data
+    if platforms_planner:
+        print('  Generating: Planner Cycle Times')
+        fig = plot_planner_cycle_times(platforms_planner)
+        fig = save_plot(fig, output_dir, 'planner_cycle_times')
+        figures.append(('Planner Cycle Times', fig))
 
     # Control loop misses chart (different signature — uses miss_counts)
     print('  Generating: Control Loop Misses')

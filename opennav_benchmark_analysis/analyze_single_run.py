@@ -30,7 +30,8 @@ from plotly.subplots import make_subplots
 
 from utils import (
     load_run, compute_stats, save_plot, build_html_report, get_metric_label,
-    count_control_loop_misses, load_vlm_queries, VLM_OUTCOMES,
+    count_control_loop_misses, parse_planner_loop_times,
+    load_vlm_queries, VLM_OUTCOMES,
 )
 
 
@@ -616,6 +617,19 @@ def main():
     # Count control loop misses from ROS logs
     control_loop_misses = count_control_loop_misses(args.metrics_file)
 
+    # Parse planner loop times from ROS logs
+    planner_data = parse_planner_loop_times(args.metrics_file)
+    planner_html = ''
+    if planner_data:
+        planner_html = (
+            '<div class="metadata"><strong>Planner Cycle Times:</strong> '
+            f'{planner_data["count"]} calls &nbsp;|&nbsp; '
+            f'mean: {planner_data["mean"] * 1000:.1f} ms &nbsp;|&nbsp; '
+            f'p95: {planner_data["p95"] * 1000:.1f} ms &nbsp;|&nbsp; '
+            f'p99: {planner_data["p99"] * 1000:.1f} ms &nbsp;|&nbsp; '
+            f'max: {planner_data["max"] * 1000:.1f} ms</div>\n'
+        )
+
     # Parse VLM query outcomes from ROS logs
     vlm_data = load_vlm_queries(args.metrics_file)
     vlm_html = ''
@@ -647,7 +661,7 @@ def main():
     stats_html = (
         f'<div class="metadata"><strong>Control Loop Misses (30 Hz target):</strong> '
         f'{control_loop_misses}</div>\n'
-    ) + vlm_html + stats_df.to_html(
+    ) + planner_html + vlm_html + stats_df.to_html(
         classes='stats-table',
         float_format=lambda x: f'{x:.2f}',
     )

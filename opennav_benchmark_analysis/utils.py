@@ -373,6 +373,61 @@ def load_vlm_queries(metrics_filepath):
     return {'queries': queries, 'summary': summary}
 
 
+def parse_planner_loop_times(metrics_filepath):
+    """Parse planning cycle times from planner server loop-miss warnings.
+
+    When expected_planner_frequency is set high, the planner server logs a
+    warning on every planning call with the actual loop rate. The planning
+    time is computed as 1 / actual_rate.
+
+    Args:
+        metrics_filepath: Path to system_metrics.json file.
+
+    Returns:
+        dict with 'count', 'times_sec' (list of floats), and stats
+        ('mean', 'std', 'min', 'max', 'p50', 'p95', 'p99') in seconds,
+        or None if no planner loop warnings found.
+    """
+    run_dir = os.path.dirname(os.path.abspath(metrics_filepath))
+    ros_dir = os.path.join(run_dir, 'ros')
+    if not os.path.isdir(ros_dir):
+        return None
+
+    log_files = glob.glob(os.path.join(ros_dir, 'component_container_isolated_*.log'))
+    if not log_files:
+        return None
+
+    pattern = re.compile(
+        r'Planner loop missed its desired rate of [\d.]+ Hz\. '
+        r'Current loop rate is ([\d.]+) Hz')
+
+    times = []
+    for log_file in log_files:
+        with open(log_file, 'r', errors='replace') as f:
+            for line in f:
+                m = pattern.search(line)
+                if m:
+                    rate = float(m.group(1))
+                    if rate > 0:
+                        times.append(round(1.0 / rate, 4))
+
+    if not times:
+        return None
+
+    times_arr = np.array(times)
+    return {
+        'count': len(times),
+        'times_sec': times,
+        'mean': round(float(times_arr.mean()), 4),
+        'std': round(float(times_arr.std()), 4),
+        'min': round(float(times_arr.min()), 4),
+        'max': round(float(times_arr.max()), 4),
+        'p50': round(float(np.percentile(times_arr, 50)), 4),
+        'p95': round(float(np.percentile(times_arr, 95)), 4),
+        'p99': round(float(np.percentile(times_arr, 99)), 4),
+    }
+
+
 def count_control_loop_misses(metrics_filepath):
     """Count control loop rate misses from component container isolated logs.
 
