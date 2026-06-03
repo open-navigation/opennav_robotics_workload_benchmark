@@ -1023,12 +1023,16 @@ def build_comparison_table(platforms):
 
     Returns HTML string.
     """
-    # Key metrics to include
+    # Key metrics to include. A tuple (display_key, (col_a, col_b, ...))
+    # picks the first column present per-platform and labels the row by
+    # display_key. Used to unify AMD's gpu_power_w (amdgpu power1_average is
+    # SoC+CPU on APUs per upstream kernel doc) with Jetson's board_power_w
+    # under a single "Board Power (W)" row.
     key_metrics = [
         'cpu_total', 'gpu_util',
         'gpu_mem_used_mb', 'ram_percent', 'swap_percent',
         'cpu_temp', 'gpu_temp',
-        'gpu_power_w', 'board_power_w',
+        ('board_power_w', ('board_power_w', 'gpu_power_w')),
         'load_1m', 'process_count',
         'disk_read_rate_mbps', 'disk_write_rate_mbps',
         'net_sent_rate_mbps', 'net_recv_rate_mbps',
@@ -1036,12 +1040,17 @@ def build_comparison_table(platforms):
 
     rows = []
     for metric in key_metrics:
-        row = {'Metric': get_metric_label(metric)}
+        if isinstance(metric, tuple):
+            display_key, candidates = metric
+        else:
+            display_key, candidates = metric, (metric,)
+        row = {'Metric': get_metric_label(display_key)}
         any_data = False
         for key, (meta, df) in platforms.items():
             label = PLATFORM_ARG_LABELS[key]
-            if metric in df.columns:
-                series = df[metric].dropna()
+            col = next((c for c in candidates if c in df.columns), None)
+            if col is not None:
+                series = df[col].dropna()
                 if not series.empty:
                     row[f'{label} Mean'] = f'{series.mean():.2f}'
                     row[f'{label} P95'] = f'{series.quantile(0.95):.2f}'

@@ -60,7 +60,7 @@ METRIC_LABELS = {
     'gpu_clock_mhz': 'GPU Clock (MHz)',
     'gpu_mem_clock_mhz': 'GPU Memory Clock (MHz)',
     'gpu_temp': 'GPU Temperature (°C)',
-    'gpu_power_w': 'GPU Power (W)',
+    'gpu_power_w': 'Board Power (W)',
     'vcn_util': 'VCN Utilization (%)',
     'board_power_w': 'Board Power (W)',
     'emc_freq_mhz': 'EMC Frequency (MHz)',
