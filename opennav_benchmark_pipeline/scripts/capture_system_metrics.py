@@ -27,6 +27,7 @@ Output:
     Writes a JSON file to <output_dir>/system_metrics_<timestamp>.json
 """
 
+import glob
 import json
 import os
 import signal
@@ -39,6 +40,26 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from hardware_platforms import detect_platform, AmdGpuMetrics, JetsonGpuMetrics
 
 
+def _read_cpufreq_sysfs_mean_mhz():
+    """Fallback CPU frequency when psutil.cpu_freq() can't enumerate every
+    policy. On Jetson Thor in 70W nvpmodel one cluster is gated off and its
+    policy*/scaling_cur_freq returns EBUSY; psutil bails and raises
+    NotImplementedError. Average across whichever policies are readable to
+    match psutil.cpu_freq().current's all-CPU-mean semantic.
+    """
+    vals_khz = []
+    for p in sorted(glob.glob(
+            '/sys/devices/system/cpu/cpufreq/policy*/scaling_cur_freq')):
+        try:
+            with open(p, 'r') as f:
+                vals_khz.append(int(f.read().strip()))
+        except (OSError, ValueError):
+            continue
+    if not vals_khz:
+        return None
+    return round(sum(vals_khz) / len(vals_khz) / 1000.0, 1)
+
+
 def collect_common_metrics():
     """Collect platform-independent system metrics via psutil."""
     metrics = {}
@@ -49,9 +70,14 @@ def collect_common_metrics():
     metrics['cpu_total'] = psutil.cpu_percent(interval=0)
     metrics['cpu_cores'] = psutil.cpu_percent(percpu=True)
 
-    freq = psutil.cpu_freq()
-    if freq:
-        metrics['cpu_freq_mhz'] = round(freq.current, 1)
+    try:
+        freq = psutil.cpu_freq()
+        if freq:
+            metrics['cpu_freq_mhz'] = round(freq.current, 1)
+    except NotImplementedError:
+        freq_mhz = _read_cpufreq_sysfs_mean_mhz()
+        if freq_mhz is not None:
+            metrics['cpu_freq_mhz'] = freq_mhz
 
     # Memory
     vm = psutil.virtual_memory()
