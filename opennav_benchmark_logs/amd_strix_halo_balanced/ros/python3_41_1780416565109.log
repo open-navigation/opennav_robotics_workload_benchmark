@@ -1,0 +1,157 @@
+[INFO] [1780416565.187961252] [vlm_node]: Subscribed to image topic: /camera_front/image
+[INFO] [1780416571.716694625] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780416588.410939388] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: True
+[INFO] [1780416588.411115931] [vlm_node]: VLM_QUERY|QueryBool|success|16.69|1|
+[INFO] [1780416588.416889158] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416614.171673595] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416614.171906917] [vlm_node]: VLM_QUERY|QueryBool|success|25.76|1|
+[INFO] [1780416614.176903011] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416622.866610223] [vlm_node]: Completed prompt: "Are there any people visible in this scene? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416622.866975390] [vlm_node]: VLM_QUERY|QueryBool|success|8.69|1|
+[INFO] [1780416622.887075371] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780416640.373699322] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: False
+[INFO] [1780416640.373950063] [vlm_node]: VLM_QUERY|QueryBool|success|17.49|1|
+[INFO] [1780416640.387248594] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416653.446823870] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416653.447013203] [vlm_node]: VLM_QUERY|QueryBool|success|13.06|1|
+[INFO] [1780416653.467793960] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416666.099541959] [vlm_node]: Completed prompt: "Are there any people visible in this scene? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416666.099731342] [vlm_node]: VLM_QUERY|QueryBool|success|12.63|1|
+[INFO] [1780416666.117580023] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780416684.010729099] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: False
+[INFO] [1780416684.012065012] [vlm_node]: VLM_QUERY|QueryBool|success|17.89|1|
+[INFO] [1780416688.185474484] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780416707.465002729] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: True
+[INFO] [1780416707.465190803] [vlm_node]: VLM_QUERY|QueryBool|success|19.28|1|
+[INFO] [1780416707.476401867] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416721.267948651] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416721.268325498] [vlm_node]: VLM_QUERY|QueryBool|success|13.79|1|
+[INFO] [1780416728.673848590] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780416750.232691943] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: False
+[INFO] [1780416750.232934984] [vlm_node]: VLM_QUERY|QueryBool|success|21.56|1|
+[INFO] [1780416750.252986627] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416763.437933364] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416763.438221694] [vlm_node]: VLM_QUERY|QueryBool|success|13.19|1|
+[INFO] [1780416763.452853998] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416774.401494099] [vlm_node]: Completed prompt: "Are there any people visible in this scene? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416774.401683783] [vlm_node]: VLM_QUERY|QueryBool|success|10.95|1|
+[INFO] [1780416774.413110230] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780416787.033270109] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: False
+[INFO] [1780416787.033463322] [vlm_node]: VLM_QUERY|QueryBool|success|12.62|1|
+[INFO] [1780416787.053460837] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416808.920375832] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416808.920569456] [vlm_node]: VLM_QUERY|QueryBool|success|21.87|1|
+[INFO] [1780416808.933651484] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416817.786527301] [vlm_node]: Completed prompt: "Are there any people visible in this scene? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416817.787428577] [vlm_node]: VLM_QUERY|QueryBool|success|8.85|1|
+[INFO] [1780416817.794203115] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780416833.764255151] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: False
+[INFO] [1780416833.764617415] [vlm_node]: VLM_QUERY|QueryBool|success|15.97|1|
+[INFO] [1780416833.783988183] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416847.149957028] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416847.150193724] [vlm_node]: VLM_QUERY|QueryBool|success|13.37|1|
+[INFO] [1780416847.163222565] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416855.893468951] [vlm_node]: Completed prompt: "Are there any people visible in this scene? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416855.893714737] [vlm_node]: VLM_QUERY|QueryBool|success|8.73|1|
+[INFO] [1780416858.601861287] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780416877.259522451] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: True
+[INFO] [1780416877.259720178] [vlm_node]: VLM_QUERY|QueryBool|success|18.66|1|
+[INFO] [1780416877.271997459] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416905.167632027] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416905.167842883] [vlm_node]: VLM_QUERY|QueryBool|success|27.90|1|
+[INFO] [1780416905.181837953] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[INFO] [1780416918.589600857] [vlm_node]: Completed prompt: "Are there any people visible in this scene? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780416918.589799664] [vlm_node]: VLM_QUERY|QueryBool|success|13.41|1|
+[INFO] [1780416918.604882418] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780416930.047599320] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780416976.650085869] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: False
+[INFO] [1780416976.650615189] [vlm_node]: VLM_QUERY|QueryBool|success|58.05|1|
+[INFO] [1780417019.005015591] [vlm_node]: VLM_QUERY|QueryBool|cancelled|88.96|2|
+[INFO] [1780417025.545417981] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780417050.053522339] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: True
+[INFO] [1780417050.054273753] [vlm_node]: VLM_QUERY|QueryBool|success|24.51|1|
+[INFO] [1780417050.066041348] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780417074.704064249] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417074.704317653] [vlm_node]: VLM_QUERY|QueryBool|success|24.64|1|
+[INFO] [1780417074.715679282] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[INFO] [1780417084.220119755] [vlm_node]: Completed prompt: "Are there any people visible in this scene? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417084.220311190] [vlm_node]: VLM_QUERY|QueryBool|success|9.51|1|
+[INFO] [1780417084.227071449] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780417094.410511154] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780417107.586320582] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: False
+[INFO] [1780417107.587048905] [vlm_node]: VLM_QUERY|QueryBool|success|13.18|1|
+[INFO] [1780417107.602961762] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780417124.482998129] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417124.483371590] [vlm_node]: VLM_QUERY|QueryBool|success|16.88|1|
+[INFO] [1780417124.501040581] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[INFO] [1780417138.386664256] [vlm_node]: Completed prompt: "Are there any people visible in this scene? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417138.387049327] [vlm_node]: VLM_QUERY|QueryBool|success|13.89|1|
+[INFO] [1780417138.401412921] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780417165.483483531] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: False
+[INFO] [1780417165.483839613] [vlm_node]: VLM_QUERY|QueryBool|success|27.08|1|
+[INFO] [1780417165.500014526] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780417175.509834347] [vlm_node]: VLM request failed on attempt 1: Request timed out.
+[INFO] [1780417175.511888987] [vlm_node]: VLM_QUERY|QueryBool|error|91.28|1|Request timed out.
+[INFO] [1780417176.427945744] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417176.428545410] [vlm_node]: VLM_QUERY|QueryBool|success|10.93|1|
+[INFO] [1780417176.442421135] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[INFO] [1780417186.483757832] [vlm_node]: Completed prompt: "Are there any people visible in this scene? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417186.483955587] [vlm_node]: VLM_QUERY|QueryBool|success|10.04|1|
+[INFO] [1780417187.470624186] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780417205.783556697] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: True
+[INFO] [1780417205.783937868] [vlm_node]: VLM_QUERY|QueryBool|success|18.31|1|
+[INFO] [1780417205.801123265] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780417220.151795958] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417220.152071931] [vlm_node]: VLM_QUERY|QueryBool|success|14.35|1|
+[INFO] [1780417220.171353502] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[INFO] [1780417231.392601662] [vlm_node]: Completed prompt: "Are there any people visible in this scene? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417231.392850666] [vlm_node]: VLM_QUERY|QueryBool|success|11.22|1|
+[INFO] [1780417231.410891005] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780417249.535701106] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: False
+[INFO] [1780417249.536020858] [vlm_node]: VLM_QUERY|QueryBool|success|18.13|1|
+[INFO] [1780417249.550532231] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780417259.433017433] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417259.433247017] [vlm_node]: VLM_QUERY|QueryBool|success|9.88|1|
+[INFO] [1780417259.450615116] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[INFO] [1780417266.715267421] [vlm_node]: Completed prompt: "Are there any people visible in this scene? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417266.716138109] [vlm_node]: VLM_QUERY|QueryBool|success|7.27|1|
+[INFO] [1780417276.082233467] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780417303.087215488] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: False
+[INFO] [1780417303.087877791] [vlm_node]: VLM_QUERY|QueryBool|success|27.01|1|
+[INFO] [1780417303.092879960] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780417331.233606715] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417331.233852629] [vlm_node]: VLM_QUERY|QueryBool|success|28.14|1|
+[INFO] [1780417339.620447119] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780417383.565784449] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: True
+[INFO] [1780417383.566044301] [vlm_node]: VLM_QUERY|QueryBool|success|43.95|2|
+[INFO] [1780417383.579968485] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[INFO] [1780417393.975581631] [vlm_node]: Completed prompt: "Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417393.975795145] [vlm_node]: VLM_QUERY|QueryBool|success|10.40|1|
+[INFO] [1780417393.990029028] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[INFO] [1780417406.295332110] [vlm_node]: Completed prompt: "Are there any people visible in this scene? If so, respond only yes. Otherwise respond no." with response: False
+[INFO] [1780417406.295676881] [vlm_node]: VLM_QUERY|QueryBool|success|12.31|1|
+[INFO] [1780417406.302525333] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780417416.586733190] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780417430.655842439] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[INFO] [1780417451.591408694] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: False
+[INFO] [1780417451.591912970] [vlm_node]: VLM_QUERY|QueryBool|success|45.29|1|
+[INFO] [1780417472.682026244] [vlm_node]: Completed prompt: "Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no." with response: False
+[INFO] [1780417472.682482771] [vlm_node]: VLM_QUERY|QueryBool|success|56.10|1|
+[INFO] [1780417487.224112681] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780417488.559161347] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780417488.559427679] [vlm_node]: VLM_QUERY|QueryBool|error|1.34|1|Connection error.
+[INFO] [1780417488.574301720] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780417489.764466261] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780417489.764772952] [vlm_node]: VLM_QUERY|QueryBool|error|1.19|1|Connection error.
+[INFO] [1780417489.784043100] [vlm_node]: Goal received with prompt: Are there any people visible in this scene? If so, respond only yes. Otherwise respond no.
+[WARN] [1780417491.048094765] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780417491.048400126] [vlm_node]: VLM_QUERY|QueryBool|error|1.26|1|Connection error.
+[INFO] [1780417491.063501830] [vlm_node]: Goal received with prompt: Check if there are any small hazards on the ground that would cause harm to the robot if it navigated over it OR the area is blocked by large objects that make it impassable. If so respond only yes. Otherwise, respond no.
+[WARN] [1780417492.091283410] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780417492.091531223] [vlm_node]: VLM_QUERY|QueryBool|error|61.44|1|Connection error.
+[WARN] [1780417492.416204749] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[INFO] [1780417492.416734224] [vlm_node]: VLM_QUERY|QueryBool|error|1.35|1|Connection error.
+[INFO] [1780417492.433474662] [vlm_node]: Goal received with prompt: Is this space too crowded by people or working machinery to move though safely? If so, respond only yes. Otherwise respond no.
+[WARN] [1780417493.734656938] [vlm_node]: VLM request failed on attempt 1: Connection error.
+[ERROR] [1780417493.735139604] [vlm_node.action_server]: Error raised in execute callback: Failed to publish feedback with an action server: feedback publisher is invalid, at ./src/rcl_action/action_server.c:1002
+[WARN] [1780417493.742229674] [vlm_node.action_server]: Goal state not set, assuming aborted. Goal ID: [ 93 142 195  66 212 181  17 223  31  36 211  20 235 146  49  91]

@@ -1,0 +1,18 @@
+Detected platform: jetson_thor
+Writing metrics to: /home/opennav/opennav_robotics_workload_benchmark/opennav_benchmark_logs/run_1780419053/system_metrics.json
+Capturing metrics every 1s for 900s...
+Traceback (most recent call last):
+  File "/home/opennav/opennav_robotics_workload_benchmark/opennav_benchmark_pipeline/scripts/capture_system_metrics.py", line 231, in <module>
+    main()
+  File "/home/opennav/opennav_robotics_workload_benchmark/opennav_benchmark_pipeline/scripts/capture_system_metrics.py", line 205, in main
+    sample = collect_common_metrics()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opennav/opennav_robotics_workload_benchmark/opennav_benchmark_pipeline/scripts/capture_system_metrics.py", line 52, in collect_common_metrics
+    freq = psutil.cpu_freq()
+           ^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/psutil/__init__.py", line 1913, in cpu_freq
+    ret = _psplatform.cpu_freq()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/psutil/_pslinux.py", line 784, in cpu_freq
+    raise NotImplementedError(msg)
+NotImplementedError: can't find current frequency file

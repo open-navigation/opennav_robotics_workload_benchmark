@@ -1,0 +1,5 @@
+[INFO] [1780419056.734481611] [laserscan_merger]: Subscribed to /scan_front_left
+[INFO] [1780419056.735496538] [laserscan_merger]: Subscribed to /scan_front_right
+[INFO] [1780419056.736276073] [laserscan_merger]: Publishing merged scan on /scan_merged in frame base_link
+[WARN] [1780419056.840019451] [laserscan_merger]: TF lookup failed for lidar_2d_front_left_link: "lidar_2d_front_left_link" passed to lookupTransform argument source_frame does not exist. 
+[WARN] [1780419056.941602715] [laserscan_merger]: TF lookup failed for lidar_2d_front_right_link: "lidar_2d_front_right_link" passed to lookupTransform argument source_frame does not exist. 
