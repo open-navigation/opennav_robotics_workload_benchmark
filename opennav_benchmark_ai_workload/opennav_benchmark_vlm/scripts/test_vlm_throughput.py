@@ -50,16 +50,16 @@ from vlm_client import VLMClient
 QUERIES = [
     (
         'Is there a person in this image? Reply yes, no, or unknown.',
-        'images/warehouse_aisle.png',
+        'images/warehouse-9.jpg',
     ),
     (
         'How many forklifts are visible? Reply with only an integer.',
-        'images/warehouse_aisle.png',
+        'images/warehouse-3.jpg',
     ),
     (
         'Describe the scene in one or two sentences, focusing on obstacles '
         'and hazards relevant to a mobile robot navigating this space.',
-        'images/warehouse_aisle.png',
+        'images/warehouse-2.jpg',
     ),
 ]
 
