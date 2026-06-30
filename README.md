@@ -129,7 +129,7 @@ Full result analysis charts and plots can be found in [opennav_benchmark_analysi
   <img src="opennav_benchmark_analysis/output/max_power/comparison/platform_balance_radar.png" alt="Max Power Radar Diagram" width="600"/>
 </p>
 
-From the three platforms evaluated, we can see that the AMD Strix Halo and NVIDIA Jetson Thor are very close in GPU & memory performance, with the Strix Halo slightly ahead. Strix Halo has significantly more CPU capability than either NVIDIA Jetson product, however both Strix Halo and Thor have sufficient headroom for deployed robotics & physical AI workloads.
+From the three platforms evaluated, we can see that the AMD Strix Halo and NVIDIA Jetson Thor are very close in GPU & memory performance, with the Strix Halo slightly ahead. Strix Halo has significantly more CPU capability than either NVIDIA Jetson product leaving more room for additional application or algorithmic workloads, however Thor has sufficient headroom for robotics & physical AI needs as long as additional workloads are minimal.
 
 The Orin AGX is significantly behind in CPU, GPU, and application performance. The Orin AGX was unable to complete 70% of the missions in the benchmark due to its inability to process navigation and AI workloads in real-time, completely saturating the GPU and key CPU cores.
 
