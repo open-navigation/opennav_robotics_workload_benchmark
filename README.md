@@ -1,6 +1,6 @@
 # Open Navigation's Robotics Workload Benchmark
 
-This is a robotics and AI workload benchmark to compare various hardware platforms using realistically complex, data intensive, representative applications. Many benchmarks exist from both hardware vendors and community members, but nearly all focus on evaluating a particular component or algorithm in isolation. Often times, multiple of these algorithms need to be run together which may interact negatively when composed into a full system due to sharing of limited CPU or conflicts accessing accelerated computing resources (GPU, NPU, FPGA, etc).
+This is a robotics and AI workload benchmark to compare various hardware platforms using realistically complex, data intensive, representative applications. Many benchmarks exist from both hardware vendors and community members, but nearly all focus on evaluating a particular component or algorithm in isolation. Often times, multiple of these algorithms need to be run together which may interact negatively when composed into a full system due to sharing of limited CPU/power or conflicts accessing accelerated computing resources (GPU, NPU, FPGA, etc).
 
 This project aims to fill the gap by providing a reproducable, independent benchmark for comparing and evaluating compute solutions for Robotics or Physical AI applications in all of their complexity. For this benchmark, we use Nav2 to autonomously navigate a forklift material handling robot within a 200,000 sqft (18,600 m2) industrial warehouse environment with its advanced, built-in planning, control, behavior modeling, and perception. It will move pallets from shipping/receiving to shelving units while processing multiple 3D lidars, 2D safety lidars, RGBD cameras, and internal sensors. This workload is representative of dozens of companies and tens of thousands of robotics deployed today in production environments.
 
@@ -123,9 +123,15 @@ The VLM server subscribes to the RGB camera topic mounted on the chassis of the 
 
 ## Results and Comparison
 
-TODO graphs, high-level metrics, and log-based analysis 
+Full result analysis charts and plots can be found in [opennav_benchmark_analysis/output](opennav_benchmark_analysis/output) for each platform. The analysis scripts can be run to generate the plots and metrics from the logs in `opennav_benchmark_logs`. A deeper analysis of these results can found on Open Navigation's blog. A tl;dr summary of key points is provided below.
 
+<p align="center">
+  <img src="opennav_benchmark_analysis/output/max_power/comparison/platform_balance_radar.png" alt="Max Power Radar Diagram" width="600"/>
+</p>
 
+From the three platforms evaluated, we can see that the AMD Strix Halo and NVIDIA Jetson Thor are very close in GPU & memory performance, with the Strix Halo slightly ahead. Strix Halo has significantly more CPU capability than either NVIDIA Jetson product, however both Strix Halo and Thor have sufficient headroom for deployed robotics & physical AI workloads.
+
+The Orin AGX is significantly behind in CPU, GPU, and application performance. The Orin AGX was unable to complete 70% of the missions in the benchmark due to its inability to process navigation and AI workloads in real-time, completely saturating the GPU and key CPU cores.
 
 ## Independent Reproduction, Extension to New Platforms
 
