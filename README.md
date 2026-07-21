@@ -123,7 +123,7 @@ The VLM server subscribes to the RGB camera topic mounted on the chassis of the 
 
 ## Results and Comparison
 
-Full result analysis charts and plots can be found in [opennav_benchmark_analysis/output](opennav_benchmark_analysis/output) for each platform. The analysis scripts can be run to generate the plots and metrics from the logs in `opennav_benchmark_logs`. A deeper analysis of these results can found on Open Navigation's blog. A tl;dr summary of key points is provided below.
+Full result analysis charts and plots can be found in [opennav_benchmark_analysis/output](opennav_benchmark_analysis/output) for each platform. The analysis scripts can be run to generate the plots and metrics from the logs in `opennav_benchmark_logs`. A deeper analysis of these results can found on Open Navigation's blog and [the technical report](docs/Robotics%20Workload%20Platform%20Benchmarking%20Results.pdf). A tl;dr summary of key points is provided below.
 
 <p align="center">
   <img src="opennav_benchmark_analysis/output/max_power/comparison/platform_balance_radar.png" alt="Max Power Radar Diagram" width="600"/>
