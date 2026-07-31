@@ -107,7 +107,7 @@ The benchmark orchestrator only launches the VLM container when `VLM_IMAGE` is s
 
 ```bash
 cd /path/to/opennav_robotics_workload_benchmark
-VLM_IMAGE=opennav_benchmark/ai_workload:amd_strix_halo ./opennav_benchmark_pipeline/run_benchmark.sh  # replace tags with jetson_orin, jetson_thor too
+VLM_IMAGE=opennav_benchmark/ai_workload:amd_strix_halo ./opennav_benchmark_pipeline/run_benchmark.sh  # replace tags with jetson_orin, jetson_thor, jetson_thor_optimized too
 ```
 
 For ad-hoc runs, you can launch the autonomy workload container by hand without the rest of the benchmark:
