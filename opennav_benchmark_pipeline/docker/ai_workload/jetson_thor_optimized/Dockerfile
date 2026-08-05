@@ -11,6 +11,7 @@ EXPOSE 8080
 # Auto-launch the OpenAI-compatible vLLM server on `docker run`.
 ENTRYPOINT ["vllm", "serve", "nvidia/Gemma-4-31B-IT-NVFP4", \
     "--port", "8080", \
+    "--served-model-name", "gemma-4", \
     "--max-model-len", "8192", \
     "--gpu-memory-utilization", "0.7", \
     "--enable-auto-tool-choice", \

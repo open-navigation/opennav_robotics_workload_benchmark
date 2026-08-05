@@ -1,0 +1,16 @@
+Platform: jetson_thor
+Profile: {'lidar_3d': 0.22, 'lidar_2d': 0.04, 'rgbd_camera': 1.3}
+Sensors: 3 3D LiDAR, 2 2D LiDAR, 3 RGBD cameras
+Total load target: 4.640 cores
+  3d_lidar_0: 0.220 cores (1 process(es))
+  3d_lidar_1: 0.220 cores (1 process(es))
+  3d_lidar_2: 0.220 cores (1 process(es))
+  2d_lidar_0: 0.040 cores (1 process(es))
+  2d_lidar_1: 0.040 cores (1 process(es))
+  rgbd_camera_0: 1.300 cores (2 process(es))
+  rgbd_camera_1: 1.300 cores (2 process(es))
+  rgbd_camera_2: 1.300 cores (2 process(es))
+Spawning 11 worker process(es) for 8 sensor(s)
+
+Received signal 15, shutting down...
+Hardware load simulation stopped.
