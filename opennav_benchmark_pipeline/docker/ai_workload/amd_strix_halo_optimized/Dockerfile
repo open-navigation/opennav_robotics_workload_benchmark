@@ -121,11 +121,16 @@ ENTRYPOINT ["vllm", "serve", "cyankiwi/gemma-4-31B-it-AWQ-4bit", \
     "--host", "0.0.0.0", \
     "--port", "8080", \
     "--served-model-name", "gemma-4", \
-    "--max-model-len", "4096", \
-    "--max-num-seqs", "1", \
+    # Updated from 4096
+    "--max-model-len", "8192", \
+    "--max-num-seqs", "1", \  # NOT IN NV (actually slows)
     "--gpu-memory-utilization", "0.7083", \
-    "--limit-mm-per-prompt", "{\"image\": 1, \"video\": 0}", \
-    "--mm-processor-cache-gb", "0", \
-    "--no-enable-prefix-caching", \
+    "--limit-mm-per-prompt", "{\"image\": 1, \"video\": 0}", \ # NOT IN NV (actually slows)
+    "--mm-processor-cache-gb", "0", \ # NOT IN NV (actually slows)
+    "--no-enable-prefix-caching", \ # NOT IN NV (actually slows)
+    "--default-chat-template-kwargs", "{\"enable_thinking\":true}", \
+    "--enable-auto-tool-choice", \
+    "--reasoning-parser", "gemma4", \
+    "--tool-call-parser", "gemma4", \
     "--mm-encoder-attn-backend", "TRITON_ATTN", \
     "--speculative-config", "{\"method\":\"mtp\",\"model\":\"google/gemma-4-31B-it-assistant\",\"num_speculative_tokens\":3}"]
