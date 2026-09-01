@@ -1,0 +1,241 @@
+---
+/**
+ * One chart, one idea.
+ *
+ * Renders a figure containing the plot, its stated takeaway, the run(s) it was
+ * measured from, and a collapsed data table. The table is the accessibility and
+ * no-JavaScript path, so every number on screen is reachable without the canvas.
+ */
+export interface TableSpec {
+  columns: string[];
+  rows: (string | number | null)[][];
+  /** Column indices rendered right-aligned in tabular figures. */
+  numeric?: number[];
+}
+
+export interface Props {
+  id: string;
+  title: string;
+  takeaway?: string;
+  /** Log directories the chart was measured from. */
+  sources?: string[];
+  csv?: string[];
+  height?: number;
+  spec: unknown;
+  table: TableSpec;
+  tableCaption?: string;
+  /** Suppress the figure's own heading when a section heading already names it. */
+  hideTitle?: boolean;
+}
+
+const {
+  id,
+  title,
+  takeaway,
+  sources = [],
+  csv = [],
+  height = 340,
+  spec,
+  table,
+  tableCaption,
+  hideTitle = false,
+} = Astro.props;
+
+const numeric = new Set(table.numeric ?? table.columns.map((_, i) => i).slice(1));
+const repoBlob =
+  'https://github.com/open-navigation/opennav_robotics_workload_benchmark/tree/main/opennav_benchmark_logs/';
+---
+
+<figure class="figure" id={id}>
+  <figcaption class="figure__head">
+    {
+      !hideTitle && (
+        <h3 class="figure__title">
+          <a href={`#${id}`} class="figure__anchor" aria-label={`Link to ${title}`}>
+            #
+          </a>
+          {title}
+        </h3>
+      )
+    }
+    {takeaway && <p class="figure__takeaway">{takeaway}</p>}
+  </figcaption>
+
+  <div
+    class="figure__plot"
+    style={`height:${height}px`}
+    role="img"
+    aria-label={`${title}. ${takeaway ?? ''} The same data is available in the table below.`}
+    data-chart={JSON.stringify(spec)}
+  >
+  </div>
+
+  <details class="figure__data">
+    <summary>Data table{table.rows.length ? ` (${table.rows.length} rows)` : ''}</summary>
+    <div class="table-scroll">
+      <table class="data">
+        {tableCaption && <caption>{tableCaption}</caption>}
+        <thead>
+          <tr>
+            {
+              table.columns.map((col, i) => (
+                <th scope="col" class={numeric.has(i) ? 'num' : undefined}>
+                  {col}
+                </th>
+              ))
+            }
+          </tr>
+        </thead>
+        <tbody>
+          {
+            table.rows.map((row) => (
+              <tr>
+                {row.map((cell, i) =>
+                  i === 0 ? (
+                    <th scope="row" class="row-head">
+                      {cell}
+                    </th>
+                  ) : (
+                    <td class={numeric.has(i) ? 'num' : undefined}>
+                      {cell === null || cell === undefined ? 'n/a' : cell}
+                    </td>
+                  ),
+                )}
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  {
+    (sources.length > 0 || csv.length > 0) && (
+      <p class="figure__source">
+        {sources.length > 0 && (
+          <>
+            Source:{' '}
+            {sources.map((s, i) => (
+              <>
+                {i > 0 && ', '}
+                <a href={repoBlob + s}>
+                  <code>{s}</code>
+                </a>
+              </>
+            ))}
+          </>
+        )}
+        {csv.length > 0 && (
+          <>
+            {sources.length > 0 && ' · '}
+            {csv.map((href, i) => (
+              <>
+                {i > 0 && ' '}
+                <a href={href} download>
+                  CSV
+                </a>
+              </>
+            ))}
+          </>
+        )}
+      </p>
+    )
+  }
+</figure>
+
+<script>
+  import '../scripts/charts';
+</script>
+
+<style>
+  .figure {
+    margin: 0 0 var(--space-7);
+    scroll-margin-top: 5.5rem;
+  }
+
+  .figure__head {
+    margin-bottom: var(--space-3);
+  }
+
+  .figure__title {
+    font-size: 1.05rem;
+    margin: 0 0 var(--space-1);
+    position: relative;
+  }
+
+  .figure__anchor {
+    position: absolute;
+    left: -1.1em;
+    color: var(--text-muted);
+    text-decoration: none;
+    opacity: 0;
+  }
+
+  .figure:hover .figure__anchor,
+  .figure__anchor:focus {
+    opacity: 1;
+  }
+
+  .figure__takeaway {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    max-width: var(--measure);
+  }
+
+  .figure__plot {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-1);
+    padding: var(--space-3);
+    overflow: hidden;
+  }
+
+  .figure__data {
+    margin-top: var(--space-3);
+  }
+
+  .figure__data > summary {
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-family: var(--font-display);
+  }
+
+  .figure__data > summary:hover {
+    color: var(--text-primary);
+  }
+
+  .figure__data .table-scroll {
+    margin-top: var(--space-3);
+    max-height: 26rem;
+    overflow-y: auto;
+  }
+
+  .figure__source {
+    margin: var(--space-2) 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    max-width: none;
+  }
+
+  .figure__source code {
+    font-size: 0.95em;
+  }
+
+  /* Without JS the canvas never paints; show the table instead of a void. */
+  :global(html.no-js) .figure__plot {
+    display: none;
+  }
+
+  :global(html.no-js) .figure__data {
+    display: block;
+  }
+
+  @media print {
+    .figure__plot {
+      display: none;
+    }
+  }
+</style>

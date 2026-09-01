@@ -1,0 +1,236 @@
+---
+import '../styles/tokens.css';
+import '../styles/global.css';
+import Icon from '../components/Icon.astro';
+
+export interface Props {
+  title: string;
+  description: string;
+  /** Rendered as the page's schema.org JSON-LD, if any. */
+  jsonLd?: Record<string, unknown>;
+  wide?: boolean;
+}
+
+const { title, description, jsonLd } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const nav = [
+  { href: `${base}/results`, label: 'Results' },
+  { href: `${base}/platforms`, label: 'Platforms' },
+  { href: `${base}/methodology`, label: 'Methodology' },
+  { href: `${base}/docs`, label: 'Run it' },
+  { href: `${base}/about`, label: 'Contact' },
+];
+const path = Astro.url.pathname.replace(/\/$/, '');
+---
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(`${base}/og.png`, Astro.site).href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Open Navigation Robotics Workload Benchmark" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={new URL(`${base}/og.png`, Astro.site).href} />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    <script is:inline>
+      // Apply the stored theme before first paint so the page never flashes.
+      (function () {
+        try {
+          var stored = localStorage.getItem('onav-theme');
+          if (stored === 'light' || stored === 'dark') {
+            document.documentElement.dataset.theme = stored;
+          }
+        } catch (e) {
+          /* private mode: fall back to the OS preference */
+        }
+        document.documentElement.classList.remove('no-js');
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="wrap site-header__inner">
+        <a class="brand" href={`${base}/`}>
+          <img
+            class="brand__mark"
+            src={`${base}/images/opennav-mark.png`}
+            alt=""
+            width="128"
+            height="128"
+            decoding="async"
+          />
+          <span class="brand__text">
+            <strong>Open Navigation</strong>
+            <span>Robotics Workload Benchmark</span>
+          </span>
+        </a>
+        <nav class="site-nav" aria-label="Main">
+          {
+            nav.map((item) => (
+              <a href={item.href} aria-current={path.startsWith(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            ))
+          }
+          <button class="theme-toggle" type="button" data-theme-toggle aria-live="polite">
+            Theme
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <div class="site-footer__brand">
+          <img
+            src={`${base}/images/opennav-mark.png`}
+            alt="Open Navigation"
+            width="128"
+            height="128"
+          />
+          <div>
+            <p class="site-footer__name">Open Navigation LLC</p>
+            <p class="site-footer__tagline">Maintainers of Nav2</p>
+          </div>
+        </div>
+
+        <div class="site-footer__cols">
+          <div>
+            <h4>The benchmark</h4>
+            <ul>
+              <li><a href={`${base}/results`}>Results</a></li>
+              <li><a href={`${base}/platforms`}>Platform comparison</a></li>
+              <li><a href={`${base}/methodology`}>Methodology</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Run it yourself</h4>
+            <ul>
+              <li><a href={`${base}/docs/reproduce`}>Practitioner's guide</a></li>
+              <li><a href={`${base}/docs/adding-a-platform`}>Add a platform</a></li>
+              <li>
+                <a
+                  href="https://github.com/open-navigation/opennav_robotics_workload_benchmark"
+                >
+                  <Icon name="github" size={14} /> GitHub repository
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4>Read</h4>
+            <ul>
+              <li>
+                <a href={`${base}/Robotics-Workload-Platform-Benchmarking-Results.pdf`}>
+                  <Icon name="download" size={14} /> Technical report (PDF)
+                </a>
+              </li>
+              <li>
+                <a href="https://opennav.org/news/opennav-robotics-workload-benchmark/">
+                  Announcement post
+                </a>
+              </li>
+              <li><a href={`${base}/data/dataset.json`}>Full dataset (JSON)</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Contact</h4>
+            <ul>
+              <li><a href={`${base}/about`}>Commercial support</a></li>
+              <li><a href={`${base}/about#vendors`}>Hardware vendors</a></li>
+              <li>
+                <a href="mailto:info@opennav.org">
+                  <Icon name="mail" size={14} /> info@opennav.org
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <p class="site-footer__legal">
+          Code and data are Apache-2.0 licensed. &copy; {new Date().getFullYear()} Open
+          Navigation LLC.
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      const toggle = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+      const root = document.documentElement;
+
+      function current(): 'light' | 'dark' {
+        if (root.dataset.theme === 'light' || root.dataset.theme === 'dark') {
+          return root.dataset.theme;
+        }
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+
+      function label() {
+        if (!toggle) return;
+        const next = current() === 'dark' ? 'light' : 'dark';
+        toggle.textContent = next === 'dark' ? 'Dark' : 'Light';
+        toggle.setAttribute('aria-label', `Switch to ${next} theme`);
+      }
+
+      toggle?.addEventListener('click', () => {
+        const next = current() === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try {
+          localStorage.setItem('onav-theme', next);
+        } catch {
+          /* storage unavailable; the choice lasts for this page only */
+        }
+        label();
+      });
+
+      label();
+    </script>
+
+    <script>
+      // Wide tables: show a right-edge fade and the scroll hint only while
+      // there is actually more table to reach.
+      function syncTableOverflow(el: HTMLElement) {
+        const overflowing = el.scrollWidth - el.clientWidth > 2;
+        el.classList.toggle('is-overflowing', overflowing);
+        el.classList.toggle(
+          'is-scrolled-end',
+          overflowing && el.scrollLeft + el.clientWidth >= el.scrollWidth - 2,
+        );
+        const hint = el.nextElementSibling;
+        if (hint?.classList.contains('table-hint')) {
+          hint.classList.toggle('is-visible', overflowing);
+        }
+      }
+
+      const tables = Array.from(document.querySelectorAll<HTMLElement>('.table-scroll'));
+      tables.forEach((el) => {
+        syncTableOverflow(el);
+        el.addEventListener('scroll', () => syncTableOverflow(el), { passive: true });
+        new ResizeObserver(() => syncTableOverflow(el)).observe(el);
+      });
+    </script>
+  </body>
+</html>

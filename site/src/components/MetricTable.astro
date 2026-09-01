@@ -1,0 +1,91 @@
+---
+import { fmt, metricLabels, type Run } from '../lib/data';
+
+export interface Props {
+  runs: Run[];
+  /** Restrict to these metrics; defaults to every metric present. */
+  metrics?: string[];
+}
+
+const { runs, metrics } = Astro.props;
+
+// Order metrics the way a reader works down a system: CPU, memory, GPU,
+// power, thermal, then I/O and load.
+const ORDER = [
+  'cpu_total', 'cpu_freq_mhz', 'peak_core_util', 'mean_core_util', 'cores_active_percent',
+  'ram_percent', 'ram_used_mb', 'ram_total_mb', 'swap_percent',
+  'gpu_util', 'gpu_clock_mhz', 'gpu_mem_clock_mhz', 'gpu_effective_throughput',
+  'gpu_mem_used_mb', 'gpu_mem_total_mb', 'vcn_util', 'npu_util',
+  'board_power_w', 'gpu_power_w', 'cpu_temp', 'gpu_temp',
+  'mem_bandwidth_gbps', 'mem_busy_percent', 'emc_freq_mhz',
+  'disk_read_rate_mbps', 'disk_write_rate_mbps', 'disk_percent',
+  'net_recv_rate_mbps', 'net_sent_rate_mbps', 'net_errors',
+  'load_1m', 'load_5m', 'load_15m', 'process_count',
+];
+
+const present = new Set<string>();
+runs.forEach((r) => Object.keys(r.stats).forEach((m) => present.add(m)));
+const rows = (metrics ?? ORDER.filter((m) => present.has(m))).filter((m) => present.has(m));
+---
+
+<div class="table-scroll metric-table">
+  <table class="data">
+    <caption>Mean / p95 / max for every captured metric, across every run in this category.</caption>
+    <thead>
+      <tr>
+        <th scope="col" rowspan="2">Metric</th>
+        {runs.map((r) => <th scope="colgroup" colspan="3" class="num group">{r.label}</th>)}
+      </tr>
+      <tr>
+        {
+          runs.map(() => (
+            <>
+              <th scope="col" class="num sub">Mean</th>
+              <th scope="col" class="num sub">p95</th>
+              <th scope="col" class="num sub">Max</th>
+            </>
+          ))
+        }
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.map((metric) => (
+          <tr>
+            <th scope="row" class="row-head">
+              {metricLabels[metric] ?? metric}
+            </th>
+            {runs.map((r) => (
+              <>
+                <td class="num">{fmt(r.stats[metric]?.mean, 2)}</td>
+                <td class="num">{fmt(r.stats[metric]?.p95, 2)}</td>
+                <td class="num">{fmt(r.stats[metric]?.max, 2)}</td>
+              </>
+            ))}
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .metric-table {
+    max-height: 40rem;
+    overflow-y: auto;
+  }
+
+  .metric-table th.group {
+    text-align: center;
+    border-left: 1px solid var(--border);
+  }
+
+  .metric-table th.sub {
+    font-size: 0.7rem;
+    top: 2.3rem;
+  }
+
+  .metric-table tbody td:nth-child(3n + 2) {
+    border-left: 1px solid var(--border);
+  }
+</style>

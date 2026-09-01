@@ -1,0 +1,268 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ChartSection from '../../components/ChartSection.astro';
+import MetricTable from '../../components/MetricTable.astro';
+import VendorCallout from '../../components/VendorCallout.astro';
+import Icon from '../../components/Icon.astro';
+import {
+  categories,
+  categoryFor,
+  derived,
+  fmt,
+  platformFor,
+  runsFor,
+} from '../../lib/data';
+import { comparisonSections } from '../../lib/charts';
+
+export function getStaticPaths() {
+  return categories.map((c) => ({ params: { category: c.key } }));
+}
+
+const { category: categoryKey } = Astro.params;
+const category = categoryFor(categoryKey!);
+const runs = runsFor(category.key);
+const sections = comparisonSections(runs, derived[category.key].radar);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: `Robotics Workload Benchmark: ${category.label}`,
+  description: category.description,
+  creator: { '@type': 'Organization', name: 'Open Navigation LLC' },
+  variableMeasured: [
+    'CPU utilization',
+    'GPU utilization',
+    'Board power',
+    'Completed missions',
+    'Control loop misses',
+    'VLM query outcomes',
+  ],
+  distribution: runs.map((r) => ({
+    '@type': 'DataDownload',
+    encodingFormat: 'text/csv',
+    contentUrl: `${base}/data/csv/${r.id}.csv`,
+  })),
+};
+---
+
+<BaseLayout
+  title={`${category.label} results | Robotics Workload Benchmark`}
+  description={category.description}
+  jsonLd={jsonLd}
+>
+  <div class="wrap results">
+    <p class="eyebrow">Results</p>
+    <h1>{category.label}</h1>
+    <p class="section__lede">{category.description}</p>
+
+    <!-- Run inventory -->
+    <div class="table-scroll runs-table">
+      <table class="data">
+        <caption>
+          Runs in this category. Every chart below is measured from these runs.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Run</th>
+            <th scope="col" class="num">TDP (W)</th>
+            <th scope="col" class="num">Duration (s)</th>
+            <th scope="col" class="num">Samples</th>
+            <th scope="col">Raw logs</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            runs.map((r) => (
+              <tr>
+                <th scope="row" class="row-head">
+                  <span
+                    class="swatch"
+                    style={`background: var(--series-${r.platform === 'amd_strix_halo' ? 'amd' : r.platform.split('_')[1]})`}
+                  />
+                  <a href={`${base}/platforms/${platformFor(r.platform).slug}`}>{r.label}</a>
+                  {r.note && <span class="note"> ({r.note})</span>}
+                </th>
+                <td class="num">{r.tdp_w ?? 'n/a'}</td>
+                <td class="num">{r.duration_sec}</td>
+                <td class="num">{r.actual_samples}</td>
+                <td>
+                  <a
+                    href={`https://github.com/open-navigation/opennav_robotics_workload_benchmark/tree/main/opennav_benchmark_logs/${r.log_dir}`}
+                  >
+                    <code>{r.log_dir}</code>
+                  </a>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="jump" aria-label="Sections on this page">
+      <span class="jump__label">Jump to</span>
+      {
+        sections.map((s) => (
+          <a href={`#${s.id}`}>
+            <Icon name={s.icon as never} size={15} /> {s.title}
+          </a>
+        ))
+      }
+      <a href="#all-metrics">
+        <Icon name="chart" size={15} /> All metrics
+      </a>
+    </nav>
+
+    {sections.map((section) => <ChartSection section={section} />)}
+
+    <!-- Efficiency summary + full metric table -->
+    <section class="chart-section" id="all-metrics">
+      <h2>Workload efficiency summary</h2>
+      <p class="section__lede">
+        The same figures the analysis pipeline emits in its comparison report, for every run in
+        this category.
+      </p>
+
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr>
+              <th scope="col">Run</th>
+              <th scope="col" class="num">Mean CPU (%)</th>
+              <th scope="col" class="num">Available CPU (%)</th>
+              <th scope="col" class="num">Cores</th>
+              <th scope="col" class="num">Free core equiv.</th>
+              <th scope="col" class="num">Mean GPU (%)</th>
+              <th scope="col" class="num">Available GPU (%)</th>
+              <th scope="col" class="num">Mean RAM (%)</th>
+              <th scope="col" class="num">Available RAM (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              runs.map((r) => (
+                <tr>
+                  <th scope="row" class="row-head">
+                    {r.label}
+                  </th>
+                  <td class="num">{fmt(r.derived.cpu_mean_percent)}</td>
+                  <td class="num">{fmt(r.derived.cpu_available_percent)}</td>
+                  <td class="num">{r.derived.num_cores}</td>
+                  <td class="num">{fmt(r.derived.free_core_equivalents)}</td>
+                  <td class="num">{fmt(r.derived.gpu_mean_percent)}</td>
+                  <td class="num">{fmt(r.derived.gpu_available_percent)}</td>
+                  <td class="num">{fmt(r.derived.ram_mean_percent)}</td>
+                  <td class="num">{fmt(r.derived.ram_available_percent)}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="table-hint">Scroll the table sideways for every column.</p>
+
+      <h3>Detailed metrics comparison</h3>
+      <MetricTable runs={runs} />
+
+      <p class="downloads">
+        Download:
+        {
+          runs.map((r, i) => (
+            <>
+              {i > 0 && ' · '}
+              <a href={`${base}/data/csv/${r.id}.csv`} download>
+                {r.label} (CSV)
+              </a>
+            </>
+          ))
+        }
+        {' · '}
+        <a href={`${base}/data/dataset.json`} download>Full dataset (JSON)</a>
+      </p>
+    </section>
+
+    <div class="vendor-slot">
+      <VendorCallout variant="banner" />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .results {
+    padding-block: var(--space-7) var(--space-8);
+  }
+
+  .runs-table {
+    margin-bottom: var(--space-6);
+  }
+
+  .note {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 0.85em;
+  }
+
+  .jump {
+    position: sticky;
+    top: 4rem;
+    z-index: 20;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    padding: var(--space-3) 0;
+    border-block: 1px solid var(--border);
+    font-size: 0.88rem;
+    background: color-mix(in srgb, var(--surface-1) 94%, transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  .jump a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    padding: 0.15rem 0;
+  }
+
+  .jump a:hover {
+    color: var(--link);
+  }
+
+  @media (max-width: 720px) {
+    .jump {
+      position: static;
+    }
+  }
+
+  .jump__label {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .chart-section {
+    padding-block: var(--space-7);
+    border-top: 1px solid var(--border);
+    scroll-margin-top: 5rem;
+  }
+
+  .chart-section h2 {
+    margin-top: 0;
+  }
+
+  .downloads {
+    margin-top: var(--space-4);
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    max-width: none;
+  }
+
+  .vendor-slot {
+    margin-top: var(--space-7);
+  }
+</style>
