@@ -34,7 +34,7 @@ The [AMD X100 (Strix Halo)](https://www.amd.com/en/products/processors/desktops/
 | **CPU** | 12x Arm Cortex-A78AE @ 2.2 GHz | 14x Arm Neoverse V3AE @ 2.6 GHz | 16x Zen 5 (32T) @ 5.1 GHz |
 | **GPU Architecture** | Ampere | Blackwell | RDNA 3.5 |
 | **GPU Cores** | 2048 CUDA + 64 Tensor | 2560 CUDA + 96 Tensor | 2560 Shaders (40 CUs) |
-| **NPU / DLA** | 2x NVDLA 2.0 | DLA (105 INT8 TOPS) | XDNA 2 (50 TOPS) |
+| **NPU / DLA** | 2x NVDLA 2.0 | None | XDNA 2 (50 TOPS) |
 | **RAM** | 64 GB LPDDR5 | 128 GB LPDDR5X | Up to 128 GB LPDDR5X |
 | **Memory Bandwidth** | 204.8 GB/s | 273 GB/s | 256 GB/s |
 | **Power (TDP)** | 15–60 W | 40–130 W | 45–120 W |

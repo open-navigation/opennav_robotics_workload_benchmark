@@ -48,8 +48,6 @@ For example we set it up as:
 * Strix Halo to `10.2.1.30`
 * Developer or Simulation Machine `10.2.1.40`
 
-Only if you are running the simulation on a separate machine from the testbed platform to isolate to only run-time experimentation.
-
 4. Build all 3 Dockerfiles using the instructions in the `opennav_benchmark_pipeline/README.md`
 
 Take care to set the AI workload tag appropriately to your current testbed platform.
@@ -75,5 +73,3 @@ Results will be posted on the `opennav_benchmark_logs` directory.
 You can analyze them using the scripts in `opennav_benchmark_analysis` if you like :-)
 
 Happy benchmarking!
-
-- Steve
