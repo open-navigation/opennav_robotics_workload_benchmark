@@ -1,13 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import VendorCallout from '../../components/VendorCallout.astro';
-import { categories, platformOrder, platforms, runsFor } from '../../lib/data';
+import { categories, colorFor, platformOrder, platforms, runsFor } from '../../lib/data';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const cols = platformOrder.map((k) => platforms[k]);
 
-const swatch = (key: string) =>
-  `var(--series-${key === 'amd_strix_halo' ? 'amd' : key.split('_')[1]})`;
+const swatch = (key: string) => colorFor(key);
 
 const specRows: [string, string][] = [
   ['CPU', 'cpu'],

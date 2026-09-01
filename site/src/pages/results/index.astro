@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import VendorCallout from '../../components/VendorCallout.astro';
-import { categories, fmt, platformFor, runsFor } from '../../lib/data';
+import { categories, colorFor, fmt, platformFor, runsFor } from '../../lib/data';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const byCategory = categories.map((c) => ({ category: c, runs: runsFor(c.key) }));
@@ -44,7 +44,7 @@ const byCategory = categories.map((c) => ({ category: c, runs: runsFor(c.key) })
                       <th scope="row" class="row-head">
                         <span
                           class="swatch"
-                          style={`background: var(--series-${r.platform === 'amd_strix_halo' ? 'amd' : r.platform.split('_')[1]})`}
+                          style={`background: ${colorFor(r.platform)}`}
                         />
                         <a href={`${base}/platforms/${platformFor(r.platform).slug}`}>{r.label}</a>
                       </th>

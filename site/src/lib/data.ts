@@ -189,6 +189,11 @@ export const defaultCategory = categories[0];
  * CSS variable holding each platform's series color. One hue per platform,
  * used identically on every chart site-wide. TDP variants of the same
  * platform share the hue and are separated by a dashed stroke.
+ *
+ * Adding a platform means adding an entry here AND defining the variable in
+ * all three theme blocks of styles/tokens.css. Miss either and the platform
+ * renders in --series-neutral grey rather than failing, so check a chart and
+ * a results table after adding one. See site/README.md.
  */
 export const seriesVar: Record<string, string> = {
   amd_strix_halo: '--series-amd',

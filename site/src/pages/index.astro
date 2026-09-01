@@ -5,6 +5,7 @@ import HilDiagram from '../components/HilDiagram.astro';
 import Chart from '../components/Chart.astro';
 import Icon from '../components/Icon.astro';
 import {
+  colorFor,
   defaultCategory,
   derived,
   fmt,
@@ -277,7 +278,7 @@ const jsonLd = {
               {
                 platformOrder.map((key) => (
                   <th scope="col">
-                    <span class="swatch" style={`background: var(--series-${key.split('_')[0] === 'amd' ? 'amd' : key.split('_')[1]})`} />
+                    <span class="swatch" style={`background: ${colorFor(key)}`} />
                     <a href={`${base}/platforms/${platforms[key].slug}`}>
                       {platforms[key].short_label}
                     </a>
@@ -334,7 +335,7 @@ const jsonLd = {
               <a class="card finding card--link" href={`${base}/platforms/${p.slug}`}>
                 <span
                   class="finding__bar"
-                  style={`background: var(--series-${r.platform === 'amd_strix_halo' ? 'amd' : r.platform.split('_')[1]})`}
+                  style={`background: ${colorFor(r.platform)}`}
                 />
                 <div class="finding__head">
                   <h3>{p.short_label}</h3>

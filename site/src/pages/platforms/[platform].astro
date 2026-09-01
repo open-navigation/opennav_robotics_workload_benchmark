@@ -7,6 +7,7 @@ import Icon from '../../components/Icon.astro';
 import StatStrip from '../../components/StatStrip.astro';
 import {
   categoryFor,
+  colorFor,
   fmt,
   platformOrder,
   platforms,
@@ -27,7 +28,7 @@ const platform = platforms[platformKey];
 const runs = runsForPlatform(platformKey);
 const notes = PLATFORM_NOTES[platformKey];
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const swatch = `var(--series-${platformKey === 'amd_strix_halo' ? 'amd' : platformKey.split('_')[1]})`;
+const swatch = colorFor(platformKey);
 
 // One chart set per (category, run). Where a category has two TDP variants of
 // this platform, both get their own set.

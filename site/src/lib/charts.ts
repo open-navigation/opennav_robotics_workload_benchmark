@@ -12,6 +12,7 @@ import {
   decimate,
   fmt,
   isVariant,
+  seriesVar,
   timeseriesFor,
   type Run,
   type Timeseries,
@@ -78,13 +79,8 @@ function lineSpec(runs: Run[], metric: string, yName: string, unit: string, digi
 }
 
 function seriesVarName(run: Run, all: Run[]): string {
-  const map: Record<string, string> = {
-    amd_strix_halo: '--series-amd',
-    jetson_thor: '--series-thor',
-    jetson_orin: '--series-orin',
-  };
   void all;
-  return map[run.platform] ?? '--series-neutral';
+  return seriesVar[run.platform] ?? '--series-neutral';
 }
 
 /** Summary table for a time-series chart: distribution, not 900 raw rows. */

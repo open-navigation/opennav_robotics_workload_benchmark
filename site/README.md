@@ -24,9 +24,11 @@ The build consumes whatever is committed. That keeps the published dataset revie
 diffs and keeps Python out of the deploy path — at the cost of one rule you have to follow, described
 under [The contract](#the-contract) below.
 
-The exporter is the only place a benchmark category is named. Every route, selector, and chart on the
-site is generated from the exported data, so publishing a new category or platform is an exporter
-change, not a website change.
+The exporter is the only place a benchmark category is named. Routes are generated from the data —
+`getStaticPaths()` in `src/pages/results/[category].astro` maps over the exported categories and
+`src/pages/platforms/[platform].astro` maps over `platformOrder` — so **adding a category is an
+exporter change alone**. Adding a *platform* is not: it also needs a color, prose, and a docs page
+that cannot be inferred from measurements. See [Adding a platform](#adding-a-platform) below.
 
 ## Prerequisites
 
@@ -70,18 +72,102 @@ Run `make site-check` before pushing to catch it locally. Because `deploy` is ga
 checks with `needs:`, a failure here means nothing is published — the previously deployed site stays
 up.
 
-## Adding a run or a category
+## Adding a run to an existing platform
 
-The exporter only looks at run directories declared in its `CATEGORIES` registry. A directory that
-exists in `opennav_benchmark_logs/` but is not declared is not silently ignored — `--strict` fails
-the build and names it, because a new run needs a display label, a TDP, and a decision about whether
-it is published, and none of that can be inferred.
+Drop the run into `opennav_benchmark_logs/<category>/<name>/` and add a `RunSpec` to the matching
+`Category` in `CATEGORIES` (`export_site_data.py`). A `RunSpec` is
+`(key, platform, label, log_dir, tdp_w=..., note='')`, where `key` is unique within the category,
+`platform` is a key from `PLATFORMS`, and `log_dir` is relative to the logs root. Then
+`make site-data` and commit. Nothing in the website enumerates runs.
 
-`--strict` checks both directions, so it also fails when a published `RunSpec` points at a log
-directory that no longer exists — otherwise a rename would quietly drop a platform from the
-comparison.
+The exporter only looks at directories declared in `CATEGORIES`. One that exists on disk but is not
+declared is **not** silently ignored — `--strict` fails and names it, because a run needs a display
+label, a TDP, and a publish decision that cannot be inferred. `--strict` checks both directions, so
+it also fails when a published `RunSpec` points at a log directory that no longer exists; otherwise a
+rename would quietly drop a platform from the comparison.
 
-See [Adding a platform](src/content/docs/docs/adding-a-platform.md) for the full submission process.
+Two `RunSpec`s may point at the same `log_dir` — `balanced_power`'s Orin entry reuses
+`max_power/jetson_orin`, since that board is already at its maximum TDP. Use `note=` to explain any
+such reuse; it renders on the results page.
+
+## Adding a category
+
+Add a `Category` to `CATEGORIES` with a unique `key`, a `label`, an `order` (controls display
+order), a `description`, and its `runs`. Set `published=False` to keep it out of the site while
+still registering its log directories; flip it to `True` and re-export to publish. Routes, selectors,
+tables and charts all follow from the data — no site edits.
+
+## Adding a platform
+
+This is the one change that spans both sides of the repo. A new board needs a color, prose, and
+documentation that no measurement can supply. Work through all of it, then `make site-data`.
+
+**In `opennav_benchmark_analysis/`:**
+
+1. `utils.py` → `PLATFORM_LABELS`: the canonical key and display name.
+2. `export_site_data.py` → `SENSOR_DRIVER_LOAD`: measured per-sensor CPU cost, as a fraction of one
+   core. Mirrors `HARDWARE_PROFILES` in
+   `opennav_benchmark_pipeline/scripts/hardware_platforms.py`; keep the two in step.
+3. `export_site_data.py` → `PLATFORMS`: the full record — `slug` (its URL and docs filename),
+   `label` / `short_label` / `tile_label`, `vendor`, `vendor_url`, `summary`, the `spec` block, and
+   `as_tested`. Copy an existing entry and fill every field; pages render them positionally.
+4. `export_site_data.py` → `PLATFORM_ORDER`: controls column and series order site-wide.
+5. `export_site_data.py` → `CATEGORIES`: a `RunSpec` in each category it competes in.
+
+**In `site/`:**
+
+6. `src/styles/tokens.css` → a `--series-<name>` variable in **all three** theme blocks: bare
+   `:root`, the `prefers-color-scheme: dark` block, and the `[data-theme="dark"]` block. Missing the
+   dark ones gives a color that vanishes for half your readers. The palette is a validated
+   categorical set — pick a hue that stays distinguishable from the existing three in both themes.
+7. `src/lib/data.ts` → `seriesVar`: map the platform key to that variable. This is the single source
+   of truth; `lib/charts.ts` and every page read it through `colorFor()`. **It fails soft** — an
+   unmapped platform renders in neutral grey rather than erroring, so open a chart and a results
+   table and confirm the new color actually appears.
+8. `src/content/platform-notes.ts` → `PLATFORM_NOTES`: `verdict`, `strengths`, `limits`. Read the
+   header comment first — nothing here may assert anything the report does not.
+9. `src/pages/platforms/[platform].astro` → the `setupDoc` map, linking the platform key to the
+   filename of its setup page.
+10. `src/content/docs/docs/platform-setup/<slug>.md` → a new Starlight page with `title` and
+    `description` frontmatter.
+11. `astro.config.mjs` → a sidebar entry under "Platform setup". The sidebar is hand-maintained; a
+    page absent from it builds and is reachable by URL but appears in no navigation.
+12. `scripts/make-og-image.mjs` → the `CARDS` array, if the board should appear on the social card.
+    Re-run it (see [The social card](#the-social-card)).
+
+Finally, `make site-check` and `make site-dev`, then check the home page, `/platforms/<slug>`, and
+one `/results/<category>` page.
+
+See [Adding a platform](src/content/docs/docs/adding-a-platform.md) for the contributor-facing
+submission process.
+
+## Editing the site itself
+
+| To change | Edit |
+| --- | --- |
+| Home page, headline findings | `src/pages/index.astro` |
+| Methodology / About prose | `src/pages/methodology.astro`, `src/pages/about.astro` |
+| Per-category comparison page | `src/pages/results/[category].astro` |
+| Per-platform page | `src/pages/platforms/[platform].astro` |
+| **Which charts exist, and their tables** | `src/lib/charts.ts` |
+| Chart rendering and interaction | `src/components/Chart.astro`, `src/scripts/charts.ts` |
+| Colors, spacing, typography | `src/styles/tokens.css` |
+| Header, footer, meta tags | `src/layouts/BaseLayout.astro` |
+
+`src/lib/charts.ts` is where nearly all chart work happens. `comparisonSections()` builds the
+multi-platform charts for a category page and `singleRunSections()` builds the single-run charts for
+a platform page; both return `Section[]`, which `ChartSection.astro` renders. Helpers already exist
+for the common shapes — `lineSpec`, `coloredBarSpec`, `groupedSpec`, `headroomSpec`, `statTable` —
+so add a chart by composing those rather than hand-rolling an ECharts option object. Every chart
+carries a summary table, not 900 raw rows.
+
+To surface a metric that is not exported yet, add it to `TIMESERIES_METRICS` in
+`export_site_data.py` and give it a display name in `METRIC_LABELS` in `utils.py`, then re-export.
+
+**The docs pages under `src/content/docs/docs/` are hand-maintained forks of the markdown in the
+repo's top-level `docs/`**, with Starlight frontmatter and reworked headings. They are not synced:
+editing `docs/practitioners_guide.md` does not change the website, and vice versa. Update both when
+the content is meant to match.
 
 ## Assets
 
@@ -98,5 +184,18 @@ on the published page.
 
 `site/public/og.png` is generated by `node scripts/make-og-image.mjs` (run from `site/`), which reads
 its headline figures from `src/data/runs.json` so the card cannot drift from the results. It needs a
-local Chrome or Chromium, and its output is committed, so CI never runs it. Re-run it when the
-headline numbers change.
+local Chrome or Chromium, and its output is committed, so CI never runs it.
+
+Re-run it, and commit the result, whenever the headline numbers change:
+
+```sh
+cd site && node scripts/make-og-image.mjs
+```
+
+Unlike the rest of the site, its `CARDS` array names run ids and hex colors literally
+(`max_power__amd_strix_halo`, …). Adding a platform or renaming a run does not update the card — edit
+that array. The colors there are also literal hex rather than the `--series-*` tokens, because the
+card is rasterized outside the page; keep them in step with `src/styles/tokens.css` by hand.
+
+The mark it draws comes from `public/images/opennav-mark.png`, which is synced from `docs/images/`,
+so run a build (or `npm run sync-assets`) at least once in a fresh clone before generating the card.
