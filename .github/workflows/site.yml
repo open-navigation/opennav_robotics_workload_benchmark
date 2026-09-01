@@ -1,0 +1,120 @@
+name: Site
+
+# The website is built from a dataset that is committed to the repo, not
+# regenerated at deploy time. Every path below is an input to that dataset or
+# to the site build. Deploy is gated behind the data checks by `needs:`, so a
+# stale or unregistered dataset cannot reach GitHub Pages.
+#
+# GitHub Actions does not expand YAML anchors across `on:` keys, so the path
+# list is spelled out twice on purpose.
+on:
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'docs/images/**'
+      - 'docs/*.pdf'
+      - 'opennav_benchmark_logs/**'
+      - 'opennav_benchmark_analysis/export_site_data.py'
+      - 'opennav_benchmark_analysis/utils.py'
+      - 'opennav_benchmark_analysis/requirements.txt'
+      - '.github/workflows/site.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'docs/images/**'
+      - 'docs/*.pdf'
+      - 'opennav_benchmark_logs/**'
+      - 'opennav_benchmark_analysis/export_site_data.py'
+      - 'opennav_benchmark_analysis/utils.py'
+      - 'opennav_benchmark_analysis/requirements.txt'
+      - '.github/workflows/site.yml'
+  # No path filter, so this is the escape hatch for forcing a redeploy when
+  # nothing matching has changed.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # The committed dataset must match a fresh export of the logs, and every run
+  # directory must be accounted for in the CATEGORIES registry.
+  data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r opennav_benchmark_analysis/requirements.txt
+      # --strict reconciles the log tree against CATEGORIES and fails before
+      # exporting, so an unregistered run reports itself as such rather than as
+      # a confusing downstream diff.
+      - name: Check the registry and re-export the site dataset
+        run: python3 export_site_data.py --strict
+        working-directory: opennav_benchmark_analysis
+      - name: Show what drifted
+        run: git --no-pager diff --stat site/src/data site/public/data
+      - name: Committed data must match a fresh export
+        run: git diff --exit-code site/src/data site/public/data
+      - name: How to fix
+        if: failure()
+        run: |
+          echo "::error::The committed site dataset does not match a fresh"
+          echo "::error::export of opennav_benchmark_logs/."
+          echo ""
+          echo "Run this from the repo root and commit the result:"
+          echo ""
+          echo "    make site-data"
+          echo "    git add site/src/data site/public/data"
+          echo ""
+          echo "If the registry step above failed instead, add or repoint the"
+          echo "RunSpec it named in opennav_benchmark_analysis/export_site_data.py."
+          echo "See site/README.md for the full contract."
+
+  # Builds from the committed dataset that `data` just verified. This job must
+  # not run the exporter.
+  build:
+    needs: data
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+      - run: npx astro check
+      # Runs sync-assets.mjs first, which copies the canonical docs/ assets
+      # into public/.
+      - run: npm run build
+      # Uploaded on pull requests too, so a green PR has exercised the same
+      # path a deploy takes.
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    # The push trigger is already restricted to main, so this admits exactly
+    # pushes to main and manual dispatches.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    # Scoped to this job so pull request validation is never serialized behind
+    # the Pages group.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

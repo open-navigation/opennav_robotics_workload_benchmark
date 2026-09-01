@@ -1,0 +1,204 @@
+---
+/**
+ * Click-to-play YouTube facade.
+ *
+ * The GIF that already ships in the repo is the poster, so the hero paints
+ * immediately and no third-party iframe (or cookie) is requested until the
+ * reader actually asks for the video.
+ *
+ * TEMPORARY: pass `autoplay` to skip the facade and embed a muted, looping
+ * player straight away, standing in for the GIF. Remove the `autoplay` props
+ * on the callers to restore click-to-play.
+ */
+export interface Props {
+  videoId: string;
+  poster: string;
+  title: string;
+  caption?: string;
+  eager?: boolean;
+  /** TEMPORARY: embed a muted autoplaying player instead of the poster. */
+  autoplay?: boolean;
+  /** Player box shape, e.g. "16 / 9". Set this to the source video's real
+   *  aspect ratio, otherwise YouTube pads the difference with black. */
+  aspect?: string;
+  /** Scale the player past its box, per axis, so padding baked into the
+   *  upload is clipped. 1 leaves that axis alone. Use cropX when the video
+   *  has black bars down the sides: set it to the upload's aspect divided by
+   *  the visible content's aspect. The player stays centred, so the overflow
+   *  comes off both edges evenly. */
+  cropX?: number;
+  cropY?: number;
+}
+
+const {
+  videoId,
+  poster,
+  title,
+  caption,
+  eager = false,
+  autoplay = false,
+  aspect = '16 / 9',
+  cropX = 1,
+  cropY = 1,
+} = Astro.props;
+
+// Muted is required for browsers to allow autoplay at all. Looping needs the
+// playlist parameter set to the same id.
+const autoplaySrc =
+  `https://www.youtube-nocookie.com/embed/${videoId}` +
+  `?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&rel=0&playsinline=1`;
+---
+
+<figure class="vid">
+  {
+    autoplay ? (
+      <div
+        class="vid__crop"
+        style={`aspect-ratio: ${aspect}; --crop-x: ${cropX}; --crop-y: ${cropY}`}
+      >
+        <iframe
+          class="vid__frame--auto"
+          src={autoplaySrc}
+          title={title}
+          loading={eager ? 'eager' : 'lazy'}
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allowfullscreen
+        />
+      </div>
+    ) : (
+      <button class="vid__btn" type="button" data-video-id={videoId} aria-label={`Play: ${title}`}>
+        <img src={poster} alt={title} loading={eager ? 'eager' : 'lazy'} decoding="async" />
+        <span class="vid__play" aria-hidden="true">
+          <span class="vid__disc">
+            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+              <path d="M9 7 17 12l-8 5z" fill="currentColor"></path>
+            </svg>
+          </span>
+        </span>
+      </button>
+    )
+  }
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.vid__btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.videoId;
+      if (!id) return;
+      const frame = document.createElement('iframe');
+      frame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+      frame.title = btn.getAttribute('aria-label') ?? 'Video';
+      frame.allow =
+        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      frame.allowFullscreen = true;
+      frame.className = 'vid__frame';
+      // Give the player the poster's exact box so it drops into the same space
+      // and nothing on the page moves. Sized in pixels inline: an iframe is an
+      // inline replaced element that defaults to 300x150, and a JS-created node
+      // never picks up Astro's scoped class, so a percentage width here would
+      // resolve against a collapsed box.
+      const box = btn.getBoundingClientRect();
+      if (box.width > 0 && box.height > 0) {
+        frame.style.width = `${Math.round(box.width)}px`;
+        frame.style.height = `${Math.round(box.height)}px`;
+        frame.style.aspectRatio = `${box.width} / ${box.height}`;
+      }
+      frame.style.display = 'block';
+      frame.style.maxWidth = '100%';
+      btn.replaceWith(frame);
+    });
+  });
+</script>
+
+<style>
+  .vid {
+    margin: 0;
+    width: 100%;
+  }
+
+  .vid__btn {
+    display: block;
+    position: relative;
+    width: 100%;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface-2);
+    cursor: pointer;
+    line-height: 0;
+  }
+
+  .vid__btn img {
+    width: 100%;
+    display: block;
+  }
+
+  .vid__play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(transparent 55%, rgb(0 0 0 / 35%));
+  }
+
+  .vid__disc {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: var(--n2-blue-deep);
+    box-shadow: 0 4px 20px rgb(0 0 0 / 35%);
+  }
+
+  /* The glyph is optically centred by nudging it right of the disc centre. */
+  .vid__disc svg {
+    width: 24px;
+    height: 24px;
+    margin-left: 3px;
+  }
+
+  .vid__btn:hover .vid__disc {
+    background: var(--n2-blue);
+  }
+
+  /* The player can be sized past this box so padding baked into the upload is
+   * clipped rather than shown. It stays centred, so the surplus comes off both
+   * edges evenly. */
+  .vid__crop {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #000;
+  }
+
+  .vid__frame--auto {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% * var(--crop-x, 1));
+    height: calc(100% * var(--crop-y, 1));
+    border: 0;
+    display: block;
+  }
+
+  .vid :global(.vid__frame) {
+    width: 100%;
+    /* Overridden inline with the poster's own ratio; this is the fallback. */
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .vid figcaption {
+    margin-top: var(--space-2);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+</style>

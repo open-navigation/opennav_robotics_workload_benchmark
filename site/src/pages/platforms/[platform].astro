@@ -1,0 +1,444 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ChartSection from '../../components/ChartSection.astro';
+import MetricTable from '../../components/MetricTable.astro';
+import VendorCallout from '../../components/VendorCallout.astro';
+import Icon from '../../components/Icon.astro';
+import StatStrip from '../../components/StatStrip.astro';
+import {
+  categoryFor,
+  fmt,
+  platformOrder,
+  platforms,
+  runsForPlatform,
+} from '../../lib/data';
+import { singleRunSections } from '../../lib/charts';
+import { PLATFORM_NOTES } from '../../content/platform-notes';
+
+export function getStaticPaths() {
+  return platformOrder.map((key) => ({
+    params: { platform: platforms[key].slug },
+    props: { platformKey: key },
+  }));
+}
+
+const { platformKey } = Astro.props;
+const platform = platforms[platformKey];
+const runs = runsForPlatform(platformKey);
+const notes = PLATFORM_NOTES[platformKey];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const swatch = `var(--series-${platformKey === 'amd_strix_halo' ? 'amd' : platformKey.split('_')[1]})`;
+
+// One chart set per (category, run). Where a category has two TDP variants of
+// this platform, both get their own set.
+const headline = runs[0];
+
+// One entry per power category. Thor has two runs (70 W and 90 W) inside
+// balanced_power, and this section links to categories, not to runs.
+const runCategories = [...new Map(runs.map((r) => [r.category, r])).values()];
+
+const headlineSections = singleRunSections(headline);
+
+const SPEC_LABELS: Record<string, string> = {
+  cpu: 'CPU',
+  gpu_architecture: 'GPU architecture',
+  gpu_cores: 'GPU cores',
+  npu_dla: 'NPU / DLA',
+  ram: 'RAM',
+  memory_bandwidth: 'Memory bandwidth',
+  tdp: 'Power (TDP)',
+};
+
+const setupDoc: Record<string, string> = {
+  amd_strix_halo: 'amd-strix-halo',
+  jetson_orin: 'jetson-orin',
+  jetson_thor: 'jetson-thor',
+};
+---
+
+<BaseLayout
+  title={`${platform.label} | Robotics Workload Benchmark`}
+  description={`Benchmark results, hardware specification, and measured sensor-driver load for the ${platform.label} running a full Nav2 autonomy stack with an edge AI workload.`}
+>
+  <div class="wrap page">
+    <p class="eyebrow">
+      <a href={`${base}/platforms`}>Platforms</a> · {platform.vendor}
+    </p>
+    <h1><span class="swatch swatch--lg" style={`background: ${swatch}`}></span>{platform.short_label}</h1>
+    <p class="section__lede">{platform.summary}</p>
+
+    <div class="spec-badges">
+      <span class="badge"><Icon name="cpu" size={13} /> {platform.spec.cpu}</span>
+      <span class="badge"><Icon name="gpu" size={13} /> {platform.spec.gpu_architecture}</span>
+      <span class="badge"><Icon name="memory" size={13} /> {platform.spec.ram}</span>
+      <span class="badge"><Icon name="power" size={13} /> {platform.spec.tdp}</span>
+    </div>
+
+    <details class="profile profile--headline">
+      <summary>
+        <StatStrip
+          expandable
+          items={[
+        {
+          icon: 'cpu',
+          label: 'CPU available',
+          value: `${fmt(headline.derived.cpu_available_percent)}%`,
+          note: `${fmt(headline.derived.free_core_equivalents)} of ${headline.derived.num_cores} cores free`,
+        },
+        {
+          icon: 'robot',
+          label: 'Missions completed',
+          value: String(headline.application.completed_missions),
+          note: `in ${headline.duration_sec} s`,
+        },
+        {
+          icon: 'gauge',
+          label: 'Control loop misses',
+          value: `${fmt(headline.application.control_loop_misses_per_sec, 2)}/s`,
+          note: 'against a 30 Hz target',
+        },
+        {
+          icon: 'ai',
+          label: 'VLM queries completed',
+          value: headline.application.vlm
+            ? `${headline.application.vlm.success} of ${headline.application.vlm.total}`
+            : 'n/a',
+          note: 'scene-understanding queries',
+        },
+      ]}
+          caption={`${categoryFor(headline.category).label} at ${headline.tdp_w ?? 'n/a'} W`}
+        />
+      </summary>
+      <div class="profile__body">
+        {headlineSections.map((section) => <ChartSection section={section} />)}
+        <section class="tsec">
+          <h2>All metrics for {categoryFor(headline.category).label}</h2>
+          <MetricTable runs={[headline]} />
+          <p class="note">
+            Raw samples:{' '}
+            <a href={`${base}/data/csv/${headline.id}.csv`} download>
+              CSV
+            </a>{' '}
+            ·{' '}
+            <a
+              href={`https://github.com/open-navigation/opennav_robotics_workload_benchmark/tree/main/opennav_benchmark_logs/${headline.log_dir}`}
+            >
+              <code>{headline.log_dir}</code>
+            </a>
+          </p>
+        </section>
+      </div>
+    </details>
+
+    <!-- Verdict -->
+    <div class="callout verdict">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="scale" /></span>
+        <div class="sec-head__body">
+          <h2>Verdict</h2>
+          <p>{notes.verdict}</p>
+        </div>
+      </div>
+      <div class="grid grid--2 verdict__cols">
+        <div>
+          <h3><span class="badge badge--good">Strong</span></h3>
+          <ul class="icon-list icon-list--good">
+            {notes.strengths.map((s) => (
+              <li>
+                <Icon name="check" size={17} />
+                <span>{s}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3><span class="badge badge--warn">Weakness</span></h3>
+          <ul class="icon-list icon-list--limit">
+            {notes.limits.map((s) => (
+              <li>
+                <Icon name="alert" size={17} />
+                <span>{s}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Specification -->
+    <section class="tsec" id="specification">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="layers" /></span>
+        <div class="sec-head__body">
+          <h2>Specification</h2>
+          <p class="section__lede">
+            The vendor's numbers on the left; what this platform's sensor drivers actually cost
+            it, measured on real hardware, on the right.
+          </p>
+        </div>
+      </div>
+      <div class="grid grid--2">
+        <div class="table-scroll">
+          <table class="data">
+            <caption>Vendor specification</caption>
+            <tbody>
+              {
+                Object.entries(platform.spec).map(([k, v]) => (
+                  <tr>
+                    <th scope="row" class="row-head">{SPEC_LABELS[k] ?? k}</th>
+                    <td>{v}</td>
+                  </tr>
+                ))
+              }
+              <tr>
+                <th scope="row" class="row-head">Product page</th>
+                <td><a href={platform.vendor_url}>{platform.vendor}</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-scroll">
+          <table class="data">
+            <caption>Measured sensor-driver load (fraction of one core, per instance)</caption>
+            <tbody>
+              <tr>
+                <th scope="row" class="row-head">3D LiDAR</th>
+                <td class="num">{fmt(platform.sensor_driver_load.lidar_3d, 3)}</td>
+              </tr>
+              <tr>
+                <th scope="row" class="row-head">2D safety LiDAR</th>
+                <td class="num">{fmt(platform.sensor_driver_load.lidar_2d, 3)}</td>
+              </tr>
+              <tr>
+                <th scope="row" class="row-head">RGBD camera</th>
+                <td class="num">{fmt(platform.sensor_driver_load.rgbd_camera, 3)}</td>
+              </tr>
+              <tr>
+                <th scope="row" class="row-head">Total for the robot's sensor suite</th>
+                <td class="num">
+                  {
+                    fmt(
+                      3 * platform.sensor_driver_load.lidar_3d +
+                        2 * platform.sensor_driver_load.lidar_2d +
+                        3 * platform.sensor_driver_load.rgbd_camera,
+                      2,
+                    )
+                  } cores
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="note">
+        Setup instructions for this platform are in the{' '}
+        <a href={`${base}/docs/platform-setup/${setupDoc[platformKey]}`}>platform setup guide</a>.
+      </p>
+    </section>
+
+    <!-- Headline numbers per category -->
+    <section class="tsec">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="chart" /></span>
+        <div class="sec-head__body">
+          <h2>Results by TDP or Configuration</h2>
+          <p class="section__lede">
+            Each category fixes a TDP power budget or optimized configuration and runs the
+            workload on every platform. Open one to see how this platform behaved under those
+            conditions, and how it compared against the others.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid--2 catcards">
+        {
+          runCategories.map((r) => (
+            <a class="card card--feature card--link" href={`${base}/results/${r.category}`}>
+              <span class="card__icon">
+                <Icon name="power" />
+              </span>
+              <p class="card__title">{categoryFor(r.category).label}</p>
+              <p class="card__blurb">{categoryFor(r.category).description}</p>
+              {r.note && <p class="card__note">{r.note}</p>}
+              <span class="card__cta">
+                See the results <Icon name="arrow-right" size={16} />
+              </span>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <div class="vendor-slot">
+      <VendorCallout variant="banner" />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-7) var(--space-8);
+  }
+
+  .swatch--lg {
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 3px;
+    margin-right: 0.6rem;
+  }
+
+  .spec-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .verdict {
+    margin-block: var(--space-6);
+  }
+
+  .verdict__cols {
+    gap: var(--space-5) var(--space-6);
+  }
+
+  .verdict h3 {
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+  }
+
+  .verdict h2 {
+    margin-top: 0;
+    font-size: 1.25rem;
+  }
+
+  .verdict h3 {
+    font-size: 0.95rem;
+    margin-bottom: var(--space-2);
+  }
+
+  .verdict ul {
+    padding-left: 1.1rem;
+  }
+
+  .verdict li {
+    margin-bottom: var(--space-2);
+    font-size: 0.93rem;
+    color: var(--text-secondary);
+  }
+
+  .tsec {
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--border);
+    scroll-margin-top: 5rem;
+  }
+
+  .tsec h2 {
+    margin-top: 0;
+  }
+
+  .card__blurb,
+  .card__note {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .card__note {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .catcards {
+    margin-top: var(--space-4);
+  }
+
+  .note {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: var(--space-3);
+  }
+
+  .profile.profile--headline {
+    border: 0;
+    background: none;
+    margin-top: 0;
+  }
+
+  .profile.profile--headline > summary {
+    display: block;
+    padding: 0;
+    list-style: none;
+  }
+
+  .profile.profile--headline > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .profile.profile--headline > summary :global(.strip) {
+    cursor: pointer;
+  }
+
+  .profile.profile--headline > summary:hover :global(.strip) {
+    border-color: var(--border-strong);
+  }
+
+  .profile.profile--headline > .profile__body {
+    padding: 0;
+  }
+
+  .vendor-slot {
+    margin-top: var(--space-7);
+  }
+
+  .profile {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-top: var(--space-5);
+    background: var(--surface-1);
+  }
+
+  .profile > summary {
+    cursor: pointer;
+    padding: var(--space-4) var(--space-5);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-4);
+    list-style: none;
+  }
+
+  .profile > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .profile__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+
+  .profile__title::before {
+    content: '+ ';
+    color: var(--accent-contrast);
+    font-family: var(--font-mono);
+  }
+
+  .profile[open] .profile__title::before {
+    content: '− ';
+  }
+
+  .profile__meta {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .profile__body {
+    padding: 0 var(--space-5) var(--space-5);
+  }
+
+  .profile__body :global(.chart-section:first-child) {
+    border-top: 0;
+    padding-top: 0;
+  }
+</style>

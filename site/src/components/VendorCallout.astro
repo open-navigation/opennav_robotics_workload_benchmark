@@ -1,0 +1,104 @@
+---
+export interface Props {
+  /** `full` on /about; `banner` where a vendor engineer is already reading. */
+  variant?: 'full' | 'banner';
+}
+
+const { variant = 'banner' } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+{
+  variant === 'banner' ? (
+    <aside class="vendor vendor--banner">
+      <div>
+        <p class="eyebrow">Hardware vendors</p>
+        <h3>Want your platform in this benchmark?</h3>
+        <p>
+          If you build silicon or compute modules for robotics, whether that is AMD, Intel,
+          Qualcomm, NVIDIA, or anyone else, Open Navigation can bring your platform up, profile
+          it, and include it in the next revision of this report and in future benchmark
+          categories.
+        </p>
+      </div>
+      <div class="vendor__cta">
+        <a class="btn btn--primary" href="https://opennav.org/contact/">
+          Contact Open Navigation
+        </a>
+        <a class="btn btn--secondary" href={`${base}/about#vendors`}>What's involved</a>
+      </div>
+    </aside>
+  ) : (
+    <aside class="vendor" id="vendors">
+      <p class="eyebrow">Hardware vendors</p>
+      <h2>Get your platform into this benchmark</h2>
+      <p>
+        This comparison covers the platforms from major EOMs used by the industry and partners.
+        It is not a complete map of the robotics compute landscape, and it is meant to grow. If
+        you build compute modules for robotics, Open Navigation can bring your platform up,
+        profile it, and include it in this benchmark results reports. Contact us for more
+        information and support.
+      </p>
+
+      <p>
+        <a class="btn btn--primary" href="https://opennav.org/contact/">
+          Contact Open Navigation
+        </a>
+      </p>
+    </aside>
+  )
+}
+
+<style>
+  .vendor {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    padding: var(--space-5) var(--space-6);
+    scroll-margin-top: 5rem;
+  }
+
+  .vendor h2,
+  .vendor h3 {
+    margin-top: var(--space-5);
+  }
+
+  .vendor > :first-child + h2,
+  .vendor > :first-child + h3 {
+    margin-top: 0;
+  }
+
+  .vendor > :last-child {
+    margin-bottom: 0;
+  }
+
+  .vendor--banner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-5);
+    align-items: center;
+  }
+
+  .vendor--banner h3 {
+    margin: 0 0 var(--space-2);
+    font-size: 1.15rem;
+  }
+
+  .vendor--banner p:last-child {
+    margin-bottom: 0;
+  }
+
+  .vendor__cta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 720px) {
+    .vendor--banner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

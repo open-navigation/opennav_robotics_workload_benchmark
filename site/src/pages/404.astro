@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const destinations = [
+  {
+    href: `${base}/results`,
+    icon: 'chart' as const,
+    title: 'Results',
+    blurb: 'Every chart, by power category, with the underlying data.',
+  },
+  {
+    href: `${base}/platforms`,
+    icon: 'cpu' as const,
+    title: 'Platform comparison',
+    blurb: 'Specifications, as-tested configuration, and results at a glance.',
+  },
+  {
+    href: `${base}/methodology`,
+    icon: 'book' as const,
+    title: 'Methodology',
+    blurb: 'What is measured, how, and what the limitations are.',
+  },
+  {
+    href: `${base}/docs/reproduce`,
+    icon: 'terminal' as const,
+    title: 'Run it yourself',
+    blurb: 'Reproduce every result on your own hardware.',
+  },
+];
+---
+
+<BaseLayout title="Page not found | Robotics Workload Benchmark" description="That page does not exist.">
+  <div class="wrap page">
+    <p class="eyebrow">404</p>
+    <h1>That page does not exist</h1>
+    <p class="section__lede">
+      The link may be out of date, or the page may have moved. Here is everything on the site.
+    </p>
+
+    <div class="grid grid--2 dests">
+      {
+        destinations.map((d) => (
+          <a class="card card--feature card--link" href={d.href}>
+            <span class="card__icon">
+              <Icon name={d.icon} />
+            </span>
+            <p class="card__title">{d.title}</p>
+            <p class="card__blurb">{d.blurb}</p>
+          </a>
+        ))
+      }
+    </div>
+
+    <p class="more">
+      <a href={`${base}/`}>
+        Back to the start <Icon name="arrow-right" size={16} />
+      </a>
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-8);
+    max-width: 820px;
+  }
+
+  .dests {
+    margin-block: var(--space-6);
+  }
+
+  .card__blurb {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .more a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+</style>

@@ -1,0 +1,151 @@
+---
+/**
+ * The hardware-in-the-loop setup, redrawn from the README's Mermaid graph as
+ * theme-aware inline SVG. Colors are CSS custom properties so the figure
+ * re-themes with the page instead of shipping two images.
+ */
+---
+
+<figure class="hil">
+  <svg viewBox="0 0 900 380" role="img" aria-labelledby="hil-title hil-desc" class="hil__svg">
+    <title id="hil-title">Hardware-in-the-loop benchmark architecture</title>
+    <desc id="hil-desc">
+      A developer computer runs the Gazebo warehouse simulation and the robot's simulated
+      sensors in a Docker container. It is connected over wired Ethernet, carrying DDS
+      traffic, to the compute platform under test. That platform runs the Nav2 autonomy
+      stack, the vision-language model workload, a simulated sensor-driver load, and the
+      metrics capture script, each in its own container.
+    </desc>
+
+    <defs>
+      <marker id="hil-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border-strong)"></path>
+      </marker>
+    </defs>
+
+    <!-- Developer computer -->
+    <rect x="16" y="40" width="290" height="300" rx="10" class="grp" />
+    <text x="36" y="70" class="grp-label">Developer Computer</text>
+
+    <rect x="40" y="90" width="242" height="72" rx="8" class="node" />
+    <text x="60" y="118" class="node-title">Gazebo Simulation</text>
+    <text x="60" y="140" class="node-sub">Docker container</text>
+
+    <line x1="161" y1="162" x2="161" y2="192" class="link" />
+
+    <rect x="40" y="192" width="242" height="120" rx="8" class="node" />
+    <text x="60" y="220" class="node-title">Simulated Sensors</text>
+    <text x="60" y="243" class="node-sub">3x 3D LiDAR · 3x RGBD</text>
+    <text x="60" y="263" class="node-sub">2x 2D safety LiDAR</text>
+    <text x="60" y="283" class="node-sub">RGB camera · IMU</text>
+
+    <!-- Link -->
+    <line x1="306" y1="190" x2="386" y2="190" class="link link--strong" marker-start="url(#hil-arrow)" marker-end="url(#hil-arrow)" />
+    <text x="346" y="172" class="edge-label" text-anchor="middle">Wired Ethernet</text>
+    <text x="346" y="212" class="edge-label" text-anchor="middle">(DDS)</text>
+
+    <!-- Platform under test -->
+    <rect x="392" y="16" width="492" height="348" rx="10" class="grp grp--accent" />
+    <text x="412" y="46" class="grp-label">HIL Compute Platform Under Test</text>
+
+    <rect x="416" y="64" width="216" height="66" rx="8" class="node node--accent" />
+    <text x="436" y="90" class="node-title">Nav2 Autonomy</text>
+    <text x="436" y="112" class="node-sub">Planning · control · perception</text>
+
+    <rect x="648" y="64" width="216" height="66" rx="8" class="node node--accent" />
+    <text x="668" y="90" class="node-title">VLM Workload</text>
+    <text x="668" y="112" class="node-sub">Gemma 4.0 via llama.cpp</text>
+
+    <rect x="416" y="146" width="216" height="66" rx="8" class="node node--accent" />
+    <text x="436" y="172" class="node-title">Sensor Driver Load</text>
+    <text x="436" y="194" class="node-sub">Measured on real hardware</text>
+
+    <rect x="648" y="146" width="216" height="66" rx="8" class="node node--accent" />
+    <text x="668" y="172" class="node-title">Metrics Capture</text>
+    <text x="668" y="194" class="node-sub">1 Hz system counters</text>
+
+    <rect x="416" y="240" width="448" height="100" rx="8" class="node node--muted" />
+    <text x="436" y="268" class="node-title">Mission dispatcher</text>
+    <text x="436" y="291" class="node-sub">Forklift AMR moving pallets in a 200,000 sqft warehouse</text>
+    <text x="436" y="313" class="node-sub">All four workloads contend for the same CPU, power, and accelerators</text>
+  </svg>
+</figure>
+
+<style>
+  .hil {
+    margin: 0;
+  }
+
+  .hil__svg {
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-1);
+    padding: var(--space-3);
+  }
+
+  .grp {
+    fill: var(--surface-2);
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+
+  .grp--accent {
+    fill: color-mix(in srgb, var(--n2-blue) 7%, var(--surface-2));
+    stroke: color-mix(in srgb, var(--n2-blue) 35%, var(--border));
+  }
+
+  .node {
+    fill: var(--surface-1);
+    stroke: var(--border-strong);
+    stroke-width: 1;
+  }
+
+  .node--accent {
+    stroke: var(--n2-blue-deep);
+  }
+
+  .node--muted {
+    fill: var(--surface-2);
+    stroke: var(--border);
+    stroke-dasharray: 4 3;
+  }
+
+  .grp-label {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    fill: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .node-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    fill: var(--text-primary);
+  }
+
+  .node-sub {
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    fill: var(--text-secondary);
+  }
+
+  .edge-label {
+    font-family: var(--font-body);
+    font-size: 12px;
+    fill: var(--text-muted);
+  }
+
+  .link {
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+  }
+
+  .link--strong {
+    stroke-width: 2;
+  }
+</style>

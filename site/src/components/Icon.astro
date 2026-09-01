@@ -1,0 +1,100 @@
+---
+/**
+ * Inline icon set.
+ *
+ * One consistent family: 24x24 viewBox, 1.6 stroke, round caps and joins,
+ * drawn in `currentColor` so an icon always inherits the ink of the text it
+ * sits beside. Icons are decorative by default. Every one is paired with a
+ * visible label, so they carry no information on their own.
+ */
+export type IconName =
+  | 'cpu'
+  | 'gpu'
+  | 'memory'
+  | 'power'
+  | 'thermal'
+  | 'robot'
+  | 'ai'
+  | 'gauge'
+  | 'layers'
+  | 'check'
+  | 'alert'
+  | 'arrow-right'
+  | 'download'
+  | 'github'
+  | 'mail'
+  | 'book'
+  | 'chart'
+  | 'shield'
+  | 'external'
+  | 'play'
+  | 'terminal'
+  | 'scale'
+  | 'building'
+  | 'sensor'
+  | 'network'
+  | 'radar'
+  | 'plus';
+
+export interface Props {
+  name: IconName;
+  size?: number;
+  class?: string;
+}
+
+const { name, size = 20, class: className } = Astro.props;
+
+const paths: Record<string, string> = {
+  cpu: '<rect x="7" y="7" width="10" height="10" rx="1.5"/><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M8 1.5v2M12 1.5v2M16 1.5v2M8 20.5v2M12 20.5v2M16 20.5v2M1.5 8h2M1.5 12h2M1.5 16h2M20.5 8h2M20.5 12h2M20.5 16h2"/>',
+  gpu: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="2.5"/><circle cx="16" cy="12" r="2.5"/><path d="M6 18v3M18 18v3"/>',
+  memory: '<rect x="2.5" y="7" width="19" height="10" rx="2"/><path d="M6 17v3M10 17v3M14 17v3M18 17v3M7 11h2M11 11h2M15 11h2"/>',
+  power: '<path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z"/>',
+  thermal: '<path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4.5 4.5 0 1 0 4 0z"/><path d="M12 10v6"/>',
+  robot: '<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 14h.01M15 14h.01M9.5 17.5h5"/><circle cx="12" cy="3" r="1.5"/><path d="M1.5 12v3M22.5 12v3"/>',
+  ai: '<path d="M12 3a4 4 0 0 1 4 4v.6a3.5 3.5 0 0 1 1.8 6.1V15a4 4 0 0 1-4 4h-3.6A4 4 0 0 1 6 15v-1.3A3.5 3.5 0 0 1 8 7.6V7a4 4 0 0 1 4-4z"/><path d="M12 3v16M9 11h6"/>',
+  gauge: '<path d="M3.5 18a9 9 0 1 1 17 0"/><path d="M12 14.5 16 10"/><circle cx="12" cy="15.5" r="1.5"/>',
+  layers: '<path d="m12 2.5 9 4.75-9 4.75-9-4.75z"/><path d="m3 12.25 9 4.75 9-4.75"/><path d="m3 17 9 4.75L21 17"/>',
+  check: '<path d="M4 12.5 9.5 18 20 6.5"/>',
+  alert: '<path d="M12 3.5 22 20H2z"/><path d="M12 10v4.5M12 17.5h.01"/>',
+  'arrow-right': '<path d="M4 12h15M13 6l6 6-6 6"/>',
+  download: '<path d="M12 3v12M7 10.5l5 5 5-5M4 20.5h16"/>',
+  github:
+    '<path fill="currentColor" stroke="none" d="M12 1.3a10.7 10.7 0 0 0-3.4 20.9c.5.1.7-.2.7-.5v-2c-3 .6-3.6-1.3-3.6-1.3-.5-1.2-1.2-1.6-1.2-1.6-1-.7.1-.7.1-.7 1 .1 1.6 1.1 1.6 1.1 1 1.7 2.5 1.2 3.1.9.1-.7.4-1.2.7-1.5-2.4-.3-4.9-1.2-4.9-5.3 0-1.2.4-2.1 1.1-2.9-.1-.3-.5-1.4.1-2.9 0 0 .9-.3 2.9 1.1a10 10 0 0 1 5.3 0c2-1.4 2.9-1.1 2.9-1.1.6 1.5.2 2.6.1 2.9.7.8 1.1 1.7 1.1 2.9 0 4.1-2.5 5-4.9 5.3.4.3.7 1 .7 2v3c0 .3.2.6.7.5A10.7 10.7 0 0 0 12 1.3z"/>',
+  mail: '<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 6.5 9 6.5 9-6.5"/>',
+  book: '<path d="M13.5 2.5H6.5a1.5 1.5 0 0 0-1.5 1.5v16a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M13.5 2.5V8H19"/><path d="M8.5 13h7M8.5 17h4.5"/>',
+  chart: '<path d="M3.5 3.5v17h17"/><path d="M7.5 16v-4M12 16V7.5M16.5 16v-6.5"/>',
+  shield: '<path d="M12 2.5 20 5.5v6c0 5-3.4 8.7-8 10.5-4.6-1.8-8-5.5-8-10.5v-6z"/><path d="m9 12 2 2 4-4.5"/>',
+  external: '<path d="M14 4h6v6M20 4l-8.5 8.5"/><path d="M18 14.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4.5"/>',
+  play: '<circle cx="12" cy="12" r="9.5"/><path d="M10 8.5 16 12l-6 3.5z"/>',
+  terminal: '<rect x="2.5" y="4" width="19" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/>',
+  scale: '<path d="M12 3v18M7 6.5h10"/><path d="M4 16 7 8l3 8a3.5 3.5 0 0 1-6 0zM14 16l3-8 3 8a3.5 3.5 0 0 1-6 0z"/>',
+  building: '<path d="M3 21h18M5 21V5l7-2.5V21M19 21V9l-7-2.5"/><path d="M8 8h.01M8 12h.01M8 16h.01M15.5 12h.01M15.5 16h.01"/>',
+  sensor: '<circle cx="12" cy="12" r="2.5"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 16.2a6 6 0 0 0 0-8.4M4.9 4.9a10 10 0 0 0 0 14.2M19.1 19.1a10 10 0 0 0 0-14.2"/>',
+  network: '<rect x="2" y="4" width="7" height="6" rx="1.5"/><rect x="15" y="14" width="7" height="6" rx="1.5"/><path d="M5.5 10v4a3 3 0 0 0 3 3H15"/><path d="M12 5.5h3a3 3 0 0 1 3 3V14"/>',
+  radar: '<path d="M12 2.5 20.5 7.5v9L12 21.5 3.5 16.5v-9z"/><path d="m12 7 4.5 2.6v4.8L12 17l-4.5-2.6V9.6z"/><path d="M12 2.5v4.5M20.5 7.5 16.5 9.6M20.5 16.5l-4-2.1M12 21.5V17M3.5 16.5l4-2.1M3.5 7.5l4 2.1"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+};
+---
+
+<svg
+  class:list={['icon', className]}
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+  set:html={paths[name] ?? ''}
+/>
+
+<style>
+  .icon {
+    flex: none;
+    display: inline-block;
+    vertical-align: -0.15em;
+  }
+</style>
