@@ -62,7 +62,7 @@ h1{font-family:Poppins,sans-serif;font-size:62px;line-height:1.06;letter-spacing
 </style></head><body>
 <div>
   <div class="top"><img src="data:image/png;base64,${mark}"><div class="brand">Open Navigation <span>· Robotics Workload Benchmark</span></div></div>
-  <h1 style="margin-top:34px">The whole robot, not one algorithm.</h1>
+  <h1 style="margin-top:34px">The whole robot benchmark, fully loaded.</h1>
   <div class="sub">An independently managed, vendor-agnostic benchmark: a full Nav2 autonomy stack and an edge AI workload, running at the same time, on the same computer.</div>
 </div>
 <div class="cards">${cards}</div>
