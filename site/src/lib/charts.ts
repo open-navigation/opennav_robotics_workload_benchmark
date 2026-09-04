@@ -218,7 +218,7 @@ export function comparisonSections(
     title: 'Platform balance',
     takeaway: soloRadar
       ? 'Six dimensions, normalized within this category. Only one run is published here, ' +
-        'so every axis normalizes against itself and reads 1.0 — the full shape shows the ' +
+        'so every axis normalizes against itself and reads 1.0. The full shape shows the ' +
         'axes, not a perfect score. Compare against the max power category instead.'
       : 'Six dimensions, each min-max normalized against the strongest platform in this category.',
     height: 420,
@@ -241,7 +241,7 @@ export function comparisonSections(
         .map((r) => [r.label, ...radar.dimensions.map((d) => fmt(radar.normalized[r.run_key][d], 2))]),
     },
     tableCaption: soloRadar
-      ? 'Normalized 0–1 within this category. With a single run every axis is 1.0 by construction.'
+      ? 'Normalized 0–1 within this category. With a single run every axis is 1.0.'
       : 'Normalized 0–1 against the best platform on each axis; higher is better.',
     sources: src,
     csv,
