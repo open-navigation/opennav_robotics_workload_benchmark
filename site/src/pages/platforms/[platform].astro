@@ -4,7 +4,7 @@ import ChartSection from '../../components/ChartSection.astro';
 import MetricTable from '../../components/MetricTable.astro';
 import VendorCallout from '../../components/VendorCallout.astro';
 import Icon from '../../components/Icon.astro';
-import StatStrip from '../../components/StatStrip.astro';
+import StatStrip, { type Props as StatStripProps } from '../../components/StatStrip.astro';
 import {
   categoryFor,
   colorFor,
@@ -46,7 +46,7 @@ const profileRuns = [
   ...runs.filter((r) => r !== headline && categoryFor(r.category).optimized),
 ];
 
-const statItems = (run: (typeof runs)[number]) => [
+const statItems = (run: (typeof runs)[number]): StatStripProps['items'] => [
   {
     icon: 'cpu',
     label: 'CPU available',
