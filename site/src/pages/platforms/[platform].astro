@@ -4,7 +4,7 @@ import ChartSection from '../../components/ChartSection.astro';
 import MetricTable from '../../components/MetricTable.astro';
 import VendorCallout from '../../components/VendorCallout.astro';
 import Icon from '../../components/Icon.astro';
-import StatStrip from '../../components/StatStrip.astro';
+import StatStrip, { type Props as StatStripProps } from '../../components/StatStrip.astro';
 import {
   categoryFor,
   colorFor,
@@ -38,7 +38,42 @@ const headline = runs[0];
 // balanced_power, and this section links to categories, not to runs.
 const runCategories = [...new Map(runs.map((r) => [r.category, r])).values()];
 
-const headlineSections = singleRunSections(headline);
+// The headline (stock) run, followed by any tuned run of the same platform.
+// Driven by the category's `optimized` flag, so a platform gaining an
+// optimized run picks this up with no template change.
+const profileRuns = [
+  headline,
+  ...runs.filter((r) => r !== headline && categoryFor(r.category).optimized),
+];
+
+const statItems = (run: (typeof runs)[number]): StatStripProps['items'] => [
+  {
+    icon: 'cpu',
+    label: 'CPU available',
+    value: `${fmt(run.derived.cpu_available_percent)}%`,
+    note: `${fmt(run.derived.free_core_equivalents)} of ${run.derived.num_cores} cores free`,
+  },
+  {
+    icon: 'robot',
+    label: 'Missions completed',
+    value: String(run.application.completed_missions),
+    note: `in ${run.duration_sec} s`,
+  },
+  {
+    icon: 'gauge',
+    label: 'Control loop misses',
+    value: `${fmt(run.application.control_loop_misses_per_sec, 2)}/s`,
+    note: 'against a 30 Hz target',
+  },
+  {
+    icon: 'ai',
+    label: 'VLM queries completed',
+    value: run.application.vlm
+      ? `${run.application.vlm.success} of ${run.application.vlm.total}`
+      : 'n/a',
+    note: 'scene-understanding queries',
+  },
+];
 
 const SPEC_LABELS: Record<string, string> = {
   cpu: 'CPU',
@@ -75,61 +110,38 @@ const setupDoc: Record<string, string> = {
       <span class="badge"><Icon name="power" size={13} /> {platform.spec.tdp}</span>
     </div>
 
-    <details class="profile profile--headline">
-      <summary>
-        <StatStrip
-          expandable
-          items={[
-        {
-          icon: 'cpu',
-          label: 'CPU available',
-          value: `${fmt(headline.derived.cpu_available_percent)}%`,
-          note: `${fmt(headline.derived.free_core_equivalents)} of ${headline.derived.num_cores} cores free`,
-        },
-        {
-          icon: 'robot',
-          label: 'Missions completed',
-          value: String(headline.application.completed_missions),
-          note: `in ${headline.duration_sec} s`,
-        },
-        {
-          icon: 'gauge',
-          label: 'Control loop misses',
-          value: `${fmt(headline.application.control_loop_misses_per_sec, 2)}/s`,
-          note: 'against a 30 Hz target',
-        },
-        {
-          icon: 'ai',
-          label: 'VLM queries completed',
-          value: headline.application.vlm
-            ? `${headline.application.vlm.success} of ${headline.application.vlm.total}`
-            : 'n/a',
-          note: 'scene-understanding queries',
-        },
-      ]}
-          caption={`${categoryFor(headline.category).label} at ${headline.tdp_w ?? 'n/a'} W`}
-        />
-      </summary>
-      <div class="profile__body">
-        {headlineSections.map((section) => <ChartSection section={section} />)}
-        <section class="tsec">
-          <h2>All metrics for {categoryFor(headline.category).label}</h2>
-          <MetricTable runs={[headline]} />
-          <p class="note">
-            Raw samples:{' '}
-            <a href={`${base}/data/csv/${headline.id}.csv`} download>
-              CSV
-            </a>{' '}
-            ·{' '}
-            <a
-              href={`https://github.com/open-navigation/opennav_robotics_workload_benchmark/tree/main/opennav_benchmark_logs/${headline.log_dir}`}
-            >
-              <code>{headline.log_dir}</code>
-            </a>
-          </p>
-        </section>
-      </div>
-    </details>
+    {
+      profileRuns.map((run) => (
+        <details class="profile profile--headline">
+          <summary>
+            <StatStrip
+              expandable
+              items={statItems(run)}
+              caption={`${categoryFor(run.category).label} at ${run.tdp_w ?? 'n/a'} W`}
+            />
+          </summary>
+          <div class="profile__body">
+            {singleRunSections(run).map((section) => <ChartSection section={section} />)}
+            <section class="tsec">
+              <h2>All metrics for {categoryFor(run.category).label}</h2>
+              <MetricTable runs={[run]} />
+              <p class="note">
+                Raw samples:{' '}
+                <a href={`${base}/data/csv/${run.id}.csv`} download>
+                  CSV
+                </a>{' '}
+                ·{' '}
+                <a
+                  href={`https://github.com/open-navigation/opennav_robotics_workload_benchmark/tree/main/opennav_benchmark_logs/${run.log_dir}`}
+                >
+                  <code>{run.log_dir}</code>
+                </a>
+              </p>
+            </section>
+          </div>
+        </details>
+      ))
+    }
 
     <!-- Verdict -->
     <div class="callout verdict">
@@ -364,6 +376,23 @@ const setupDoc: Record<string, string> = {
     border: 0;
     background: none;
     margin-top: 0;
+  }
+
+  /* Stacked stat strips: the stock run, then any optimized run below it.
+     Each strip carries its own generous margin-block; adjacent ones collapse
+     to the larger of the two, so both sides have to be tightened. Spacing
+     above the first strip and below the last is left alone — the verdict
+     block's own margin already sets the gap underneath. */
+  .profile.profile--headline + .profile.profile--headline {
+    margin-top: 0;
+  }
+
+  .profile.profile--headline > summary :global(.strip) {
+    margin-bottom: var(--space-2);
+  }
+
+  .profile.profile--headline + .profile.profile--headline > summary :global(.strip) {
+    margin-top: var(--space-2);
   }
 
   .profile.profile--headline > summary {

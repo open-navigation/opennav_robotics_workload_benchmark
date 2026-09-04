@@ -41,6 +41,7 @@ export const PLATFORM_NOTES: Record<string, PlatformNotes> = {
       'Excellent GPU compute and memory bandwidth efficiency.',
       'Unified memory: free system RAM is directly available to the GPU for larger models.',
       'Completed every mission and kept the VLM fed throughout.',
+      'The optimized AI workload configuration nearly tripled throughput and cut query latency by roughly 60%.',
       'The Jetson ecosystem, including Isaac SDK, is available and mature.',
     ],
     limits: [

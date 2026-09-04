@@ -15,6 +15,8 @@ export interface Category {
   key: string;
   label: string;
   order: number;
+  /** A tuned rather than stock configuration. */
+  optimized: boolean;
   description: string;
   run_keys: string[];
 }

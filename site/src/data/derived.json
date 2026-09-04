@@ -343,5 +343,66 @@
         }
       }
     }
+  },
+  "max_power_optimized": {
+    "efficiency": {
+      "jetson_thor_optimized": {
+        "available_ghz_cores": 13.91,
+        "cpu_available_percent": 52.83,
+        "cpu_freq_ghz": 1.88,
+        "cpu_mean_percent": 47.17,
+        "cpu_thermal_margin_c": 38.49,
+        "free_core_equivalents": 7.4,
+        "ghz_cores_per_watt": 0.166,
+        "gpu_available_percent": 8.43,
+        "gpu_mean_percent": 91.57,
+        "gpu_percent_per_watt": 1.0932,
+        "gpu_thermal_margin_c": 37.59,
+        "label": "NVIDIA Jetson Thor (optimized)",
+        "least_loaded_core_percent": 20.4,
+        "mean_power_w": 83.76,
+        "num_cores": 14,
+        "platform": "jetson_thor",
+        "power_source_metric": "board_power_w",
+        "ram_available_percent": 18.41,
+        "ram_free_mb": 24380.9,
+        "ram_mean_percent": 81.59,
+        "ram_total_mb": 125748.6,
+        "ram_used_mb": 101367.7,
+        "single_thread_headroom_ghz": 1.497,
+        "total_ghz_cores": 26.32,
+        "used_ghz_cores": 12.42
+      }
+    },
+    "radar": {
+      "dimensions": [
+        "CPU Headroom",
+        "CPU Capability",
+        "GPU Capability",
+        "Memory Capability",
+        "Memory Headroom",
+        "Clock Speed"
+      ],
+      "normalized": {
+        "jetson_thor_optimized": {
+          "CPU Capability": 1.0,
+          "CPU Headroom": 1.0,
+          "Clock Speed": 1.0,
+          "GPU Capability": 1.0,
+          "Memory Capability": 1.0,
+          "Memory Headroom": 1.0
+        }
+      },
+      "raw": {
+        "jetson_thor_optimized": {
+          "CPU Capability": 26.3249,
+          "CPU Headroom": 52.8341,
+          "Clock Speed": 1.8803,
+          "GPU Capability": 91.57,
+          "Memory Capability": 125.7486,
+          "Memory Headroom": 19.3886
+        }
+      }
+    }
   }
 }

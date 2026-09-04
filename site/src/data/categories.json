@@ -3,6 +3,7 @@
     "description": "Each platform configured to its maximum rated TDP, so the comparison reflects the most compute each board can deliver.",
     "key": "max_power",
     "label": "Max Power",
+    "optimized": false,
     "order": 1,
     "run_keys": [
       "amd_strix_halo",
@@ -11,10 +12,21 @@
     ]
   },
   {
+    "description": "Maximum rated TDP with the AI inference stack tuned for the platform according to OEM best practices. Only Jetson Thor has a published optimized evaluation currently.",
+    "key": "max_power_optimized",
+    "label": "Max Power (AI Workload Optimized)",
+    "optimized": true,
+    "order": 2,
+    "run_keys": [
+      "jetson_thor_optimized"
+    ]
+  },
+  {
     "description": "Each platform set to a balanced power profile (except Orin AGX, max TDP 65W).",
     "key": "balanced_power",
     "label": "Balanced Power",
-    "order": 2,
+    "optimized": false,
+    "order": 3,
     "run_keys": [
       "amd_strix_halo",
       "jetson_thor_90w",

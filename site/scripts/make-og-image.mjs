@@ -22,7 +22,7 @@ const runs = Object.fromEntries(
 const mark = readFileSync(join(siteDir, 'public/images/opennav-mark.png')).toString('base64');
 
 const CARDS = [
-  ['max_power__amd_strix_halo', 'Strix Halo', '#eb6834'],
+  ['max_power__amd_strix_halo', 'Strix Halo', '#b8860b'],
   ['max_power__jetson_thor', 'Jetson Thor', '#1baf7a'],
   ['max_power__jetson_orin', 'Jetson AGX Orin', '#4a3aa7'],
 ];
