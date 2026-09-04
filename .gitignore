@@ -1,0 +1,13 @@
+__pycache__/
+opennav_benchmark_analysis/temp_core_stress/
+
+# Website build artifacts. node_modules/ and .astro/ are deliberately
+# unanchored: Astro creates nested copies (site/src/content/docs/node_modules/
+# holds a Vite dep cache), which anchored site/* patterns would not match.
+node_modules/
+.astro/
+site/dist/
+
+# Synced from docs/ at build time by site/scripts/sync-assets.mjs.
+site/public/images/
+site/public/Robotics-Workload-Platform-Benchmarking-Results.pdf

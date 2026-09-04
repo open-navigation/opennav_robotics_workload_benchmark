@@ -1,0 +1,23 @@
+{
+  "name": "opennav-robotics-workload-benchmark-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/sync-assets.mjs && astro dev",
+    "build": "node scripts/sync-assets.mjs && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "sync-assets": "node scripts/sync-assets.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/starlight": "^0.41.10",
+    "astro": "^7.2.9",
+    "echarts": "^6.1.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,347 @@
+{
+  "balanced_power": {
+    "efficiency": {
+      "amd_strix_halo": {
+        "available_ghz_cores": 47.12,
+        "cpu_available_percent": 79.85,
+        "cpu_freq_ghz": 1.844,
+        "cpu_mean_percent": 20.15,
+        "cpu_thermal_margin_c": 36.26,
+        "free_core_equivalents": 25.55,
+        "ghz_cores_per_watt": 0.5649,
+        "gpu_available_percent": 7.36,
+        "gpu_mean_percent": 92.64,
+        "gpu_percent_per_watt": 1.1107,
+        "gpu_thermal_margin_c": 39.93,
+        "label": "AMD Strix Halo",
+        "least_loaded_core_percent": 2.1,
+        "mean_power_w": 83.41,
+        "num_cores": 32,
+        "platform": "amd_strix_halo",
+        "power_source_metric": "gpu_power_w",
+        "ram_available_percent": 55.11,
+        "ram_free_mb": 70826.7,
+        "ram_mean_percent": 44.89,
+        "ram_total_mb": 126428.7,
+        "ram_used_mb": 55602.0,
+        "single_thread_headroom_ghz": 1.805,
+        "total_ghz_cores": 59.0,
+        "used_ghz_cores": 11.89,
+        "vram_free_mb": 1854.6,
+        "vram_free_percent": 90.56,
+        "vram_total_mb": 2048.0,
+        "vram_used_mb": 193.4
+      },
+      "jetson_orin": {
+        "available_ghz_cores": 1.69,
+        "cpu_available_percent": 6.38,
+        "cpu_freq_ghz": 2.202,
+        "cpu_mean_percent": 93.62,
+        "cpu_thermal_margin_c": 40.29,
+        "free_core_equivalents": 0.77,
+        "ghz_cores_per_watt": 0.0538,
+        "gpu_available_percent": 85.75,
+        "gpu_mean_percent": 14.25,
+        "gpu_percent_per_watt": 0.4548,
+        "gpu_thermal_margin_c": 44.73,
+        "label": "NVIDIA Jetson Orin (65 W)",
+        "least_loaded_core_percent": 92.9,
+        "mean_power_w": 31.34,
+        "num_cores": 12,
+        "platform": "jetson_orin",
+        "power_source_metric": "board_power_w",
+        "ram_available_percent": 21.27,
+        "ram_free_mb": 13993.3,
+        "ram_mean_percent": 78.73,
+        "ram_total_mb": 62828.1,
+        "ram_used_mb": 48834.8,
+        "single_thread_headroom_ghz": 0.156,
+        "total_ghz_cores": 26.42,
+        "used_ghz_cores": 24.73
+      },
+      "jetson_thor_70w": {
+        "available_ghz_cores": 8.96,
+        "cpu_available_percent": 43.56,
+        "cpu_freq_ghz": 1.713,
+        "cpu_mean_percent": 56.44,
+        "cpu_thermal_margin_c": 45.28,
+        "free_core_equivalents": 5.23,
+        "ghz_cores_per_watt": 0.1253,
+        "gpu_available_percent": 9.38,
+        "gpu_mean_percent": 90.62,
+        "gpu_percent_per_watt": 1.2679,
+        "gpu_thermal_margin_c": 44.07,
+        "label": "NVIDIA Jetson Thor (70 W)",
+        "least_loaded_core_percent": 35.1,
+        "mean_power_w": 71.48,
+        "num_cores": 12,
+        "platform": "jetson_thor",
+        "power_source_metric": "board_power_w",
+        "ram_available_percent": 54.09,
+        "ram_free_mb": 69711.2,
+        "ram_mean_percent": 45.91,
+        "ram_total_mb": 125771.7,
+        "ram_used_mb": 56060.5,
+        "single_thread_headroom_ghz": 1.112,
+        "total_ghz_cores": 20.56,
+        "used_ghz_cores": 11.61
+      },
+      "jetson_thor_90w": {
+        "available_ghz_cores": 12.93,
+        "cpu_available_percent": 47.97,
+        "cpu_freq_ghz": 2.246,
+        "cpu_mean_percent": 52.03,
+        "cpu_thermal_margin_c": 42.2,
+        "free_core_equivalents": 5.76,
+        "ghz_cores_per_watt": 0.1687,
+        "gpu_available_percent": 9.39,
+        "gpu_mean_percent": 90.61,
+        "gpu_percent_per_watt": 1.1824,
+        "gpu_thermal_margin_c": 42.06,
+        "label": "NVIDIA Jetson Thor (90 W)",
+        "least_loaded_core_percent": 21.7,
+        "mean_power_w": 76.64,
+        "num_cores": 12,
+        "platform": "jetson_thor",
+        "power_source_metric": "board_power_w",
+        "ram_available_percent": 54.2,
+        "ram_free_mb": 69819.3,
+        "ram_mean_percent": 45.8,
+        "ram_total_mb": 125771.7,
+        "ram_used_mb": 55952.4,
+        "single_thread_headroom_ghz": 1.758,
+        "total_ghz_cores": 26.95,
+        "used_ghz_cores": 14.02
+      }
+    },
+    "radar": {
+      "dimensions": [
+        "CPU Headroom",
+        "CPU Capability",
+        "GPU Capability",
+        "Memory Capability",
+        "Memory Headroom",
+        "Clock Speed"
+      ],
+      "normalized": {
+        "amd_strix_halo": {
+          "CPU Capability": 1.0,
+          "CPU Headroom": 1.0,
+          "Clock Speed": 0.8211,
+          "GPU Capability": 1.0,
+          "Memory Capability": 1.0,
+          "Memory Headroom": 1.0
+        },
+        "jetson_orin": {
+          "CPU Capability": 0.4478,
+          "CPU Headroom": 0.08,
+          "Clock Speed": 0.9804,
+          "GPU Capability": 0.1538,
+          "Memory Capability": 0.4969,
+          "Memory Headroom": 0.2459
+        },
+        "jetson_thor_70w": {
+          "CPU Capability": 0.3485,
+          "CPU Headroom": 0.5454,
+          "Clock Speed": 0.763,
+          "GPU Capability": 0.9782,
+          "Memory Capability": 0.9948,
+          "Memory Headroom": 0.6121
+        },
+        "jetson_thor_90w": {
+          "CPU Capability": 0.4567,
+          "CPU Headroom": 0.6007,
+          "Clock Speed": 1.0,
+          "GPU Capability": 0.9781,
+          "Memory Capability": 0.9948,
+          "Memory Headroom": 0.613
+        }
+      },
+      "raw": {
+        "amd_strix_halo": {
+          "CPU Capability": 59.0026,
+          "CPU Headroom": 79.8543,
+          "Clock Speed": 1.8438,
+          "GPU Capability": 92.6444,
+          "Memory Capability": 126.4287,
+          "Memory Headroom": 90.5584
+        },
+        "jetson_orin": {
+          "CPU Capability": 26.4203,
+          "CPU Headroom": 6.3844,
+          "Clock Speed": 2.2017,
+          "GPU Capability": 14.253,
+          "Memory Capability": 62.8281,
+          "Memory Headroom": 22.2724
+        },
+        "jetson_thor_70w": {
+          "CPU Capability": 20.5613,
+          "CPU Headroom": 43.5551,
+          "Clock Speed": 1.7134,
+          "GPU Capability": 90.6244,
+          "Memory Capability": 125.7717,
+          "Memory Headroom": 55.4268
+        },
+        "jetson_thor_90w": {
+          "CPU Capability": 26.9483,
+          "CPU Headroom": 47.9682,
+          "Clock Speed": 2.2457,
+          "GPU Capability": 90.6122,
+          "Memory Capability": 125.7717,
+          "Memory Headroom": 55.5128
+        }
+      }
+    }
+  },
+  "max_power": {
+    "efficiency": {
+      "amd_strix_halo": {
+        "available_ghz_cores": 69.3,
+        "cpu_available_percent": 81.87,
+        "cpu_freq_ghz": 2.645,
+        "cpu_mean_percent": 18.13,
+        "cpu_thermal_margin_c": 23.0,
+        "free_core_equivalents": 26.2,
+        "ghz_cores_per_watt": 0.586,
+        "gpu_available_percent": 4.87,
+        "gpu_mean_percent": 95.13,
+        "gpu_percent_per_watt": 0.8045,
+        "gpu_thermal_margin_c": 27.56,
+        "label": "AMD Strix Halo",
+        "least_loaded_core_percent": 2.0,
+        "mean_power_w": 118.24,
+        "num_cores": 32,
+        "platform": "amd_strix_halo",
+        "power_source_metric": "gpu_power_w",
+        "ram_available_percent": 52.7,
+        "ram_free_mb": 67795.8,
+        "ram_mean_percent": 47.3,
+        "ram_total_mb": 126428.7,
+        "ram_used_mb": 58632.9,
+        "single_thread_headroom_ghz": 2.592,
+        "total_ghz_cores": 84.64,
+        "used_ghz_cores": 15.34,
+        "vram_free_mb": 1409.4,
+        "vram_free_percent": 68.82,
+        "vram_total_mb": 2048.0,
+        "vram_used_mb": 638.6
+      },
+      "jetson_orin": {
+        "available_ghz_cores": 1.69,
+        "cpu_available_percent": 6.38,
+        "cpu_freq_ghz": 2.202,
+        "cpu_mean_percent": 93.62,
+        "cpu_thermal_margin_c": 40.29,
+        "free_core_equivalents": 0.77,
+        "ghz_cores_per_watt": 0.0538,
+        "gpu_available_percent": 85.75,
+        "gpu_mean_percent": 14.25,
+        "gpu_percent_per_watt": 0.4548,
+        "gpu_thermal_margin_c": 44.73,
+        "label": "NVIDIA Jetson Orin",
+        "least_loaded_core_percent": 92.9,
+        "mean_power_w": 31.34,
+        "num_cores": 12,
+        "platform": "jetson_orin",
+        "power_source_metric": "board_power_w",
+        "ram_available_percent": 21.27,
+        "ram_free_mb": 13993.3,
+        "ram_mean_percent": 78.73,
+        "ram_total_mb": 62828.1,
+        "ram_used_mb": 48834.8,
+        "single_thread_headroom_ghz": 0.156,
+        "total_ghz_cores": 26.42,
+        "used_ghz_cores": 24.73
+      },
+      "jetson_thor": {
+        "available_ghz_cores": 13.9,
+        "cpu_available_percent": 50.23,
+        "cpu_freq_ghz": 1.977,
+        "cpu_mean_percent": 49.77,
+        "cpu_thermal_margin_c": 35.06,
+        "free_core_equivalents": 7.03,
+        "ghz_cores_per_watt": 0.1514,
+        "gpu_available_percent": 10.86,
+        "gpu_mean_percent": 89.14,
+        "gpu_percent_per_watt": 0.9705,
+        "gpu_thermal_margin_c": 34.48,
+        "label": "NVIDIA Jetson Thor",
+        "least_loaded_core_percent": 25.0,
+        "mean_power_w": 91.85,
+        "num_cores": 14,
+        "platform": "jetson_thor",
+        "power_source_metric": "board_power_w",
+        "ram_available_percent": 36.05,
+        "ram_free_mb": 47132.0,
+        "ram_mean_percent": 63.95,
+        "ram_total_mb": 125771.7,
+        "ram_used_mb": 78639.7,
+        "single_thread_headroom_ghz": 1.483,
+        "total_ghz_cores": 27.68,
+        "used_ghz_cores": 13.78
+      }
+    },
+    "radar": {
+      "dimensions": [
+        "CPU Headroom",
+        "CPU Capability",
+        "GPU Capability",
+        "Memory Capability",
+        "Memory Headroom",
+        "Clock Speed"
+      ],
+      "normalized": {
+        "amd_strix_halo": {
+          "CPU Capability": 1.0,
+          "CPU Headroom": 1.0,
+          "Clock Speed": 1.0,
+          "GPU Capability": 1.0,
+          "Memory Capability": 1.0,
+          "Memory Headroom": 1.0
+        },
+        "jetson_orin": {
+          "CPU Capability": 0.3122,
+          "CPU Headroom": 0.078,
+          "Clock Speed": 0.8324,
+          "GPU Capability": 0.1498,
+          "Memory Capability": 0.4969,
+          "Memory Headroom": 0.3236
+        },
+        "jetson_thor": {
+          "CPU Capability": 0.3271,
+          "CPU Headroom": 0.6135,
+          "Clock Speed": 0.7476,
+          "GPU Capability": 0.937,
+          "Memory Capability": 0.9948,
+          "Memory Headroom": 0.5445
+        }
+      },
+      "raw": {
+        "amd_strix_halo": {
+          "CPU Capability": 84.639,
+          "CPU Headroom": 81.8729,
+          "Clock Speed": 2.645,
+          "GPU Capability": 95.1333,
+          "Memory Capability": 126.4287,
+          "Memory Headroom": 68.8194
+        },
+        "jetson_orin": {
+          "CPU Capability": 26.4203,
+          "CPU Headroom": 6.3844,
+          "Clock Speed": 2.2017,
+          "GPU Capability": 14.253,
+          "Memory Capability": 62.8281,
+          "Memory Headroom": 22.2724
+        },
+        "jetson_thor": {
+          "CPU Capability": 27.6821,
+          "CPU Headroom": 50.227,
+          "Clock Speed": 1.9773,
+          "GPU Capability": 89.1444,
+          "Memory Capability": 125.7717,
+          "Memory Headroom": 37.4742
+        }
+      }
+    }
+  }
+}

@@ -1,4 +1,7 @@
-# NVIDIA Jetson Orin AGX 64G: Gemma-4 31B VLM Setup & Runtime
+---
+title: Jetson Orin setup
+description: Preparing an NVIDIA Jetson AGX Orin to run the benchmark.
+---
 
 Serve Gemma-4 31B as an OpenAI-compatible VLM endpoint on the Jetson Orin AGX 64G
 using llama.cpp (NVIDIA's prebuilt Jetson container, CUDA backend). The server listens
