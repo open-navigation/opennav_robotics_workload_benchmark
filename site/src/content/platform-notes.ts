@@ -20,9 +20,9 @@ export const PLATFORM_NOTES: Record<string, PlatformNotes> = {
       'with 82% of the CPU bandwidth available to application developers. It can absorb work ' +
       'that today is split between a Jetson Orin and a separate x86 computer.',
     strengths: [
-      'Highest available CPU capability per watt.',
+      'Highest available CPU capability per watt. Can absorb at least an additional eight cores of load with no change in application performance.',
       'Completed every mission while holding the lowest control-loop miss rate.',
-      'Measured to absorb at least an additional eight cores of load with no change in application performance.',
+      'Best in class GPU performance inline with NVIDIA Jetson Thor.',
       'Unified memory: free system RAM is directly available to the GPU for larger models.',
       'x86, so existing x86-only robotics software runs without porting.',
     ],

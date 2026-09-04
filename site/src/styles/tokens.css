@@ -41,10 +41,10 @@
 
   /* Categorical data palette: one hue per platform, fixed order, never
    * cycled. Validated with the dataviz palette checker at --pairs all in
-   * both modes (worst CVD dE 9.2 light / 9.4 dark; normal-vision 27.6 /
-   * 24.6). Aqua sits below 3:1 on the light surface, so every chart ships
+   * both modes (worst CVD dE 9.9 light / 8.3 dark; normal-vision 17.7 /
+   * 18.1). Aqua sits below 3:1 on the light surface, so every chart ships
    * direct labels and a data table (the relief rule). */
-  --series-amd: #eb6834;
+  --series-amd: #b8860b;
   --series-thor: #1baf7a;
   --series-orin: #4a3aa7;
   --series-neutral: #6b6f73;
@@ -97,7 +97,7 @@
     --focus-ring: var(--n2-blue-light);
     --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 16px rgb(0 0 0 / 30%);
 
-    --series-amd: #d95926;
+    --series-amd: #c08a1e;
     --series-thor: #199e70;
     --series-orin: #9085e9;
     --series-neutral: #9a9ea2;
@@ -129,7 +129,7 @@
   --focus-ring: var(--n2-blue-light);
   --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 16px rgb(0 0 0 / 30%);
 
-  --series-amd: #d95926;
+  --series-amd: #c08a1e;
   --series-thor: #199e70;
   --series-orin: #9085e9;
   --series-neutral: #9a9ea2;
