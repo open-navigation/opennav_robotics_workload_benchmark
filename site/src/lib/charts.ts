@@ -208,11 +208,19 @@ export function comparisonSections(
 
   // -- Overview -------------------------------------------------------------
 
+  // With one run there is nothing to normalize against, so every axis scores
+  // 1.0 and the shape is full by construction. Say so, or the reader mistakes
+  // a degenerate plot for a perfect score.
+  const soloRadar = runs.filter((r) => radar.normalized[r.run_key]).length < 2;
+
   const radarChart: ChartDef = {
     id: 'platform-balance-radar',
     title: 'Platform balance',
-    takeaway:
-      'Six dimensions, each min-max normalized against the strongest platform in this category.',
+    takeaway: soloRadar
+      ? 'Six dimensions, normalized within this category. Only one run is published here, ' +
+        'so every axis normalizes against itself and reads 1.0 — the full shape shows the ' +
+        'axes, not a perfect score. Compare against the max power category instead.'
+      : 'Six dimensions, each min-max normalized against the strongest platform in this category.',
     height: 420,
     spec: {
       kind: 'radar',
@@ -232,7 +240,9 @@ export function comparisonSections(
         .filter((r) => radar.normalized[r.run_key])
         .map((r) => [r.label, ...radar.dimensions.map((d) => fmt(radar.normalized[r.run_key][d], 2))]),
     },
-    tableCaption: 'Normalized 0–1 against the best platform on each axis; higher is better.',
+    tableCaption: soloRadar
+      ? 'Normalized 0–1 within this category. With a single run every axis is 1.0 by construction.'
+      : 'Normalized 0–1 against the best platform on each axis; higher is better.',
     sources: src,
     csv,
   };

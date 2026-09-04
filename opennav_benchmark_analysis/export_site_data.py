@@ -74,6 +74,10 @@ class Category:
     published: bool
     description: str
     runs: List[RunSpec] = field(default_factory=list)
+    # A tuned rather than stock configuration. Platform pages surface these
+    # runs alongside the headline one, so the reader sees what tuning bought
+    # without leaving the page.
+    optimized: bool = False
 
 
 CATEGORIES = [
@@ -98,7 +102,7 @@ CATEGORIES = [
     Category(
         key='balanced_power',
         label='Balanced Power',
-        order=2,
+        order=3,
         published=True,
         description=(
             'Each platform set to a balanced power profile '
@@ -116,19 +120,24 @@ CATEGORIES = [
                     note='Kept at maximum TDP; no separate balanced run.'),
         ],
     ),
-    # Preliminary; not part of the v1.3 technical report. Flip published=True
-    # and re-run this script to add it to the website.
+    # Single-platform for now: only Thor has a published optimized run. The
+    # matching Strix Halo run is still preliminary, so this category stays a
+    # one-run page until that lands.
     Category(
         key='max_power_optimized',
-        label='Max Power (Optimized)',
-        order=3,
-        published=False,
-        description='Preliminary optimized-configuration runs.',
+        label='Max Power (AI Workload Optimized)',
+        order=2,
+        published=True,
+        optimized=True,
+        description=(
+            'Maximum rated TDP with the AI inference stack tuned for the '
+            'platform according to OEM best practices. Only Jetson Thor has a '
+            'published optimized evaluation currently.'
+        ),
         runs=[
-            RunSpec('amd_strix_halo_optimized_prelim', 'amd_strix_halo',
-                    'AMD Strix Halo (optimized)',
-                    'max_power_optimized/amd_strix_halo_optimized_prelim',
-                    tdp_w=120),
+            RunSpec('jetson_thor_optimized', 'jetson_thor',
+                    'NVIDIA Jetson Thor (optimized)',
+                    'max_power_optimized/jetson_thor_optimized', tdp_w=130),
         ],
     ),
 ]
@@ -735,6 +744,7 @@ def main():
             'key': category.key,
             'label': category.label,
             'order': category.order,
+            'optimized': category.optimized,
             'description': category.description,
             'run_keys': [r['run_key'] for r in records],
         })
