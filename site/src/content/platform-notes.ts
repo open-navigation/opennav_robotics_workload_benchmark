@@ -27,9 +27,9 @@ export const PLATFORM_NOTES: Record<string, PlatformNotes> = {
       'x86, so existing x86-only robotics software runs without porting.',
     ],
     limits: [
-      'Runs the hottest of the three, so thermal design in a sealed enclosure needs attention.',
       'In the balanced-power category it shows more control-loop misses than at max power, because the generic BIOS balanced profile allocates TDP toward the saturated GPU rather than the CPU.',
       'No equivalent of the Jetson software ecosystem (yet).',
+      'Thermal design in a sealed enclosure may need closer evaluation.',
     ],
   },
   jetson_thor: {
