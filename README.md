@@ -6,7 +6,7 @@ This project aims to fill the gap by providing a reproducable, independent bench
 
 The benchmark also includes an (optional) Edge AI workload. We use Gemma 4.0, a popular VLM, to exercise the platforms' GPUs during the benchmark. We integrate it scene understanding in the navigation behavior tree to impact decision making. VLMs are intensive workloads robotics-targeted embedded platforms are being built with in mind, so its a good benchmark to fully leverage the capabilities of modern platforms.
 
-[The benchmark's methodology, platform details, and visual results are documented on our website: https://open-navigation.github.io/opennav_robotics_workload_benchmark/](https://open-navigation.github.io/opennav_robotics_workload_benchmark/).
+[The benchmark's methodology, platform details, and visual results are documented on our website:](https://open-navigation.github.io/opennav_robotics_workload_benchmark/).
 
 [![Benchmark Overview](docs/images/website.png)](https://open-navigation.github.io/opennav_robotics_workload_benchmark/)
 
