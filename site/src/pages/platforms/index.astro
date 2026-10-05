@@ -1,0 +1,236 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import VendorCallout from '../../components/VendorCallout.astro';
+import { categories, colorFor, platformOrder, platforms, runsFor } from '../../lib/data';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const cols = platformOrder.map((k) => platforms[k]);
+
+const swatch = (key: string) => colorFor(key);
+
+const specRows: [string, string][] = [
+  ['CPU', 'cpu'],
+  ['GPU architecture', 'gpu_architecture'],
+  ['GPU cores', 'gpu_cores'],
+  ['NPU / DLA', 'npu_dla'],
+  ['RAM', 'ram'],
+  ['Memory bandwidth', 'memory_bandwidth'],
+  ['Power (TDP)', 'tdp'],
+];
+
+---
+
+<BaseLayout
+  title="Platform comparison | Robotics Workload Benchmark"
+  description="Hardware specifications, as-tested configuration, and results at a glance for every platform in the benchmark."
+>
+  <div class="wrap page">
+    <p class="eyebrow">Platforms</p>
+    <h1>Platform comparison</h1>
+    <p class="section__lede">
+      What each platform is on paper, what it was actually configured to for these runs, and how
+      it performed. Specifications are the vendors' own; everything measured is from the runs in
+      this repository.
+    </p>
+
+    <nav class="jump" aria-label="Tables on this page">
+      <span class="jump__label">Jump to</span>
+      <a href="#silicon">Silicon and memory</a>
+      <a href="#as-tested">As tested</a>
+    </nav>
+
+    <!-- Table 1 -->
+    <section class="tsec" id="silicon">
+      <h2>Silicon and memory</h2>
+      <p class="section__lede">Vendor specifications for the three platforms evaluated.</p>
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr>
+              <th scope="col">Feature</th>
+              {
+                cols.map((p) => (
+                  <th scope="col">
+                    <span class="swatch" style={`background: ${swatch(p.key)}`} />
+                    <a href={`${base}/platforms/${p.slug}`}>{p.short_label}</a>
+                  </th>
+                ))
+              }
+            </tr>
+          </thead>
+          <tbody>
+            {
+              specRows.map(([label, field]) => (
+                <tr>
+                  <th scope="row" class="row-head">
+                    {label}
+                  </th>
+                  {cols.map((p) => <td>{p.spec[field]}</td>)}
+                </tr>
+              ))
+            }
+            <tr>
+              <th scope="row" class="row-head">Vendor</th>
+              {cols.map((p) => <td><a href={p.vendor_url}>{p.vendor}</a></td>)}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid grid--3 summaries">
+        {
+          cols.map((p) => (
+            <article class="card">
+              <h3>
+                <span class="swatch" style={`background: ${swatch(p.key)}`} />
+                {p.short_label}
+              </h3>
+              <p>{p.summary}</p>
+              <p>
+                <a href={`${base}/platforms/${p.slug}`}>Full profile →</a>
+              </p>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Table 2 -->
+    <section class="tsec" id="as-tested">
+      <h2>As tested</h2>
+      <p class="section__lede">The tested TDP and other key configurations.</p>
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr>
+              <th scope="col">Configuration</th>
+              {
+                cols.map((p) => (
+                  <th scope="col">
+                    <span class="swatch" style={`background: ${swatch(p.key)}`} />
+                    {p.short_label}
+                  </th>
+                ))
+              }
+            </tr>
+          </thead>
+          <tbody>
+            {
+              categories.map((c) => (
+                <tr>
+                  <th scope="row" class="row-head">
+                    TDP, {c.label} (W)
+                  </th>
+                  {cols.map((p) => {
+                    const run = runsFor(c.key).find((r) => r.platform === p.key);
+                    const all = runsFor(c.key).filter((r) => r.platform === p.key);
+                    return (
+                      <td class="tdp">
+                        {all.length > 1
+                          ? all.map((r) => r.tdp_w).join(' / ')
+                          : (run?.tdp_w ?? 'n/a')}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))
+            }
+            <tr>
+              <th scope="row" class="row-head">Software stack</th>
+              {cols.map((p) => <td>{p.as_tested.software}</td>)}
+            </tr>
+            <tr>
+              <th scope="row" class="row-head">ROS distribution</th>
+              {cols.map((p) => <td>{p.as_tested.ros_distro}</td>)}
+            </tr>
+            <tr>
+              <th scope="row" class="row-head">DDS</th>
+              {cols.map((p) => <td>{p.as_tested.dds}</td>)}
+            </tr>
+            <tr>
+              <th scope="row" class="row-head">Run length</th>
+              {cols.map(() => <td>900 s at 1 Hz sampling</td>)}
+            </tr>
+            <tr>
+              <th scope="row" class="row-head">Nav2 configuration</th>
+              {
+                cols.map(() => (
+                  <td>
+                    <a
+                      href="https://github.com/open-navigation/opennav_robotics_workload_benchmark/blob/main/opennav_benchmark_robotics_workload/opennav_benchmark_nav2/config/nav2_params.yaml"
+                    >
+                      <code>nav2_params.yaml</code>
+                    </a>
+                  </td>
+                ))
+              }
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <VendorCallout variant="banner" />
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-7) var(--space-8);
+  }
+
+  table.data td.tdp {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-3) 0;
+    border-block: 1px solid var(--border);
+    font-size: 0.88rem;
+    margin-bottom: var(--space-6);
+  }
+
+  .jump__label {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .tsec {
+    padding-bottom: var(--space-7);
+    scroll-margin-top: 5rem;
+  }
+
+  .tsec h2 {
+    margin-top: var(--space-6);
+  }
+
+  .summaries {
+    margin-top: var(--space-5);
+  }
+
+  .summaries h3 {
+    margin-top: 0;
+    font-size: 1.05rem;
+  }
+
+  .note {
+    margin-top: var(--space-3);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  table.data tr.total {
+    background: var(--surface-2);
+    font-weight: 600;
+  }
+</style>

@@ -1,0 +1,483 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HilDiagram from '../components/HilDiagram.astro';
+import Icon from '../components/Icon.astro';
+import { platformOrder, platforms, fmt } from '../lib/data';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const sensors: [string, string, string, string][] = [
+  ['3D LiDAR', '3', '10 Hz', '30 m range, 32 beams at 512 resolution'],
+  ['RGBD camera', '3', '10 Hz', '320x240'],
+  ['2D safety LiDAR', '2', '30 Hz', '25 m range'],
+  ['RGB camera', '1', '5 Hz', '640x480, feeds the VLM only'],
+  ['IMU', '1', '100 Hz', 'Internal'],
+];
+
+const stackCards = [
+  {
+    icon: 'layers' as const,
+    title: 'Planning',
+    body: 'Hybrid-A* with full-footprint SE2 collision checking. This is the expensive, correct option, not a point-robot approximation.',
+  },
+  {
+    icon: 'gauge' as const,
+    title: 'Control',
+    body: 'MPPI, an optimization-based trajectory planner, at a 30 Hz target. This is the part most sensitive to CPU contention.',
+  },
+  {
+    icon: 'sensor' as const,
+    title: 'Perception',
+    body: 'Spatio-Temporal Voxel Layer for the 3D lidars; obstacle and voxel layers for the 2D lidars and RGBD cameras.',
+  },
+  {
+    icon: 'shield' as const,
+    title: 'Safety',
+    body: 'Velocity smoother and collision monitor, running alongside everything else.',
+  },
+  {
+    icon: 'robot' as const,
+    title: 'Localization',
+    body: 'AMCL with simulated odometry.',
+  },
+];
+
+const limitations = [
+  {
+    title: 'Power is not the same on every platform',
+    body:
+      'The platforms are compared using max power profiles which are not the same to compare ' +
+      'the highest performance modes possible on each. A balanced TDP comparison is also made ' +
+      'to compare as close to the same as possible but are not exactly identical due to ' +
+      'vendor configuration limitations.',
+  },
+  {
+    title: 'Optimized AI runtime are not identical',
+    body:
+      'The results from unoptimized AI workloads use the same model, quantization, and source ' +
+      'to give a 1:1 comparison between platforms. The results from optimized AI workloads ' +
+      'showcase optimized paths on each vendor recommended instructions to showcase ' +
+      'performance using hardware specialized methods, quantizations, or libraries.',
+  },
+  {
+    title: 'A 15-minute window',
+    body: 'Long-duration thermal behavior, memory fragmentation, and multi-hour drift are outside what this measures.',
+  },
+  {
+    title: 'Simulated sensor-driver load',
+    body:
+      'Driver cost is replayed from coefficients measured on real hardware rather than ' +
+      'produced by real drivers. Difference sensor configurations will vary these metrics.',
+  },
+];
+
+const metricDefs: [string, string][] = [
+  [
+    'Free core equivalents',
+    'Available CPU percentage multiplied by the core count. What is left, expressed in the unit you budget new nodes in.',
+  ],
+  [
+    'Absolute compute headroom (GHz-cores)',
+    'Core count multiplied by sustained clock, minus the portion the workload consumed. Counts core count and clock speed together, so a platform cannot look good on one while hiding the other.',
+  ],
+  [
+    'Single-thread headroom (GHz)',
+    'The median across the run of the least-loaded core, converted to available clock. This is the budget for one new real-time control thread that cannot be parallelized.',
+  ],
+  [
+    'Thermal runway (°C)',
+    'Margin between the mean measured temperature and a 100 °C throttle point.',
+  ],
+  [
+    'Control loop misses',
+    'Occurrences of the Nav2 controller server’s "Control loop missed its desired rate" warning, counted against its 30 Hz target and normalized per second of run time.',
+  ],
+  [
+    'Completed missions',
+    'Count of "[bt_navigator]: Goal succeeded" in the ROS logs, meaning navigation goals the robot actually finished.',
+  ],
+  [
+    'Planner cycle time',
+    'Derived as 1 / actual rate from the planner server loop-rate warnings, so it reports the real time to produce one plan.',
+  ],
+  [
+    'VLM query outcome',
+    'Parsed from VLM_QUERY log lines emitted by the VLM node: success, error, cancelled, retries exhausted, no image, stale image, or encode failed.',
+  ],
+  [
+    'Platform balance radar',
+    'Six dimensions: CPU headroom, CPU capability, GPU capability, memory capability, memory headroom, and clock speed. Each is min-max normalized against the strongest platform in that category, so 1.0 means "best of this group", not "perfect".',
+  ],
+];
+---
+
+<BaseLayout
+  title="Methodology | Robotics Workload Benchmark"
+  description="How the benchmark is constructed and measured: the workload, the sensor suite, the autonomy and AI stacks, the metric definitions, and the limitations."
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: 'Robotics Workload Benchmark methodology',
+    author: { '@type': 'Organization', name: 'Open Navigation LLC' },
+  }}
+>
+  <div class="wrap wrap--narrow page">
+    <p class="eyebrow">Methodology</p>
+    <h1>How this is measured</h1>
+    <p class="section__lede">
+      Everything here is reproducible from the repository. If a definition on this page is not
+      what you would have chosen, the analysis code is public and you can compute it your way
+      from the same raw logs.
+    </p>
+
+    <nav class="toc" aria-label="On this page">
+      <a href="#workload">Robotics workload</a>
+      <a href="#sensors">Sensor suite</a>
+      <a href="#autonomy">Autonomy stack</a>
+      <a href="#ai">AI workload</a>
+      <a href="#driver-load">Sensor-driver load</a>
+      <a href="#harness">Test harness</a>
+      <a href="#metrics">Metric definitions</a>
+      <a href="#limitations">Limitations</a>
+      <a href="#independence">Independence</a>
+    </nav>
+
+    <section id="workload">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="building" /></span>
+        <div class="sec-head__body">
+          <h2>Robotics workload</h2>
+        </div>
+      </div>
+      <p>
+        Nav2 autonomously navigates a forklift material handling robot within a 200,000 sqft
+        (18,600 m²) industrial warehouse environment, using its advanced, built-in planning,
+        control, behavior modeling, and perception. It moves pallets from shipping/receiving to
+        shelving units while processing multiple 3D lidars, 2D safety lidars, RGBD cameras, and
+        internal sensors. This workload is representative of dozens of companies and tens of
+        thousands of robots deployed today in production environments.
+      </p>
+      <p>
+        The mission loop runs from a charging dock: pick a pallet from a block stack or loading
+        dock, drop it at racking, repeat. A wait is inserted at each pick and place to simulate
+        the physical handling time, and the robot periodically returns to the dock. Maximum
+        robot speed is 2 m/s. Runs are 900 seconds, with system metrics sampled at 1 Hz.
+      </p>
+    </section>
+
+    <section id="sensors">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="sensor" /></span>
+        <div class="sec-head__body">
+          <h2>Sensor suite</h2>
+        </div>
+      </div>
+      <p>
+        Ten sensors. Nine feed the AMR autonomy workload; the RGB camera feeds the VLM only.
+      </p>
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr>
+              <th scope="col">Sensor</th>
+              <th scope="col" class="num">Count</th>
+              <th scope="col" class="num">Rate</th>
+              <th scope="col">Configuration</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              sensors.map(([name, count, rate, config]) => (
+                <tr>
+                  <th scope="row" class="row-head">
+                    {name}
+                  </th>
+                  <td class="num">{count}</td>
+                  <td class="num">{rate}</td>
+                  <td>{config}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="autonomy">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="robot" /></span>
+        <div class="sec-head__body">
+          <h2>Autonomy stack</h2>
+          <p>
+            Five subsystems, all resident at once. Optimization-based control at 30 Hz is the
+            part of this stack most sensitive to CPU contention, which is why control-loop
+            misses are the most diagnostic single number in the results.
+          </p>
+        </div>
+      </div>
+      <div class="grid grid--3 stack-cards">
+        {
+          stackCards.map((c) => (
+            <div class="card card--feature">
+              <span class="card__icon">
+                <Icon name={c.icon} />
+              </span>
+              <p class="card__title">{c.title}</p>
+              <p class="card__blurb">{c.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="ai">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="ai" /></span>
+        <div class="sec-head__body">
+          <h2>AI workload</h2>
+        </div>
+      </div>
+      <p>
+        Gemma 4.0 (31B, Q4_K_M) served by a llama.cpp server on the platform under test,
+        integrated into the navigation behavior tree for scene understanding so that its answers
+        affect the robot's decisions rather than running beside them. Queries are re-issued
+        immediately after each one completes, so the GPU stays saturated for the whole run.
+        VLMs are intensive workloads that robotics-targeted embedded platforms are being built
+        with in mind, which makes them a good way to fully leverage the capabilities of modern
+        platforms.
+      </p>
+      <p>
+        The AI workload is optional in the pipeline. Every result published here includes it.
+      </p>
+    </section>
+
+    <section id="driver-load">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="cpu" /></span>
+        <div class="sec-head__body">
+          <h2>Sensor-driver load</h2>
+        </div>
+      </div>
+      <p>
+        Real sensor drivers are not attached, because the sensors are simulated. But driver CPU
+        cost is a real and platform-dependent expense, so it is measured on real hardware (Orbbec
+        Gemini 355 depth cameras and Ouster OS-1 32 lidars) and then replayed on each platform as
+        a synthetic load. The coefficients, as a fraction of one core per sensor instance:
+      </p>
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr>
+              <th scope="col">Sensor</th>
+              {platformOrder.map((k) => <th scope="col" class="num">{platforms[k].short_label}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {
+              (
+                [
+                  ['3D LiDAR', 'lidar_3d'],
+                  ['2D safety LiDAR', 'lidar_2d'],
+                  ['RGBD camera', 'rgbd_camera'],
+                ] as [string, string][]
+              ).map(([label, field]) => (
+                <tr>
+                  <th scope="row" class="row-head">
+                    {label}
+                  </th>
+                  {platformOrder.map((k) => (
+                    <td class="num">{fmt(platforms[k].sensor_driver_load[field], 3)}</td>
+                  ))}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="harness">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="layers" /></span>
+        <div class="sec-head__body">
+          <h2>Test harness</h2>
+        </div>
+      </div>
+      <HilDiagram />
+      <p>
+        A developer computer runs the Gazebo simulation of the warehouse and the robot's sensors
+        in a provided Docker container. This is run on another machine to isolate potential
+        effects from resource scheduling the simulation on utilization metrics. DDS is
+        configured to only operate on the wired ethernet interface to minimize the impacts due
+        to discovery traffic or other interference.
+      </p>
+      <p>
+        On the platform under test: the AMR autonomy container, the AI workload container, the
+        simulated sensor-driver load, and the metrics capture script. All four contend for the
+        same CPU, power, and accelerators, which is the entire point.
+      </p>
+      <p>
+        The same offered sensor load reaches every platform: measured network receive rate is
+        approximately 66 MB/s on all three, so no platform is being fed less work than another.
+      </p>
+    </section>
+
+    <section id="metrics">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="chart" /></span>
+        <div class="sec-head__body">
+          <h2>Metric definitions</h2>
+        </div>
+      </div>
+      <p>
+        System counters are sampled at 1 Hz for 900 seconds. Application metrics are parsed from
+        the ROS logs. Derived metrics:
+      </p>
+      <dl class="defs">
+        {
+          metricDefs.map(([term, def]) => (
+            <div>
+              <dt>{term}</dt>
+              <dd>{def}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <p>
+        Power is read at the board where the platform exposes it. On the Jetsons this is the
+        board power rail; on Strix Halo it is the GPU/SoC power counter reported by the driver.
+        Both are the figure the platform itself reports, and neither is a wall-socket
+        measurement.
+      </p>
+    </section>
+
+    <section id="limitations">
+      <div class="sec-head">
+        <span class="sec-head__icon sec-head__icon--warn"><Icon name="alert" /></span>
+        <div class="sec-head__body">
+          <h2>Limitations and Concerns</h2>
+          <p>
+            Stated plainly, because a benchmark that hides these is not one you should base a
+            purchase on.
+          </p>
+        </div>
+      </div>
+      <div class="grid grid--2 limit-cards">
+        {
+          limitations.map((l) => (
+            <div class="card limit">
+              <p class="card__title">
+                <Icon name="alert" size={16} />
+                {l.title}
+              </p>
+              <p class="card__blurb">{l.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="independence">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="scale" /></span>
+        <div class="sec-head__body">
+          <h2>Vendor agnostic Independence</h2>
+        </div>
+      </div>
+      <p>
+        This is an independently managed, vendor-agnostic benchmark. Open Navigation LLC, the
+        maintainers of Nav2, designed the workload, ran it, and wrote the analysis.
+      </p>
+      <p>
+        What makes the disclosure meaningful is that the methodology, the raw logs from every
+        run, and the analysis code are all public. Any result on this site can be recomputed
+        from the published logs, and the whole pipeline can be re-run on your own hardware.
+        Results that are unflattering to any platform, including in the balanced-power category,
+        are published alongside the rest.
+      </p>
+      <p>
+        <a class="btn btn--secondary" href={`${base}/docs/reproduce`}>Reproduce it</a>
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-7) var(--space-8);
+  }
+
+  .toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-4);
+    padding: var(--space-4) 0;
+    border-block: 1px solid var(--border);
+    font-size: 0.88rem;
+    margin-bottom: var(--space-6);
+  }
+
+  section {
+    padding-block: var(--space-5);
+    scroll-margin-top: 5rem;
+  }
+
+  section + section {
+    border-top: 1px solid var(--border);
+  }
+
+  .defs {
+    margin: 0;
+  }
+
+  .defs > div {
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .defs dt {
+    font-family: var(--font-display);
+    font-weight: 600;
+    margin-bottom: var(--space-1);
+  }
+
+  .defs dd {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  .btn + .btn {
+    margin-left: var(--space-3);
+  }
+
+  .card__blurb {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .stack-cards,
+  .limit-cards {
+    margin-top: var(--space-4);
+  }
+
+  .limit .card__title {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
+  .limit .card__title :global(svg) {
+    color: var(--series-amd);
+    margin-top: 0.15em;
+  }
+
+  :global(.sec-head__icon--warn) {
+    background: color-mix(in srgb, var(--series-amd) 12%, var(--surface-2));
+    border-color: color-mix(in srgb, var(--series-amd) 30%, var(--border));
+    color: var(--series-amd);
+  }
+
+</style>

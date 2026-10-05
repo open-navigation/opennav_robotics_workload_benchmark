@@ -1,0 +1,351 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import VendorCallout from '../components/VendorCallout.astro';
+import Icon from '../components/Icon.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const repo = 'https://github.com/open-navigation/opennav_robotics_workload_benchmark';
+const issue = (template: string, title: string) =>
+  `${repo}/issues/new?template=${template}&title=${encodeURIComponent(title)}`;
+
+const routes = [
+  {
+    href: '#who',
+    icon: 'building' as const,
+    title: 'Who runs this',
+    blurb: 'Open Navigation LLC, the maintainers of Nav2, and how independence is guaranteed.',
+  },
+  {
+    href: '#support',
+    icon: 'shield' as const,
+    title: 'Commercial support',
+    blurb: 'ROS 2 and Nav2 engineering, autonomy integration, and hardware evaluation.',
+  },
+  {
+    href: '#vendors',
+    icon: 'cpu' as const,
+    title: 'Hardware vendors',
+    blurb: 'Get your platform benchmarked and included in the next edition.',
+  },
+  {
+    href: '#contribute',
+    icon: 'terminal' as const,
+    title: 'Test your platform yourself',
+    blurb: 'Run the pipeline on your own silicon and submit the results.',
+  },
+];
+
+---
+
+<BaseLayout
+  title="Contact and contributing | Robotics Workload Benchmark"
+  description="Who runs this benchmark, how to get commercial ROS 2 and Nav2 support, how hardware vendors get their platform included, and how to add a platform yourself."
+>
+  <div class="wrap page">
+    <div class="col head">
+      <p class="eyebrow">Contact</p>
+      <h1>Talk to us, get your platform included, or add your own results</h1>
+      <p class="section__lede">
+        Four different reasons you might be on this page. Pick the one that is yours.
+      </p>
+    </div>
+
+    <nav class="col grid grid--2 routes" aria-label="On this page">
+      {
+        routes.map((r) => (
+          <a class="card card--feature card--link" href={r.href}>
+            <span class="card__icon">
+              <Icon name={r.icon} />
+            </span>
+            <p class="card__title">{r.title}</p>
+            <p class="card__blurb">{r.blurb}</p>
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="col">
+      <section id="who">
+        <div class="sec-head">
+          <span class="sec-head__icon"><Icon name="building" /></span>
+          <div class="sec-head__body">
+            <h2>Who runs this</h2>
+          </div>
+        </div>
+        <p>
+          This benchmark is built and maintained by <strong>Open Navigation LLC</strong>, the
+          maintainers of Nav2. That is the open-source autonomy framework the workload itself is
+          built on, and the one a large share of production mobile robots run today.
+        </p>
+        <p>
+          It is an independently managed, vendor-agnostic benchmark. No hardware vendor controls
+          the workload definition, the metrics, the analysis, or what gets published. The reason
+          we can say that and expect to be believed is not the claim itself. The pipeline, raw
+          logs, and the full analysis results are all in the open, so any metric here can be
+          recomputed or contested by anyone who disagrees - all coming from a trusted source.
+        </p>
+        <p>
+          The work is made possible with support from benchmarked vendors. Compute OEMs pay for
+          engineering support to maintain the benchmark, but does not buy a result and results
+          unflattering to any platform are published alongside the rest.
+        </p>
+        <p class="btn-row">
+          <a class="btn btn--secondary" href="https://opennav.org">
+            <Icon name="external" size={16} /> opennav.org
+          </a>
+          <a class="btn btn--secondary" href={repo}>
+            <Icon name="github" size={16} /> GitHub repository
+          </a>
+        </p>
+      </section>
+
+      <section id="support">
+        <div class="sec-head">
+          <span class="sec-head__icon"><Icon name="shield" /></span>
+          <div class="sec-head__body">
+            <h2>Commercial support</h2>
+            <p>
+              Open Navigation provides commercial engineering support for teams building on
+              ROS 2 and Nav2. If you are choosing hardware using this benchmark, we can also
+              help you validate the choice and other architectural, hardware, ROS, Nav2, and
+              autonomy needs you may have.
+            </p>
+          </div>
+        </div>
+
+        <p class="btn-row">
+          <a
+            class="btn btn--primary"
+            href="mailto:info@opennav.org?subject=Commercial%20support%20enquiry"
+          >
+            <Icon name="mail" size={16} /> info@opennav.org
+          </a>
+          <a class="btn btn--secondary" href="https://opennav.org">
+            <Icon name="external" size={16} /> Open Navigation services
+          </a>
+        </p>
+      </section>
+    </div>
+
+    <div class="col vendor-slot">
+      <VendorCallout variant="full" />
+    </div>
+
+    <div class="col">
+      <section id="contribute">
+        <div class="sec-head">
+          <span class="sec-head__icon"><Icon name="terminal" /></span>
+          <div class="sec-head__body">
+            <h2>Test your platform yourself</h2>
+            <p>
+              The pipeline is public and designed to be extended and tested yourself for your
+              own platform(s) and software. If you run it on hardware that is not here and want
+              to publish the results, lets talk.
+            </p>
+          </div>
+        </div>
+
+        <p class="more">
+          <a href={`${base}/docs/adding-a-platform`}>
+            Full instructions for adding a platform <Icon name="arrow-right" size={16} />
+          </a>
+        </p>
+
+        <details class="disclose">
+          <summary>The checklist</summary>
+          <ol class="steps">
+          <li>
+            <div>
+              Implement <code>detect_platform()</code> detection, a
+              <code>HARDWARE_PROFILES</code> entry, and a <code>GpuMetrics</code> subclass in
+              <code>opennav_benchmark_pipeline/scripts/hardware_platforms.py</code> so your GPU,
+              NPU, clock, and power counters are read natively.
+            </div>
+          </li>
+          <li>
+            <div>
+              Add <code>docker/ai_workload/&lt;platform&gt;/Dockerfile</code> and
+              <code>profile.sh</code>, serving
+              <code>ggml-org/gemma-4-31B-it-GGUF:Q4_K_M</code> behind a llama.cpp server, with
+              whatever GPU runtime and device passthrough flags your platform needs.
+            </div>
+          </li>
+          <li>
+            <div>
+              Measure sensor-driver load on your hardware with real lidar and depth cameras, and
+              put the coefficients in your <code>HARDWARE_PROFILES</code> entry.
+            </div>
+          </li>
+          <li>
+            <div>
+              Run <code>run_benchmark.sh</code> for 900 seconds in each power mode you want
+              represented, with the simulation on a separate machine over wired Ethernet.
+            </div>
+          </li>
+          <li>
+            <div>
+              Open a pull request with the full
+              <code>opennav_benchmark_logs/&lt;category&gt;/&lt;platform&gt;/</code> tree.
+            </div>
+          </li>
+          </ol>
+        </details>
+
+        <details class="disclose">
+          <summary>What we need to publish a result</summary>
+          <ul class="icon-list icon-list--good">
+          <li>
+            <Icon name="check" size={17} />
+            <span>A complete <code>system_metrics.json</code> covering the whole run.</span>
+          </li>
+          <li>
+            <Icon name="check" size={17} />
+            <span>
+              The full <code>ros/</code> log directory. Mission counts, control-loop misses,
+              planner cycle times, and VLM outcomes are all parsed from it.
+            </span>
+          </li>
+          <li>
+            <Icon name="check" size={17} />
+            <span>The configured TDP, plus firmware and BIOS versions.</span>
+          </li>
+          <li>
+            <Icon name="check" size={17} />
+            <span>
+              The simulation machine's specification, so we know the sensor load was actually
+              delivered.
+            </span>
+          </li>
+          <li>
+            <Icon name="check" size={17} />
+            <span>
+              Any vendor relationship, disclosed. A result from a vendor is welcome; an
+              undisclosed one is not.
+            </span>
+          </li>
+          </ul>
+        </details>
+
+        <p class="issue-links">
+          <a
+            class="btn btn--primary"
+            href={issue('new-platform-results.yml', 'New platform results: ')}
+          >
+            <Icon name="plus" size={16} /> Submit platform results
+          </a>
+        </p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-7) var(--space-8);
+  }
+
+  .col {
+    max-width: 820px;
+    margin-inline: auto;
+  }
+
+  .routes {
+    margin-block: var(--space-6);
+  }
+
+  .card__blurb {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  section {
+    padding-block: var(--space-6);
+    scroll-margin-top: 5rem;
+  }
+
+  section + section {
+    border-top: 1px solid var(--border);
+  }
+
+  .vendor-slot {
+    margin-block: var(--space-6);
+  }
+
+  h3 {
+    margin-top: var(--space-6);
+  }
+
+  .btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    max-width: none;
+    margin-top: var(--space-5);
+  }
+
+  .issue-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    margin-bottom: var(--space-4);
+  }
+
+  .disclose {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    padding: 0 var(--space-5);
+    margin-top: var(--space-4);
+  }
+
+  .disclose > summary {
+    cursor: pointer;
+    padding: var(--space-4) 0;
+    font-family: var(--font-display);
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .disclose > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .disclose > summary::before {
+    content: '+';
+    font-family: var(--font-mono);
+    color: var(--accent-contrast);
+    width: 1ch;
+  }
+
+  .disclose[open] > summary::before {
+    content: '\2212';
+  }
+
+  .disclose > summary:hover {
+    color: var(--link);
+  }
+
+  .disclose > :last-child {
+    padding-bottom: var(--space-5);
+  }
+
+  .note {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .more a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+</style>

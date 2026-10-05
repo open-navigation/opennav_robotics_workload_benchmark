@@ -1,0 +1,144 @@
+/*
+ * Design tokens.
+ *
+ * Brand colors are sampled from the Nav2 logo source: primary blue #00ADEE,
+ * deep blue #1B75BB, light blue #47C6EE, logo black #1A1A1A, logo grey
+ * #A6A8AB. Brand typeface is Poppins.
+ *
+ * Blue is site chrome only. Data series use a separate, validated categorical
+ * palette (see --series-*) so a reader never confuses an interactive
+ * affordance with a measurement.
+ */
+
+:root {
+  /* Nav2 brand */
+  --n2-blue: #00adee;
+  --n2-blue-mid: #26a9e0;
+  --n2-blue-deep: #1b75bb;
+  --n2-blue-light: #47c6ee;
+  --n2-blue-pale: #76cee4;
+  --n2-ink: #1a1a1a;
+  --n2-grey: #a6a8ab;
+  --n2-grey-light: #d1d1d1;
+  --n2-surface-alt: #f2f2f2;
+  --n2-white: #ffffff;
+
+  /* Semantic surfaces + ink (light) */
+  --surface-1: var(--n2-white);
+  --surface-2: var(--n2-surface-alt);
+  --surface-3: #e8e9ea;
+  --border: #dfe1e3;
+  --border-strong: var(--n2-grey);
+  --text-primary: var(--n2-ink);
+  --text-secondary: #4a4d50;
+  --text-muted: #6b6f73;
+  --link: var(--n2-blue-deep);
+  --accent: var(--n2-blue);
+  --accent-contrast: var(--n2-blue-deep);
+  --on-accent: var(--n2-white);
+  --focus-ring: var(--n2-blue-deep);
+  --shadow: 0 1px 2px rgb(26 26 26 / 6%), 0 4px 16px rgb(26 26 26 / 6%);
+
+  /* Categorical data palette: one hue per platform, fixed order, never
+   * cycled. Validated with the dataviz palette checker at --pairs all in
+   * both modes (worst CVD dE 9.9 light / 8.3 dark; normal-vision 17.7 /
+   * 18.1). Aqua sits below 3:1 on the light surface, so every chart ships
+   * direct labels and a data table (the relief rule). */
+  --series-amd: #b8860b;
+  --series-thor: #1baf7a;
+  --series-orin: #4a3aa7;
+  --series-neutral: #6b6f73;
+
+  /* Sequential ramp for the per-core heatmap: one hue, light to dark. */
+  --ramp-0: #f2f7fa;
+  --ramp-1: #cfe6f4;
+  --ramp-2: #9ed2ec;
+  --ramp-3: #63b6e0;
+  --ramp-4: #2f93cc;
+  --ramp-5: #1b75bb;
+  --ramp-6: #14548a;
+
+  /* Type */
+  --font-display: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Menlo',
+    'Consolas', monospace;
+
+  /* Rhythm */
+  --measure: 68ch;
+  --page-max: 1180px;
+  --radius: 8px;
+  --radius-sm: 4px;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+}
+
+/* Dark mode: OS preference, unless the viewer explicitly chose light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --surface-1: #111214;
+    --surface-2: #1a1a1c;
+    --surface-3: #232426;
+    --border: #2e3033;
+    --border-strong: #45484c;
+    --text-primary: #f2f2f2;
+    --text-secondary: #c2c5c8;
+    --text-muted: #9a9ea2;
+    --link: var(--n2-blue-light);
+    --accent: var(--n2-blue-light);
+    --accent-contrast: var(--n2-blue-light);
+    --on-accent: #0b0c0d;
+    --focus-ring: var(--n2-blue-light);
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 16px rgb(0 0 0 / 30%);
+
+    --series-amd: #c08a1e;
+    --series-thor: #199e70;
+    --series-orin: #9085e9;
+    --series-neutral: #9a9ea2;
+
+    --ramp-0: #14181c;
+    --ramp-1: #16303f;
+    --ramp-2: #1a4a63;
+    --ramp-3: #1f6489;
+    --ramp-4: #2a83b0;
+    --ramp-5: #47a6d6;
+    --ramp-6: #8bcdec;
+  }
+}
+
+/* Dark mode: explicit viewer choice wins in both directions. */
+:root[data-theme='dark'] {
+  --surface-1: #111214;
+  --surface-2: #1a1a1c;
+  --surface-3: #232426;
+  --border: #2e3033;
+  --border-strong: #45484c;
+  --text-primary: #f2f2f2;
+  --text-secondary: #c2c5c8;
+  --text-muted: #9a9ea2;
+  --link: var(--n2-blue-light);
+  --accent: var(--n2-blue-light);
+  --accent-contrast: var(--n2-blue-light);
+  --on-accent: #0b0c0d;
+  --focus-ring: var(--n2-blue-light);
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 16px rgb(0 0 0 / 30%);
+
+  --series-amd: #c08a1e;
+  --series-thor: #199e70;
+  --series-orin: #9085e9;
+  --series-neutral: #9a9ea2;
+
+  --ramp-0: #14181c;
+  --ramp-1: #16303f;
+  --ramp-2: #1a4a63;
+  --ramp-3: #1f6489;
+  --ramp-4: #2a83b0;
+  --ramp-5: #47a6d6;
+  --ramp-6: #8bcdec;
+}

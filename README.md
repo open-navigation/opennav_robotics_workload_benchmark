@@ -1,6 +1,6 @@
 # Open Navigation's Robotics Workload Benchmark
 
-This is a robotics and AI workload benchmark to compare various hardware platforms using realistically complex, data intensive, representative applications. Many benchmarks exist from both hardware vendors and community members, but nearly all focus on evaluating a particular component or algorithm in isolation. Often times, multiple of these algorithms need to be run together which may interact negatively when composed into a full system due to sharing of limited CPU/power or conflicts accessing accelerated computing resources (GPU, NPU, FPGA, etc).
+This is an independently managed, vendor-agnostic robotics and AI workload benchmark to compare various hardware platforms using realistically complex, data intensive, representative applications. Many benchmarks exist from both hardware vendors and community members, but nearly all focus on evaluating a particular component or algorithm in isolation. Often times, multiple of these algorithms need to be run together which may interact negatively when composed into a full system due to sharing of limited CPU/power or conflicts accessing accelerated computing resources (GPU, NPU, FPGA, etc).
 
 This project aims to fill the gap by providing a reproducable, independent benchmark for comparing and evaluating compute solutions for Robotics or Physical AI applications in all of their complexity. For this benchmark, we use Nav2 to autonomously navigate a forklift material handling robot within a 200,000 sqft (18,600 m2) industrial warehouse environment with its advanced, built-in planning, control, behavior modeling, and perception. It will move pallets from shipping/receiving to shelving units while processing multiple 3D lidars, 2D safety lidars, RGBD cameras, and internal sensors. This workload is representative of dozens of companies and tens of thousands of robotics deployed today in production environments.
 
@@ -34,7 +34,7 @@ The [AMD X100 (Strix Halo)](https://www.amd.com/en/products/processors/desktops/
 | **CPU** | 12x Arm Cortex-A78AE @ 2.2 GHz | 14x Arm Neoverse V3AE @ 2.6 GHz | 16x Zen 5 (32T) @ 5.1 GHz |
 | **GPU Architecture** | Ampere | Blackwell | RDNA 3.5 |
 | **GPU Cores** | 2048 CUDA + 64 Tensor | 2560 CUDA + 96 Tensor | 2560 Shaders (40 CUs) |
-| **NPU / DLA** | 2x NVDLA 2.0 | DLA (105 INT8 TOPS) | XDNA 2 (50 TOPS) |
+| **NPU / DLA** | 2x NVDLA 2.0 | None | XDNA 2 (50 TOPS) |
 | **RAM** | 64 GB LPDDR5 | 128 GB LPDDR5X | Up to 128 GB LPDDR5X |
 | **Memory Bandwidth** | 204.8 GB/s | 273 GB/s | 256 GB/s |
 | **Power (TDP)** | 15–60 W | 40–130 W | 45–120 W |
@@ -123,13 +123,15 @@ The VLM server subscribes to the RGB camera topic mounted on the chassis of the 
 
 ## Results and Comparison
 
-Full result analysis charts and plots can be found in [opennav_benchmark_analysis/output](opennav_benchmark_analysis/output) for each platform. The analysis scripts can be run to generate the plots and metrics from the logs in `opennav_benchmark_logs`. A deeper analysis of these results can found on Open Navigation's blog. A tl;dr summary of key points is provided below.
+Full result analysis charts and plots can be found in [opennav_benchmark_analysis/output](opennav_benchmark_analysis/output) for each platform. The analysis scripts can be run to generate the plots and metrics from the logs in `opennav_benchmark_logs`. A deeper analysis of these results can found on Open Navigation's blog and [the technical report](docs/Robotics%20Workload%20Platform%20Benchmarking%20Results.pdf). A tl;dr summary of key points is provided below.
 
 <p align="center">
   <img src="opennav_benchmark_analysis/output/max_power/comparison/platform_balance_radar.png" alt="Max Power Radar Diagram" width="600"/>
 </p>
 
-From the three platforms evaluated, we can see that the AMD Strix Halo and NVIDIA Jetson Thor are very close in GPU & memory performance. Strix Halo however has ~2.7x more CPU headroom than the NVIDIA Jetson Thor leaving substantial room for additional application or algorithmic workloads. NVIDIA's Thor has sufficient headroom though as long as additional workloads are minimal and should still be considered as a good option.
+From the three platforms evaluated, we can see that the AMD Strix Halo and NVIDIA Jetson Thor are very close in GPU & memory performance. Strix Halo however has ~2.7x more CPU headroom than the NVIDIA Jetson Thor leaving substantial room for additional application or algorithmic workloads. NVIDIA's Thor has sufficient headroom though as long as additional workloads are minimal and is considered still as a great option.
+
+When the AI workloads are optimized per-platform rather than using portable, cross-platform supported quantizations and libraries, a significant jump in performance can be seen on both Jetson Thor and AMD Strix Halo. These optimized configurations and results are respectively named and also compared in the analysis.
 
 The Orin AGX is significantly behind in CPU, GPU, and application performance. The Orin AGX was unable to complete 70% of the missions in the benchmark due to its inability to process navigation and AI workloads in real-time, completely saturating the GPU and key CPU cores.
 

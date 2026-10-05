@@ -1,0 +1,125 @@
+---
+import Icon, { type IconName } from './Icon.astro';
+
+export interface Props {
+  items: { icon: IconName; label: string; value: string; note?: string }[];
+  caption?: string;
+  /** Renders a +/- marker in the caption row. Set when the strip is the
+   *  summary of a <details>, so it reads as a disclosure control. */
+  expandable?: boolean;
+}
+
+const { items, caption, expandable = false } = Astro.props;
+---
+
+<div class="strip">
+  {
+    (caption || expandable) && (
+      <p class="strip__caption">
+        {expandable && <span class="strip__marker" aria-hidden="true" />}
+        {caption}
+      </p>
+    )
+  }
+  <dl class="strip__items">
+    {
+      items.map((item) => (
+        <div class="strip__item">
+          <dt>
+            <Icon name={item.icon} size={16} />
+            {item.label}
+          </dt>
+          <dd class="strip__value">{item.value}</dd>
+          {item.note && <dd class="strip__note">{item.note}</dd>}
+        </div>
+      ))
+    }
+  </dl>
+</div>
+
+<style>
+  .strip {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    padding: var(--space-4) var(--space-5) var(--space-5);
+    margin-block: var(--space-5);
+  }
+
+  .strip__caption {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .strip__marker {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    color: var(--accent-contrast);
+    width: 1ch;
+  }
+
+  .strip__marker::before {
+    content: '+';
+  }
+
+  :global(details[open]) .strip__marker::before {
+    content: '\2212';
+  }
+
+  .strip__items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: var(--space-4) var(--space-5);
+    margin: 0;
+  }
+
+  .strip__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .strip__item + .strip__item {
+    border-left: 1px solid var(--border);
+    padding-left: var(--space-5);
+  }
+
+  .strip__item dt {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .strip__value {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.45rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .strip__note {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 720px) {
+    .strip__item + .strip__item {
+      border-left: 0;
+      padding-left: 0;
+    }
+  }
+</style>

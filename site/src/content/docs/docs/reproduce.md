@@ -1,4 +1,7 @@
-# Practitioner's Guide
+---
+title: Run the benchmark
+description: Step-by-step instructions to reproduce every result on this site on your own hardware.
+---
 
 This is a guide for practitioners that seek to reproduce the experiments. This is a step-by-step set of instructions to run the benchmarks from this repository. It is expected that you have read the `README.md` in `opennav_benchmark_pipeline` and have done the initial setup of your platforms so that they are ready for evaluation.
 

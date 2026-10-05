@@ -3,7 +3,7 @@
 Serve Gemma-4 31B as an OpenAI-compatible VLM endpoint on the Jetson Thor using
 llama.cpp (NVIDIA's prebuilt Jetson container, CUDA backend). The server listens on
 `http://localhost:8080/v1`, which the benchmark's
-[`vlm_params.yaml`](../../opennav_benchmark_ai_workload/opennav_benchmark_vlm/config/vlm_params.yaml)
+[`vlm_params.yaml`](https://github.com/open-navigation/opennav_robotics_workload_benchmark/blob/main/opennav_benchmark_ai_workload/opennav_benchmark_vlm/config/vlm_params.yaml)
 already targets out of the box.
 
 > Benchmark note: All three platforms (AMD, Jetson Orin, Jetson Thor) run the

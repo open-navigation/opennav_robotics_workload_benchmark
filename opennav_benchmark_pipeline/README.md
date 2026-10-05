@@ -71,7 +71,7 @@ The AI workload (VLM) is packaged separately for each benchmark platform under `
 cd /path/to/opennav_robotics_workload_benchmark
 
 # Tag suffix = the platform directory under docker/ai_workload/:
-#   jetson_orin, jetson_thor, amd_strix_halo
+#   jetson_orin, jetson_thor, amd_strix_halo, jetson_thor_optimized
 docker build -t opennav_benchmark/ai_workload:amd_strix_halo \
   -f opennav_benchmark_pipeline/docker/ai_workload/amd_strix_halo/Dockerfile .
 ```
@@ -79,7 +79,7 @@ docker build -t opennav_benchmark/ai_workload:amd_strix_halo \
 You can test it via:
 
 ```bash
-./opennav_benchmark_pipeline/run_vlm.sh opennav_benchmark/ai_workload:amd_strix_halo  # jetson_orin, jetson_thor, amd_strix_halo
+./opennav_benchmark_pipeline/run_vlm.sh opennav_benchmark/ai_workload:amd_strix_halo  # jetson_orin, jetson_thor, amd_strix_halo, jetson_thor_optimized
 ```
 
 Each platform directory also ships a `profile.sh` capturing the extra `docker run` flags that platform needs (GPU runtime, device passthrough, etc.). 
@@ -107,7 +107,7 @@ The benchmark orchestrator only launches the VLM container when `VLM_IMAGE` is s
 
 ```bash
 cd /path/to/opennav_robotics_workload_benchmark
-VLM_IMAGE=opennav_benchmark/ai_workload:amd_strix_halo ./opennav_benchmark_pipeline/run_benchmark.sh  # replace tags with jetson_orin, jetson_thor too
+VLM_IMAGE=opennav_benchmark/ai_workload:amd_strix_halo ./opennav_benchmark_pipeline/run_benchmark.sh  # replace tags with jetson_orin, jetson_thor, jetson_thor_optimized
 ```
 
 For ad-hoc runs, you can launch the autonomy workload container by hand without the rest of the benchmark:

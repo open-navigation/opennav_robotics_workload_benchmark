@@ -1,0 +1,155 @@
+---
+import Chart from './Chart.astro';
+import Icon, { type IconName } from './Icon.astro';
+import type { Section } from '../lib/charts';
+
+export interface Props {
+  section: Section;
+}
+
+const { section } = Astro.props;
+
+// Charts flagged `inline` sit alongside the headline; the rest stay behind the
+// disclosure so a long section still opens as one chart plus a list.
+const inline = section.supporting.filter((c) => c.inline);
+const collapsed = section.supporting.filter((c) => !c.inline);
+---
+
+<section class="chart-section" id={section.id}>
+  <div class="sec-head">
+    <span class="sec-head__icon"><Icon name={section.icon as IconName} /></span>
+    <div class="sec-head__body">
+      <h2>{section.title}</h2>
+      <p class="section__lede">{section.lede}</p>
+    </div>
+  </div>
+
+  <Chart {...section.headline} />
+
+  {
+    inline.length > 0 && (
+      <div class="inline-charts">
+        {inline.map((chart) => (
+          <Chart {...chart} />
+        ))}
+      </div>
+    )
+  }
+
+  {
+    collapsed.length > 0 && (
+      <div class="supporting">
+        <h3 class="supporting__title">Supporting charts</h3>
+        {collapsed.map((chart) => (
+          <details class="supporting__item">
+            <summary>
+              <span>{chart.title}</span>
+            </summary>
+            <div class="supporting__body">
+              <Chart {...chart} />
+            </div>
+          </details>
+        ))}
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .chart-section {
+    padding-block: var(--space-7);
+    border-top: 1px solid var(--border);
+    scroll-margin-top: 5rem;
+  }
+
+  .chart-section :global(.sec-head) {
+    margin-bottom: var(--space-6);
+  }
+
+  .chart-section :global(.sec-head h2) {
+    margin-top: 0;
+  }
+
+  /* Two across on a wide screen, one on a narrow one. Charts keep a readable
+   * width either way, and the section reads as a set rather than a stack. */
+  .inline-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr));
+    gap: var(--space-3) var(--space-6);
+    margin-bottom: var(--space-6);
+  }
+
+  .inline-charts :global(.figure) {
+    margin-bottom: var(--space-4);
+    min-width: 0;
+  }
+
+  .supporting {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    padding: var(--space-4) var(--space-5);
+  }
+
+  .supporting__title {
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 var(--space-2);
+  }
+
+  .supporting__item {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .supporting__item:last-child {
+    border-bottom: 0;
+  }
+
+  .supporting__item > summary {
+    cursor: pointer;
+    padding: var(--space-3) 0;
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .supporting__item > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .supporting__item > summary::before {
+    content: '+';
+    font-family: var(--font-mono);
+    color: var(--accent-contrast);
+    width: 1ch;
+  }
+
+  .supporting__item[open] > summary::before {
+    content: '−';
+  }
+
+  .supporting__item > summary:hover {
+    color: var(--text-primary);
+  }
+
+  .supporting__body {
+    padding-top: var(--space-3);
+  }
+
+  .supporting__body :global(.figure) {
+    margin-bottom: var(--space-5);
+  }
+
+  @media print {
+    .supporting__item > summary {
+      display: none;
+    }
+  }
+</style>

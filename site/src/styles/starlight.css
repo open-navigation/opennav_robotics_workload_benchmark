@@ -1,0 +1,57 @@
+/*
+ * Map the site's design tokens onto Starlight's variables, so the docs section
+ * and the custom pages read as one site rather than two.
+ */
+
+:root {
+  --sl-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --sl-font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Nav2 blue accent ramp */
+  --sl-color-accent-low: #0d3a5c;
+  --sl-color-accent: #1b75bb;
+  --sl-color-accent-high: #a8dcf5;
+  --sl-color-text-accent: #47c6ee;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #cfeafa;
+  --sl-color-accent: #1b75bb;
+  --sl-color-accent-high: #0f4a78;
+  --sl-color-text-accent: #1b75bb;
+
+  --sl-color-white: #1a1a1a;
+  --sl-color-gray-1: #26282a;
+  --sl-color-gray-2: #4a4d50;
+  --sl-color-gray-3: #6b6f73;
+  --sl-color-gray-4: #a6a8ab;
+  --sl-color-gray-5: #d1d1d1;
+  --sl-color-gray-6: #f2f2f2;
+  --sl-color-gray-7: #f8f8f8;
+  --sl-color-black: #ffffff;
+}
+
+:root {
+  --sl-color-white: #f2f2f2;
+  --sl-color-gray-1: #e3e4e6;
+  --sl-color-gray-2: #c2c5c8;
+  --sl-color-gray-3: #9a9ea2;
+  --sl-color-gray-4: #5c6064;
+  --sl-color-gray-5: #2e3033;
+  --sl-color-gray-6: #1a1a1c;
+  --sl-color-gray-7: #151517;
+  --sl-color-black: #111214;
+}
+
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.site-title,
+site-title {
+  font-family: 'Poppins', var(--sl-font);
+  letter-spacing: -0.015em;
+}
+
+.sl-markdown-content table {
+  font-variant-numeric: tabular-nums;
+}

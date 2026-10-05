@@ -1,0 +1,699 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import VideoHero from '../components/VideoHero.astro';
+import HilDiagram from '../components/HilDiagram.astro';
+import Chart from '../components/Chart.astro';
+import Icon from '../components/Icon.astro';
+import {
+  colorFor,
+  defaultCategory,
+  derived,
+  fmt,
+  isVariant,
+  platformFor,
+  platformOrder,
+  platforms,
+  runsFor,
+} from '../lib/data';
+import { comparisonSections } from '../lib/charts';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const category = defaultCategory;
+const runs = runsFor(category.key).filter((r) => !isVariant(r, runsFor(category.key)));
+const radarChart = comparisonSections(runs, derived[category.key].radar)[0].headline;
+
+const specRows: [string, keyof (typeof platforms)['jetson_orin']['spec']][] = [
+  ['CPU', 'cpu'],
+  ['GPU architecture', 'gpu_architecture'],
+  ['NPU / DLA', 'npu_dla'],
+  ['RAM', 'ram'],
+  ['Memory bandwidth', 'memory_bandwidth'],
+  ['Power (TDP)', 'tdp'],
+];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: "Open Navigation's Robotics Workload Benchmark",
+  description:
+    'An independently managed, vendor-agnostic robotics and AI workload benchmark comparing ' +
+    'hardware platforms using realistically complex, data intensive, representative mobile robotics applications.',
+  creator: { '@type': 'Organization', name: 'Open Navigation LLC', url: 'https://opennav.org' },
+  license: 'https://www.apache.org/licenses/LICENSE-2.0',
+  url: 'https://github.com/open-navigation/opennav_robotics_workload_benchmark',
+  isAccessibleForFree: true,
+};
+---
+
+<BaseLayout
+  title="Robotics Workload Benchmark | Open Navigation"
+  description="An independently managed, vendor-agnostic robotics and AI workload benchmark comparing the Jetson AGX Orin, Jetson Thor, and AMD Strix Halo on a full production autonomy stack."
+  jsonLd={jsonLd}
+>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap hero__inner">
+      <div class="hero__copy">
+        <p class="eyebrow">Open Navigation · maintainers of Nav2</p>
+        <h1>The whole robot benchmark, fully loaded.</h1>
+        <p class="hero__lede">
+          An independently managed, vendor-agnostic benchmark that compares robotics compute
+          platforms using realistically complex, data intensive, representative mobile robotics
+          applications. A full autonomy stack in a deployment scale environment and an edge AI
+          workload run <em>at the same time</em>, contending for the same CPU, power, and
+          accelerators.
+        </p>
+
+        <div class="hero__cta">
+          <a class="btn btn--primary" href={`${base}/results`}>See the results</a>
+          <a class="btn btn--secondary" href={`${base}/platforms`}>Platform comparison</a>
+          <a class="btn btn--secondary" href={`${base}/docs/reproduce`}>Run it yourself</a>
+        </div>
+      </div>
+
+      <div class="hero__video">
+        <VideoHero
+          videoId="j5NtcGJvQyM"
+          poster={`${base}/images/benchmark_demo.gif`}
+          title="The workload: a forklift AMR working a 200,000 sqft warehouse"
+          caption="A forklift material handling robot moving pallets, with Nav2 planning, control, and multi-sensor perception plus a VLM for situational awareness on one compute platform."
+          eager={true}
+          autoplay
+          aspect="1240 / 720"
+          cropX={1280 / 1240}
+        />
+      </div>
+    </div>
+
+    <ul class="wrap trust">
+      <li>
+        <strong>Independently managed.</strong>
+        Run by Open Navigation LLC, maintainers of Nav2.
+      </li>
+      <li>
+        <strong>Vendor-agnostic.</strong>
+        No vendor controls the methodology or the numbers.
+      </li>
+      <li>
+        <strong>Everything is public.</strong>
+        Pipeline, raw logs, and analysis code, reproducible on your hardware.
+      </li>
+    </ul>
+  </section>
+
+  <!-- Full run video -->
+  <section class="section section--flush">
+    <div class="wrap runview">
+      <div class="runview__video">
+        <VideoHero
+          videoId="6H02OBs6xZc"
+          poster={`${base}/images/benchmark_run.gif`}
+          title="A full benchmark run, seen from the autonomy stack"
+          autoplay
+          aspect="786 / 720"
+          cropX={1280 / 786}
+        />
+      </div>
+      <div class="runview__copy">
+        <p class="eyebrow">The same run, from inside</p>
+        <h2>The workload as the robot sees it</h2>
+        <p>
+          We use Nav2 to autonomously navigate the forklift through the warehouse with its
+          advanced, built-in planning, control, behavior modeling, and perception, while it
+          processes multiple 3D lidars, 2D safety lidars, RGBD cameras, and internal sensors.
+          Gemma 4.0 runs alongside it on the same GPU for situational awareness.
+        </p>
+        <p>
+          Each of these is a real consumer of CPU, memory bandwidth, and accelerated compute on
+          the platform under test. They interact when composed into a full system which this
+          benchmark captures in full.
+        </p>
+        <p>Click either video to watch it at full length.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Where to go -->
+  <section class="section section--alt" id="explore">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="layers" /></span>
+        <div class="sec-head__body">
+          <h2>Explore the benchmark</h2>
+          <p class="section__lede">
+            Every platform ran the same missions with the same sensor and AI load. See the
+            platforms, our methodology, and the results.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid--3 routes">
+        <a class="card card--feature card--link" href={`${base}/methodology`}>
+          <span class="card__icon"><Icon name="book" /></span>
+          <p class="card__title">Methodology</p>
+          <p class="card__blurb">
+            The workload, the sensor suite, the autonomy and AI stacks, how every metric is
+            defined, and the limitations of what this measures.
+          </p>
+          <span class="card__cta">
+            Read the methodology <Icon name="arrow-right" size={16} />
+          </span>
+        </a>
+
+        <a class="card card--feature card--link" href={`${base}/platforms`}>
+          <span class="card__icon"><Icon name="cpu" /></span>
+          <p class="card__title">Platforms</p>
+          <p class="card__blurb">
+            Vendor specifications, the configuration each platform was actually tested at, the
+            measured cost of its sensor drivers, and every result at a glance.
+          </p>
+          <span class="card__cta">
+            Compare platforms <Icon name="arrow-right" size={16} />
+          </span>
+        </a>
+
+        <a class="card card--feature card--link" href={`${base}/results`}>
+          <span class="card__icon"><Icon name="chart" /></span>
+          <p class="card__title">Results</p>
+          <p class="card__blurb">
+            Application performance first, then CPU, headroom, GPU, memory, power and thermal.
+            Every chart carries the run it was measured from and a downloadable data table.
+          </p>
+          <span class="card__cta">
+            See the results <Icon name="arrow-right" size={16} />
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why -->
+  <section class="section">
+    <div class="wrap">
+      <div class="two-col">
+        <div>
+          <div class="sec-head">
+            <span class="sec-head__icon"><Icon name="scale" /></span>
+            <div class="sec-head__body">
+              <h2>Why this benchmark exists</h2>
+            </div>
+          </div>
+          <p>
+            Many benchmarks exist from both hardware vendors and community members, but nearly
+            all focus on evaluating a particular component or algorithm in isolation. Often
+            times, multiple of these algorithms need to be run together which may interact
+            negatively when composed into a full system due to sharing of limited CPU/power or
+            conflicts accessing accelerated computing resources (GPU, NPU, FPGA, etc).
+          </p>
+          <p>
+            This project fills the gap with a reproducible, independent benchmark for comparing
+            compute solutions for robotics or physical AI applications <em>in all of their
+            complexity</em>. A platform that wins every microbenchmark can still fail to hold a
+            30 Hz control loop once planning, perception, sensor drivers, and a VLM are all
+            running simultaneously on it at once. That interaction and potential failure mode is
+            what this benchmark measures and seeks to expose.
+          </p>
+        </div>
+        <div>
+          <div class="sec-head">
+            <span class="sec-head__icon"><Icon name="robot" /></span>
+            <div class="sec-head__body">
+              <h2>What is running</h2>
+            </div>
+          </div>
+          <p>
+            Nav2 autonomously navigates a forklift material handling robot within a 200,000 sqft
+            (18,600 m²) industrial warehouse. It moves pallets from shipping/receiving to
+            shelving units while processing multiple 3D lidars, 2D safety lidars, RGBD cameras,
+            and internal sensors. This workload is representative of dozens of companies and
+            tens of thousands of robots deployed today in production environments.
+          </p>
+          <p>
+            Alongside it, Gemma 4.0, a popular VLM, exercises the platform's GPU. It is
+            integrated into the navigation behavior tree for scene understanding, so its answers
+            actually affect the robot's decisions.
+          </p>
+          <p><a href={`${base}/methodology`}>Full methodology →</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section class="section section--alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="network" /></span>
+        <div class="sec-head__body">
+          <h2>How it is measured</h2>
+          <p class="section__lede">
+            An external computer runs the simulation; the platform under test runs everything
+            else for compute platform HIL, including simulated driver loads.
+          </p>
+        </div>
+      </div>
+      <HilDiagram />
+    </div>
+  </section>
+
+  <!-- Platform table -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="cpu" /></span>
+        <div class="sec-head__body">
+          <h2>Platforms evaluated</h2>
+        </div>
+      </div>
+      <p class="section__lede">
+        Three platforms in this edition. The benchmark is built to grow. See{' '}
+        <a href={`${base}/about#vendors`}>adding a platform</a>.
+      </p>
+
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr>
+              <th scope="col">Feature</th>
+              {
+                platformOrder.map((key) => (
+                  <th scope="col">
+                    <span class="swatch" style={`background: ${colorFor(key)}`} />
+                    <a href={`${base}/platforms/${platforms[key].slug}`}>
+                      {platforms[key].short_label}
+                    </a>
+                  </th>
+                ))
+              }
+            </tr>
+          </thead>
+          <tbody>
+            {
+              specRows.map(([label, field]) => (
+                <tr>
+                  <th scope="row" class="row-head">
+                    {label}
+                  </th>
+                  {platformOrder.map((key) => <td>{platforms[key].spec[field]}</td>)}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="more"><a href={`${base}/platforms`}>Full hardware and as-tested comparison →</a></p>
+    </div>
+  </section>
+
+  <!-- Radar -->
+  <section class="section section--alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="radar" /></span>
+        <div class="sec-head__body">
+          <h2>Platform balance</h2>
+        </div>
+      </div>
+      <Chart {...radarChart} hideTitle />
+    </div>
+  </section>
+
+  <!-- Findings -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="gauge" /></span>
+        <div class="sec-head__body">
+          <h2>The finding, per platform</h2>
+        </div>
+      </div>
+      <div class="grid grid--3">
+        {
+          runs.map((r) => {
+            const p = platformFor(r.platform);
+            return (
+              <a class="card finding card--link" href={`${base}/platforms/${p.slug}`}>
+                <span
+                  class="finding__bar"
+                  style={`background: ${colorFor(r.platform)}`}
+                />
+                <div class="finding__head">
+                  <h3>{p.short_label}</h3>
+                </div>
+                <dl class="finding__stats">
+                  <div>
+                    <dt>
+                      <Icon name="cpu" size={14} /> Mean CPU
+                    </dt>
+                    <dd>{fmt(r.derived.cpu_mean_percent)}%</dd>
+                  </div>
+                  <div>
+                    <dt>
+                      <Icon name="robot" size={14} /> Missions
+                    </dt>
+                    <dd>{r.application.completed_missions}</dd>
+                  </div>
+                  <div>
+                    <dt>
+                      <Icon name="gauge" size={14} /> Misses/s
+                    </dt>
+                    <dd>{fmt(r.application.control_loop_misses_per_sec, 2)}</dd>
+                  </div>
+                </dl>
+                <p class="finding__body">{p.summary}</p>
+                <span class="card__cta">
+                  Full profile <Icon name="arrow-right" size={16} />
+                </span>
+              </a>
+            );
+          })
+        }
+      </div>
+
+      <div class="callout verdict">
+        <h3>In short</h3>
+        <p>
+          Strix Halo and Thor are very close in GPU and memory performance, both are
+          production-capable for modern robotics and physical AI workloads. Strix Halo carries
+          roughly 2.7x more CPU headroom than Thor, leaving about 82% of the CPU available to
+          application developers, great where large CPU workloads are required. The Orin AGX is
+          significantly behind: unable to process the navigation and AI workload in real time,
+          it saturated its GPU and key CPU cores.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Add a platform -->
+  <section class="section section--alt" id="add-a-platform">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-head__icon"><Icon name="plus" /></span>
+        <div class="sec-head__body">
+          <h2>Add a platform to the benchmark</h2>
+          <p class="section__lede">
+            This comparison covers some of the main robotics compute platforms from major
+            suppliers. It is not a complete map of the robotics compute landscape and it is
+            meant to grow.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid--2 addplat">
+        <div class="card card--feature">
+          <span class="card__icon"><Icon name="cpu" /></span>
+          <p class="card__title">Hardware vendors</p>
+          <p class="card__blurb">
+            If you build compute modules for robotics, Open Navigation can bring your platform
+            up, profile it, and include it in this benchmark results reports. Contact us for
+            more information and support.
+          </p>
+          <p class="btn-row">
+            <a class="btn btn--primary" href="https://opennav.org/contact/">
+              <Icon name="mail" size={16} /> Contact Open Navigation
+            </a>
+          </p>
+        </div>
+
+        <div class="card card--feature">
+          <span class="card__icon"><Icon name="terminal" /></span>
+          <p class="card__title">Run it yourself</p>
+          <p class="card__blurb">
+            The pipeline is public, designed to be extended, and ran independently. Run it
+            yourself with our instructions with our robotics workload or your own on any
+            platform easily.
+          </p>
+          <p class="btn-row">
+            <a class="btn btn--secondary" href={`${base}/docs`}>
+              <Icon name="terminal" size={16} /> Run it
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Support -->
+  <section class="section">
+    <div class="wrap">
+      <div class="callout support">
+        <h2>Need ROS 2 or Nav2 help?</h2>
+        <p>
+          Open Navigation maintains Nav2 and provides commercial engineering support: autonomy
+          integration, performance work, and hardware platform bring-up and evaluation.
+        </p>
+        <p class="btn-row">
+          <a class="btn btn--primary" href="mailto:info@opennav.org">
+            <Icon name="mail" size={16} /> info@opennav.org
+          </a>
+          <a class="btn btn--secondary" href={`${base}/about`}>
+            <Icon name="shield" size={16} /> Commercial support
+          </a>
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-block: var(--space-7) var(--space-5);
+    background:
+      radial-gradient(
+        60rem 28rem at 78% -10%,
+        color-mix(in srgb, var(--n2-blue) 13%, transparent),
+        transparent 70%
+      ),
+      var(--surface-1);
+  }
+
+  .hero__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  /* Start the video on the title's line rather than the eyebrow's, by offsetting
+   * it the height of the eyebrow plus its margin. */
+  .hero__video {
+    margin-top: calc(0.75rem * 1.65 + var(--space-2));
+  }
+
+  .hero h1 {
+    margin-bottom: var(--space-4);
+  }
+
+  .hero__lede {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+  }
+
+  .hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  /* A credentials band, not cards: a single rule above and three flat columns,
+   * so it stays distinct from the icon cards further down the page. */
+  .trust {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+    margin: var(--space-6) auto 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border);
+  }
+
+  .trust li {
+    max-width: none;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+  }
+
+  .trust strong {
+    display: block;
+    margin-bottom: 0.15rem;
+    color: var(--text-primary);
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+
+  @media (max-width: 720px) {
+    .trust {
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+  }
+
+  .tiles {
+    margin-top: var(--space-5);
+  }
+
+  .more {
+    margin-top: var(--space-5);
+    font-family: var(--font-display);
+    font-weight: 500;
+  }
+
+  .runview {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: center;
+  }
+
+  /* The player is square here, so it gets tall fast. Cap it rather than let it
+   * fill the column. */
+  .runview__video {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 480px;
+  }
+
+
+  .runview__copy h2 {
+    margin-top: var(--space-2);
+  }
+
+  .routes {
+    margin-top: var(--space-5);
+  }
+
+  .card__blurb {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    gap: var(--space-6);
+  }
+
+  .two-col h2 {
+    margin-top: 0;
+  }
+
+  .two-col :global(.sec-head) {
+    margin-bottom: var(--space-4);
+  }
+
+  .finding {
+    position: relative;
+    overflow: hidden;
+    padding-top: var(--space-5);
+  }
+
+  .finding__bar {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+  }
+
+  .finding__stats {
+    display: flex;
+    gap: var(--space-5);
+    margin: 0 0 var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .finding__stats div {
+    margin: 0;
+  }
+
+  .finding__stats dt {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .finding__stats dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+  }
+
+  .finding__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .finding__head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  .finding__body {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .finding__stats dt {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .addplat {
+    margin-top: var(--space-5);
+  }
+
+  .addplat .card__blurb {
+    margin-bottom: var(--space-4);
+  }
+
+  .btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    max-width: none;
+  }
+
+  /* These callouts hold a single column of prose, and paragraphs are capped at
+   * the reading measure. Cap the box to match so it hugs its text instead of
+   * running the full page width with dead space on the right. */
+  .verdict,
+  .support {
+    max-width: calc(var(--measure) + var(--space-5) * 2);
+  }
+
+  .verdict {
+    margin-top: var(--space-6);
+  }
+
+  .verdict h3 {
+    margin-top: 0;
+  }
+
+  .support {
+    border-left-color: var(--accent);
+  }
+
+  .support h2 {
+    margin-top: 0;
+  }
+
+  .support .btn {
+    margin-right: var(--space-3);
+  }
+
+  @media (max-width: 900px) {
+    .hero__inner,
+    .runview {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

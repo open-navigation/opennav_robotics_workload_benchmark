@@ -1,0 +1,135 @@
+{
+  "metric_labels": {
+    "board_power_w": "Board Power (W)",
+    "cores_active_percent": "Active Cores (%)",
+    "cpu_freq_ghz": "CPU Frequency (GHz)",
+    "cpu_freq_mhz": "CPU Frequency (MHz)",
+    "cpu_temp": "CPU Temperature (\u00b0C)",
+    "cpu_total": "CPU Total (%)",
+    "disk_percent": "Disk Usage (%)",
+    "disk_read_rate_mbps": "Disk Read (MB/s)",
+    "disk_write_rate_mbps": "Disk Write (MB/s)",
+    "emc_freq_mhz": "EMC Frequency (MHz)",
+    "gpu_clock_mhz": "GPU Clock (MHz)",
+    "gpu_effective_throughput": "GPU Effective Throughput (GHz)",
+    "gpu_mem_clock_mhz": "GPU Memory Clock (MHz)",
+    "gpu_mem_total_mb": "GPU Memory Total (MB)",
+    "gpu_mem_used_mb": "GPU Memory Used (MB)",
+    "gpu_power_w": "Board Power (W)",
+    "gpu_temp": "GPU Temperature (\u00b0C)",
+    "gpu_util": "GPU Utilization (%)",
+    "load_15m": "Load Average (15m)",
+    "load_1m": "Load Average (1m)",
+    "load_5m": "Load Average (5m)",
+    "mean_core_util": "Mean Core Utilization (%)",
+    "mem_bandwidth_gbps": "Memory Bandwidth (GB/s)",
+    "mem_busy_percent": "Memory Bus Utilization (%)",
+    "net_errors": "Network Errors",
+    "net_recv_rate_mbps": "Net Recv (MB/s)",
+    "net_sent_rate_mbps": "Net Sent (MB/s)",
+    "npu_util": "NPU Utilization (%)",
+    "peak_core_util": "Peak Core Utilization (%)",
+    "process_count": "Process Count",
+    "ram_percent": "RAM Usage (%)",
+    "ram_total_gb": "RAM Total (GB)",
+    "ram_total_mb": "RAM Total (MB)",
+    "ram_used_gb": "RAM Used (GB)",
+    "ram_used_mb": "RAM Used (MB)",
+    "swap_percent": "Swap Usage (%)",
+    "vcn_util": "VCN Utilization (%)"
+  },
+  "order": [
+    "amd_strix_halo",
+    "jetson_thor",
+    "jetson_orin"
+  ],
+  "platforms": {
+    "amd_strix_halo": {
+      "as_tested": {
+        "dds": "CycloneDDS",
+        "ros_distro": "ROS 2 Jazzy",
+        "software": "Ubuntu, ROCm"
+      },
+      "key": "amd_strix_halo",
+      "label": "AMD Strix Halo",
+      "sensor_driver_load": {
+        "lidar_2d": 0.014,
+        "lidar_3d": 0.16,
+        "rgbd_camera": 0.52
+      },
+      "short_label": "X100 / Strix Halo",
+      "slug": "amd-strix-halo",
+      "spec": {
+        "cpu": "16x Zen 5 (32T) @ 5.1 GHz",
+        "gpu_architecture": "RDNA 3.5",
+        "gpu_cores": "2560 Shaders (40 CUs)",
+        "memory_bandwidth": "256 GB/s",
+        "npu_dla": "XDNA 2 (50 TOPS)",
+        "ram": "Up to 128 GB LPDDR5X",
+        "tdp": "45-120 W"
+      },
+      "summary": "AMD's flagship targeting AI and robotics edge workloads. Strix Halo represents an x86-based alternative to the Jetson ecosystem, offering strong CPU performance with unified memory for LLM/VLM workloads.",
+      "tile_label": "Strix Halo",
+      "vendor": "AMD",
+      "vendor_url": "https://www.amd.com/en/products/processors/desktops/ryzen/ryzen-ai-halo.html"
+    },
+    "jetson_orin": {
+      "as_tested": {
+        "dds": "CycloneDDS",
+        "ros_distro": "ROS 2 Jazzy",
+        "software": "JetPack 6.2.2, CUDA 12.6"
+      },
+      "key": "jetson_orin",
+      "label": "NVIDIA Jetson Orin",
+      "sensor_driver_load": {
+        "lidar_2d": 0.12,
+        "lidar_3d": 0.67,
+        "rgbd_camera": 1.55
+      },
+      "short_label": "Jetson AGX Orin",
+      "slug": "jetson-orin",
+      "spec": {
+        "cpu": "12x Arm Cortex-A78AE @ 2.2 GHz",
+        "gpu_architecture": "Ampere",
+        "gpu_cores": "2048 CUDA + 64 Tensor",
+        "memory_bandwidth": "204.8 GB/s",
+        "npu_dla": "2x NVDLA 2.0",
+        "ram": "64 GB LPDDR5",
+        "tdp": "15-60 W"
+      },
+      "summary": "NVIDIA's established embedded AI platform widely adopted in robotics which require edge AI such as detection, segmentation, and reinforcement learning. The Orin is the current workhorse of many production robotics deployments.",
+      "tile_label": "Jetson Orin",
+      "vendor": "NVIDIA",
+      "vendor_url": "https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/"
+    },
+    "jetson_thor": {
+      "as_tested": {
+        "dds": "CycloneDDS",
+        "ros_distro": "ROS 2 Jazzy",
+        "software": "JetPack, CUDA"
+      },
+      "key": "jetson_thor",
+      "label": "NVIDIA Jetson Thor",
+      "sensor_driver_load": {
+        "lidar_2d": 0.04,
+        "lidar_3d": 0.22,
+        "rgbd_camera": 1.3
+      },
+      "short_label": "Jetson Thor",
+      "slug": "jetson-thor",
+      "spec": {
+        "cpu": "14x Arm Neoverse V3AE @ 2.6 GHz",
+        "gpu_architecture": "Blackwell",
+        "gpu_cores": "2560 CUDA + 96 Tensor",
+        "memory_bandwidth": "273 GB/s",
+        "npu_dla": "None",
+        "ram": "128 GB LPDDR5X",
+        "tdp": "40-130 W"
+      },
+      "summary": "NVIDIA's next-generation embedded AI module built on the Blackwell GPU architecture. Thor is designed as the next platform for physical AI and advanced robotics applications and enables edge AI such as LLM/VLM and foundation models.",
+      "tile_label": "Jetson Thor",
+      "vendor": "NVIDIA",
+      "vendor_url": "https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-thor/"
+    }
+  }
+}

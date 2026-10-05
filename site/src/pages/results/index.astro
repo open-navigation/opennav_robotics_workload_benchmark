@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import VendorCallout from '../../components/VendorCallout.astro';
+import { categories, colorFor, fmt, platformFor, runsFor } from '../../lib/data';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const byCategory = categories.map((c) => ({ category: c, runs: runsFor(c.key) }));
+---
+
+<BaseLayout
+  title="Results | Robotics Workload Benchmark"
+  description="Interactive results from Open Navigation's robotics workload benchmark, by power category, with every chart and the underlying data."
+>
+  <div class="wrap page">
+    <p class="eyebrow">Results</p>
+    <h1>Results</h1>
+    <p class="section__lede">
+      Each platform ran the same workload: Nav2 driving a material handling AMR through a
+      200,000 sqft warehouse while a VLM saturates the GPU with situational awareness requests.
+      Results are grouped by TDP power levels and later optimized configurations.
+    </p>
+
+    <div class="grid cats">
+      {
+        byCategory.map(({ category, runs }) => (
+          <article class="card cat">
+            <h2>{category.label}</h2>
+            <p>{category.description}</p>
+
+            <div class="table-scroll">
+              <table class="data">
+                <thead>
+                  <tr>
+                    <th scope="col">Run</th>
+                    <th scope="col" class="num">TDP</th>
+                    <th scope="col" class="num">CPU</th>
+                    <th scope="col" class="num">Missions</th>
+                    <th scope="col" class="num">Misses/s</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {runs.map((r) => (
+                    <tr>
+                      <th scope="row" class="row-head">
+                        <span
+                          class="swatch"
+                          style={`background: ${colorFor(r.platform)}`}
+                        />
+                        <a href={`${base}/platforms/${platformFor(r.platform).slug}`}>{r.label}</a>
+                      </th>
+                      <td class="num">{r.tdp_w ? `${r.tdp_w} W` : 'n/a'}</td>
+                      <td class="num">{fmt(r.derived.cpu_mean_percent)}%</td>
+                      <td class="num">{r.application.completed_missions}</td>
+                      <td class="num">{fmt(r.application.control_loop_misses_per_sec, 2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p class="cat__cta">
+              <a class="btn btn--primary" href={`${base}/results/${category.key}`}>
+                Open {category.label.toLowerCase()} results
+              </a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+
+    <section class="section">
+      <h2>Reading these results</h2>
+      <p>
+        Application performance comes first on every category page: missions completed, control
+        loop misses, planner cycle time, VLM outcomes. A platform can look healthy on utilization
+        counters and still be failing the robot. The utilization charts explain <em>why</em> a
+        platform performed as it did, but they are not the result.
+      </p>
+      <p>
+        Every chart carries the run it was measured from and a data table downloadable as CSV.
+      </p>
+    </section>
+
+    <VendorCallout variant="banner" />
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-7) var(--space-8);
+  }
+
+  .cats {
+    margin-top: var(--space-6);
+  }
+
+  .cat h2 {
+    margin-top: 0;
+    font-size: 1.3rem;
+  }
+
+  .cat__cta {
+    margin: var(--space-4) 0 0;
+  }
+
+  .section {
+    border-top: 1px solid var(--border);
+    padding-block: var(--space-7);
+  }
+</style>

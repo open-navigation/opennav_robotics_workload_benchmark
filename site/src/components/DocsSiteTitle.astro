@@ -1,0 +1,39 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<a class="docs-brand" href={`${base}/`}>
+  <strong>Open Navigation</strong>
+  <span>Robotics Workload Benchmark</span>
+</a>
+
+<style>
+  .docs-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-family: var(--font-display, sans-serif);
+    font-weight: 600;
+    color: var(--sl-color-white);
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .docs-brand strong {
+    color: var(--sl-color-text-accent);
+    font-weight: 700;
+  }
+
+  .docs-brand span {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--sl-color-gray-3);
+  }
+
+  @media (max-width: 800px) {
+    .docs-brand span {
+      display: none;
+    }
+  }
+</style>
