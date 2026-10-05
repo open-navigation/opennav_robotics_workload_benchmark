@@ -346,6 +346,37 @@
   },
   "max_power_optimized": {
     "efficiency": {
+      "amd_strix_halo_optimized": {
+        "available_ghz_cores": 87.47,
+        "cpu_available_percent": 85.61,
+        "cpu_freq_ghz": 3.193,
+        "cpu_mean_percent": 14.39,
+        "cpu_thermal_margin_c": 16.73,
+        "free_core_equivalents": 27.39,
+        "ghz_cores_per_watt": 0.7531,
+        "gpu_available_percent": 5.45,
+        "gpu_mean_percent": 94.55,
+        "gpu_percent_per_watt": 0.8141,
+        "gpu_thermal_margin_c": 28.44,
+        "label": "AMD Strix Halo (optimized)",
+        "least_loaded_core_percent": 1.0,
+        "mean_power_w": 116.14,
+        "num_cores": 32,
+        "platform": "amd_strix_halo",
+        "power_source_metric": "gpu_power_w",
+        "ram_available_percent": 33.29,
+        "ram_free_mb": 44699.9,
+        "ram_mean_percent": 66.71,
+        "ram_total_mb": 126424.4,
+        "ram_used_mb": 81724.5,
+        "single_thread_headroom_ghz": 3.161,
+        "total_ghz_cores": 102.17,
+        "used_ghz_cores": 14.71,
+        "vram_free_mb": 1747.1,
+        "vram_free_percent": 85.31,
+        "vram_total_mb": 2048.0,
+        "vram_used_mb": 300.9
+      },
       "jetson_thor_optimized": {
         "available_ghz_cores": 13.91,
         "cpu_available_percent": 52.83,
@@ -384,16 +415,32 @@
         "Clock Speed"
       ],
       "normalized": {
-        "jetson_thor_optimized": {
+        "amd_strix_halo_optimized": {
           "CPU Capability": 1.0,
           "CPU Headroom": 1.0,
           "Clock Speed": 1.0,
           "GPU Capability": 1.0,
           "Memory Capability": 1.0,
           "Memory Headroom": 1.0
+        },
+        "jetson_thor_optimized": {
+          "CPU Capability": 0.2577,
+          "CPU Headroom": 0.6172,
+          "Clock Speed": 0.5889,
+          "GPU Capability": 0.9684,
+          "Memory Capability": 0.9947,
+          "Memory Headroom": 0.2273
         }
       },
       "raw": {
+        "amd_strix_halo_optimized": {
+          "CPU Capability": 102.1729,
+          "CPU Headroom": 85.6054,
+          "Clock Speed": 3.1929,
+          "GPU Capability": 94.5544,
+          "Memory Capability": 126.4244,
+          "Memory Headroom": 85.3054
+        },
         "jetson_thor_optimized": {
           "CPU Capability": 26.3249,
           "CPU Headroom": 52.8341,

@@ -12,12 +12,13 @@
     ]
   },
   {
-    "description": "Maximum rated TDP with the AI inference stack tuned for the platform according to OEM best practices. Only Jetson Thor has a published optimized evaluation currently.",
+    "description": "Maximum rated TDP with the AI inference stack tuned for the platform according to OEM best practices.",
     "key": "max_power_optimized",
     "label": "Max Power (AI Workload Optimized)",
     "optimized": true,
     "order": 2,
     "run_keys": [
+      "amd_strix_halo_optimized",
       "jetson_thor_optimized"
     ]
   },

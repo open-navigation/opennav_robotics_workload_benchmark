@@ -17,7 +17,11 @@
 """Cross-platform benchmark comparison and visualization.
 
 Usage:
-    python compare_platforms.py --amd <file> --orin <file> --thor <file> [--output-dir ./output]
+    python compare_platforms.py --amd <file> --thor <file> [--orin <file>]
+        [--output-dir ./output]
+
+Any subset of the platforms may be given: the charts cover whichever runs
+are passed.
 """
 
 import argparse
@@ -1107,19 +1111,28 @@ def plot_vlm_comparison(platforms_vlm):
 def main():
     parser = argparse.ArgumentParser(
         description='Compare benchmark results across 3 hardware platforms.')
-    parser.add_argument('--amd', required=True,
+    parser.add_argument('--amd',
                         help='Path to AMD Strix Halo metrics JSON')
-    parser.add_argument('--orin', required=True,
+    parser.add_argument('--orin',
                         help='Path to Jetson Orin metrics JSON')
-    parser.add_argument('--thor', required=True,
+    parser.add_argument('--thor',
                         help='Path to Jetson Thor metrics JSON')
     parser.add_argument('--output-dir', default='./output',
                         help='Output directory (default: ./output)')
     args = parser.parse_args()
 
-    # Load all 3 platforms
+    # Every chart covers whichever platforms were passed, so a comparison
+    # may be run over any subset (e.g. only the platforms with an
+    # optimized run).
+    inputs = [(key, path) for key, path in
+              (('amd', args.amd), ('orin', args.orin), ('thor', args.thor))
+              if path]
+    if len(inputs) < 2:
+        print('Error: give at least two of --amd, --orin, --thor')
+        sys.exit(1)
+
     platforms = {}
-    for key, path in [('amd', args.amd), ('orin', args.orin), ('thor', args.thor)]:
+    for key, path in inputs:
         if not os.path.isfile(path):
             print(f'Error: file not found: {path}')
             sys.exit(1)
@@ -1134,7 +1147,7 @@ def main():
     # Count completed missions and control loop misses from ROS logs
     mission_counts = {}
     miss_counts = {}
-    for key, path in [('amd', args.amd), ('orin', args.orin), ('thor', args.thor)]:
+    for key, path in inputs:
         mission_counts[key] = count_completed_missions(path)
         miss_counts[key] = count_control_loop_misses(path)
 
@@ -1179,7 +1192,7 @@ def main():
 
     # Planner cycle time chart (if planner loop warnings exist)
     platforms_planner = {}
-    for key, path in [('amd', args.amd), ('orin', args.orin), ('thor', args.thor)]:
+    for key, path in inputs:
         planner_data = parse_planner_loop_times(path)
         if planner_data:
             platforms_planner[key] = planner_data
@@ -1197,7 +1210,7 @@ def main():
 
     # VLM query outcomes chart (if VLM logs exist)
     platforms_vlm = {}
-    for key, path in [('amd', args.amd), ('orin', args.orin), ('thor', args.thor)]:
+    for key, path in inputs:
         vlm_data = load_vlm_queries(path)
         if vlm_data:
             platforms_vlm[key] = vlm_data
