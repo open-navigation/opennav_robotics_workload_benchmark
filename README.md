@@ -8,6 +8,8 @@ The benchmark also includes an (optional) Edge AI workload. We use Gemma 4.0, a 
 
 [The benchmark's methodology, platform details, and visual results are documented on our website: https://open-navigation.github.io/opennav_robotics_workload_benchmark/](https://open-navigation.github.io/opennav_robotics_workload_benchmark/).
 
+[![Benchmark Overview](docs/images/website.png)](https://open-navigation.github.io/opennav_robotics_workload_benchmark/)
+
 This benchmark compares both system metrics as well as important performance analysis of the autonomous navigation and AI workload performance. It provides instructions and tools to run the pipeline yourself for a compute platform to validate the results or extend easily to include a new platform.
 
 <p align="center">
