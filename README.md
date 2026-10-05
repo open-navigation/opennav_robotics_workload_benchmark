@@ -6,6 +6,8 @@ This project aims to fill the gap by providing a reproducable, independent bench
 
 The benchmark also includes an (optional) Edge AI workload. We use Gemma 4.0, a popular VLM, to exercise the platforms' GPUs during the benchmark. We integrate it scene understanding in the navigation behavior tree to impact decision making. VLMs are intensive workloads robotics-targeted embedded platforms are being built with in mind, so its a good benchmark to fully leverage the capabilities of modern platforms.
 
+[The benchmark's methodology, platform details, and visual results are documented on our website: https://open-navigation.github.io/opennav_robotics_workload_benchmark/](https://open-navigation.github.io/opennav_robotics_workload_benchmark/).
+
 This benchmark compares both system metrics as well as important performance analysis of the autonomous navigation and AI workload performance. It provides instructions and tools to run the pipeline yourself for a compute platform to validate the results or extend easily to include a new platform.
 
 <p align="center">
@@ -123,7 +125,9 @@ The VLM server subscribes to the RGB camera topic mounted on the chassis of the 
 
 ## Results and Comparison
 
-Full result analysis charts and plots can be found in [opennav_benchmark_analysis/output](opennav_benchmark_analysis/output) for each platform. The analysis scripts can be run to generate the plots and metrics from the logs in `opennav_benchmark_logs`. A deeper analysis of these results can found on Open Navigation's blog and [the technical report](docs/Robotics%20Workload%20Platform%20Benchmarking%20Results.pdf). A tl;dr summary of key points is provided below.
+Full result analysis charts and plots can be found in [opennav_benchmark_analysis/output](opennav_benchmark_analysis/output) for each platform. The analysis scripts can be run to generate the plots and metrics from the logs in `opennav_benchmark_logs`. A deeper analysis of these results can found on Open Navigation's blog and [the technical report](docs/Robotics%20Workload%20Platform%20Benchmarking%20Results.pdf). See more fine-grained details and interactive graphics on [our website](https://open-navigation.github.io/opennav_robotics_workload_benchmark/).
+
+A tl;dr summary of key points is provided below.
 
 <p align="center">
   <img src="opennav_benchmark_analysis/output/max_power/comparison/platform_balance_radar.png" alt="Max Power Radar Diagram" width="600"/>
