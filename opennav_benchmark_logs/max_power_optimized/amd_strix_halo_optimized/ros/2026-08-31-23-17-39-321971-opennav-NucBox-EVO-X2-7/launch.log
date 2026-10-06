@@ -1,0 +1,29 @@
+1788218259.3225248 [INFO] [launch]: All log files can be found below /root/.ros/log/2026-08-31-23-17-39-321971-opennav-NucBox-EVO-X2-7
+1788218259.3225989 [INFO] [launch]: Default logging verbosity is set to INFO
+1788218259.9850721 [INFO] [laserscan_merger.py-1]: process started with pid [40]
+1788218259.9852054 [INFO] [component_container_isolated-2]: process started with pid [41]
+1788218259.9852691 [INFO] [vlm_node-3]: process started with pid [42]
+1788218259.9853082 [INFO] [robot_mission_runner-4]: process started with pid [43]
+1788218260.2172141 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/map_server' in container '/nav2_container'
+1788218260.2267499 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/amcl' in container '/nav2_container'
+1788218260.2397861 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/controller_server' in container '/nav2_container'
+1788218260.2486293 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/lifecycle_manager_localization' in container '/nav2_container'
+1788218260.2542443 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/smoother_server' in container '/nav2_container'
+1788218260.2614424 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/planner_server' in container '/nav2_container'
+1788218260.2671556 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/route_server' in container '/nav2_container'
+1788218260.2724142 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/behavior_server' in container '/nav2_container'
+1788218260.2802370 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/bt_navigator' in container '/nav2_container'
+1788218260.2866282 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/waypoint_follower' in container '/nav2_container'
+1788218260.2915580 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/velocity_smoother' in container '/nav2_container'
+1788218260.2992744 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/collision_monitor' in container '/nav2_container'
+1788218260.3073392 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/docking_server' in container '/nav2_container'
+1788218260.3106680 [INFO] [launch_ros.actions.load_composable_nodes]: Loaded node '/lifecycle_manager_navigation' in container '/nav2_container'
+1788219180.4613502 [WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+1788219180.8430929 [INFO] [robot_mission_runner-4]: sending signal 'SIGINT' to process[robot_mission_runner-4]
+1788219180.8438096 [INFO] [vlm_node-3]: sending signal 'SIGINT' to process[vlm_node-3]
+1788219180.8443427 [INFO] [component_container_isolated-2]: sending signal 'SIGINT' to process[component_container_isolated-2]
+1788219180.8448076 [INFO] [laserscan_merger.py-1]: sending signal 'SIGINT' to process[laserscan_merger.py-1]
+1788219181.1238029 [ERROR] [laserscan_merger.py-1]: process has died [pid 40, exit code -2, cmd '/root/ws/install/opennav_benchmark_nav2/lib/opennav_benchmark_nav2/laserscan_merger.py --ros-args -r __node:=laserscan_merger --params-file /root/ws/install/opennav_benchmark_nav2/share/opennav_benchmark_nav2/config/nav2_params.yaml --params-file /tmp/launch_params_kjt29gye'].
+1788219181.3091898 [ERROR] [robot_mission_runner-4]: process has died [pid 43, exit code -2, cmd '/root/ws/install/opennav_benchmark_mission_dispatcher/lib/opennav_benchmark_mission_dispatcher/robot_mission_runner --ros-args -r __node:=robot_mission_runner --params-file /tmp/launch_params_6n3rfjlf'].
+1788219181.5524230 [ERROR] [component_container_isolated-2]: process has died [pid 41, exit code -6, cmd '/opt/ros/jazzy/lib/rclcpp_components/component_container_isolated --ros-args --log-level info --ros-args -r __node:=nav2_container --params-file /tmp/launch_params_9gf206bq --params-file /tmp/launch_params_onyqtlkz -r /tf:=tf -r /tf_static:=tf_static'].
+1788219185.1202657 [INFO] [vlm_node-3]: process has finished cleanly [pid 42]

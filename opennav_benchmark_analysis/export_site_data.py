@@ -120,9 +120,8 @@ CATEGORIES = [
                     note='Kept at maximum TDP; no separate balanced run.'),
         ],
     ),
-    # Single-platform for now: only Thor has a published optimized run. The
-    # matching Strix Halo run is still preliminary, so this category stays a
-    # one-run page until that lands.
+    # Orin has no optimized run: its stock configuration already follows
+    # JetPack's best practices, so there is nothing to tune.
     Category(
         key='max_power_optimized',
         label='Max Power (AI Workload Optimized)',
@@ -131,10 +130,12 @@ CATEGORIES = [
         optimized=True,
         description=(
             'Maximum rated TDP with the AI inference stack tuned for the '
-            'platform according to OEM best practices. Only Jetson Thor has a '
-            'published optimized evaluation currently.'
+            'platform according to OEM best practices.'
         ),
         runs=[
+            RunSpec('amd_strix_halo_optimized', 'amd_strix_halo',
+                    'AMD Strix Halo (optimized)',
+                    'max_power_optimized/amd_strix_halo_optimized', tdp_w=120),
             RunSpec('jetson_thor_optimized', 'jetson_thor',
                     'NVIDIA Jetson Thor (optimized)',
                     'max_power_optimized/jetson_thor_optimized', tdp_w=130),
