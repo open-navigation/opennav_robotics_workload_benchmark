@@ -1795,7 +1795,7 @@
       },
       "cpu_freq_ghz": {
         "label": "CPU Frequency (GHz)",
-        "max": 4.71,
+        "max": 4.72,
         "mean": 3.19,
         "min": 1.64,
         "p50": 3.41,
